@@ -45,9 +45,9 @@ public class RobotContainer {
   private void configureDefaultCommands() {
     swerve.setDefaultCommand(new SwerveTeleopDriveCommand(
             swerve,
-            xboxController::getLeftX,
-            xboxController::getLeftY,
-            xboxController::getRightX
+            () -> -xboxController.getLeftY(),
+            () -> -xboxController.getLeftX(),
+            () -> -xboxController.getRightX()
     ));
   }
 
