@@ -9,14 +9,11 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Swerve;
 
 public class RobotContainer {
 
   private final Swerve swerve = new Swerve();
-
-  public final Intake intake = new Intake();
 
   private final CommandXboxController xboxController = new CommandXboxController(0);
 
@@ -33,12 +30,6 @@ public class RobotContainer {
 
     xboxController.b().onTrue(
             new InstantCommand(swerve::lock)
-    );
-    xboxController.x().onTrue(
-            new InstantCommand(intake::deploy)
-    );
-    xboxController.y().onTrue(
-            new InstantCommand(intake::retract)
     );
   }
 
