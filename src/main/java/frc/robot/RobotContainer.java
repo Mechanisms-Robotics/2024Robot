@@ -5,8 +5,11 @@
 package frc.robot;
 
 import com.mechlib.commands.SwerveTeleopDriveCommand;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.Swerve;
@@ -31,6 +34,17 @@ public class RobotContainer {
     xboxController.b().onTrue(
             new InstantCommand(swerve::lock)
     );
+    // Test implementation for aim at
+    xboxController.rightTrigger().whileTrue(
+            new FunctionalCommand(
+                    () -> {},
+                    () -> {
+                      swerve.aimAt(new Translation2d(17, 5.7), new Rotation2d());
+                    },
+                    (interupted) -> {},
+                    () -> false
+            )
+    );
   }
 
   private void configureDefaultCommands() {
@@ -38,7 +52,12 @@ public class RobotContainer {
             swerve,
             () -> -xboxController.getLeftY(),
             () -> -xboxController.getLeftX(),
-            () -> -xboxController.getRightX()
+            () -> -xboxController.getRightX(),
+            0.1,
+            2,
+            3,
+            Math.PI,
+            2*Math.PI
     ));
   }
 

@@ -1,7 +1,8 @@
 package com.mechlib.hardware;
 
-import edu.wpi.first.math.geometry.Rotation2d;
+import java.util.function.Function;
 import com.ctre.phoenix6.hardware.CANcoder;
+import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.MagnetSensorConfigs;
 import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
@@ -12,10 +13,12 @@ import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
  * Contains some wrapper code for a CTRE CANCoder
  */
 public class CANCoder {
-  private final CANcoder canCoder; // CAN encoder
+  // CANcoder
+  private final CANcoder canCoder;
 
-  private Rotation2d angle = new Rotation2d(); // Angle Rotation2d
-  private double absoluteOffset = 0.0; // Absolute Offset
+  // Unit functions
+  private Function<Double, Double> positionUnitsFunction = (Double x) -> x;
+  private Function<Double, Double> velocityUnitsFunction = (Double x) -> x;
 
   /**
    * CANCoder constructor
@@ -23,6 +26,16 @@ public class CANCoder {
    * @param id CAN ID of CANCoder
    */
   public CANCoder(int id) {
+    this(id, SensorDirectionValue.CounterClockwise_Positive);
+  }
+
+  /**
+   * CANCoder constructor
+   *
+   * @param id CAN ID of CANCoder
+   * @param sensorDirection Direction of CANcoder
+   */
+  public CANCoder(int id, SensorDirectionValue sensorDirection) {
     // Instantiate CANCoder
     canCoder = new CANcoder(id);
 
@@ -30,6 +43,8 @@ public class CANCoder {
     CANcoderConfiguration config = new CANcoderConfiguration().withMagnetSensor(
       new MagnetSensorConfigs().withAbsoluteSensorRange(
         AbsoluteSensorRangeValue.Signed_PlusMinusHalf
+      ).withSensorDirection(
+        sensorDirection
       )
     );
 
@@ -38,53 +53,52 @@ public class CANCoder {
   }
 
   /**
-   * CANCoder constructor
+   * Sets the position units function
    *
-   * @param id CAN ID of CANCoder
-   * @param absoluteOffset Absolute offset of CANCoder
+   * @param positionUnitsFunction Function that takes in native units and returns desired units
    */
-  public CANCoder(int id, double absoluteOffset) {
-    // Instantiate CANCoder and set absolute offset
-    this(id);
-    this.absoluteOffset = absoluteOffset;
+  public void setPositionUnitsFunction(Function<Double, Double> positionUnitsFunction) {
+    this.positionUnitsFunction = positionUnitsFunction;
   }
 
   /**
-   * Sets position of CANCoder
+   * Sets the velocity units function
+   *
+   * @param velocityUnitsFunction Function that takes in native units and returns desired units
+   */
+  public void setVelocityUnitsFunction(Function<Double, Double> velocityUnitsFunction) {
+    this.velocityUnitsFunction = velocityUnitsFunction;
+  }
+
+  /**
+   * Gets the position of the CANcoder
+   *
+   * @return Position (position units)
+   */
+  public double getPosition() {
+    return positionUnitsFunction.apply(canCoder.getPosition().getValueAsDouble());
+  }
+
+  /**
+   * Gets the velocity of the CANcoder
+   *
+   * @return Velocity (velocity units)
+   */
+  public double getVelocity() {
+    return velocityUnitsFunction.apply(canCoder.getVelocity().getValueAsDouble());
+  }
+
+  /**
+   * Sets position of CANCoder in native units
    * 
-   * @param position Position (degrees)
+   * @param position Position (rotations)
    */
   private void setPosition(double position) {
-      canCoder.setPosition(position / 360.0);
+      canCoder.setPosition(position);
   }
 
   /**
    * Zeroes the CANCoder
    */
-  public void zero() { setPosition(-absoluteOffset); }
-
-  /**
-   * Get the position of the encoder
-   *
-   * @return Position
-   */
-  public Rotation2d getAngle() {
-    // Get the absolute position of the CANCoder
-    angle = Rotation2d.fromDegrees(canCoder.getAbsolutePosition().getValueAsDouble() * 360.0);
-    // Rotate by the absolute offset value
-    angle = angle.rotateBy(Rotation2d.fromDegrees(absoluteOffset));
-
-    // Return angle
-    return angle;
-  }
-
-  /**
-   * Sets the absolute offset of the encoder
-   *
-   * @param absoluteOffset Absolute offset
-   */
-  public void setAbsoluteOffset(double absoluteOffset) {
-    // Set the absolute offset
-    this.absoluteOffset = absoluteOffset;
-  }
+  public void zero() { setPosition(0.0); }
 }

@@ -1,7 +1,8 @@
 package com.mechlib.hardware;
 
+import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 import frc.robot.Robot;
-
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
@@ -14,10 +15,7 @@ import com.ctre.phoenix6.configs.TalonFXConfigurator;
 public class TalonFX extends BrushlessMotorController {
   private final com.ctre.phoenix6.hardware.TalonFX talonFX; // WPI_TalonFX instance
 
-  private TalonFXConfiguration configuration = new TalonFXConfiguration();
-
-  private CANCoder canCoder = null; // CANCoder instance
-  private boolean useInternalEncoder = true; // Internal encoder flag
+  private boolean inverted = false; // Motor inverted
 
   /**
    * TalonFX constructor
@@ -30,6 +28,9 @@ public class TalonFX extends BrushlessMotorController {
 
     // Instantiate TalonFX
     this.talonFX = new com.ctre.phoenix6.hardware.TalonFX(id);
+
+    // Reset to factory defaults
+    talonFX.getConfigurator().apply(new TalonFXConfiguration());
   }
 
   /**
@@ -39,35 +40,14 @@ public class TalonFX extends BrushlessMotorController {
    * @param canCoder CANCoder instance
    */
   public TalonFX(int id, CANCoder canCoder) {
+    // Call super constructor
+    super(id, canCoder);
+
     // Instantiate TalonFX
-    this(id);
+    this.talonFX = new com.ctre.phoenix6.hardware.TalonFX(id);
 
-    // Set CANCoder and disable internal encoder
-    this.canCoder = canCoder;
-    useInternalEncoder = false;
-  }
-
-  /**
-   * TalonFX constructor w/ CANCoder
-   *
-   * @param id CAN ID of motor controller
-   * @param canCoderID CAN ID of CANCoder
-   */
-  public TalonFX(int id, int canCoderID) {
-    // Call constructor with a newly instantiated CANCoder
-    this(id, new CANCoder(canCoderID));
-  }
-
-  /**
-   * TalonFX constructor w/ CANCoder and absoulte offset
-   *
-   * @param id CAN ID of motor controller
-   * @param canCoderID CAN ID of CANCoder
-   * @param absoluteOffset Absolute offset of CANCoder
-   */
-  public TalonFX(int id, int canCoderID, double absoluteOffset) {
-    // Call constructor with a newly instantiated CANCoder with a given absolute offset
-    this(id, new CANCoder(canCoderID, absoluteOffset));
+    // Reset to factory defaults
+    talonFX.getConfigurator().apply(new TalonFXConfiguration());
   }
 
   @Override
@@ -83,12 +63,18 @@ public class TalonFX extends BrushlessMotorController {
   public void setInverted(boolean inverted) {
     // Set TalonFX inversion
     talonFX.setInverted(inverted);
+
+    // Set inverted flag
+    this.inverted = inverted;
   }
 
   @Override
   public void invert() {
     // Toggle TalonFX inversion
     talonFX.setInverted(!talonFX.getInverted());
+
+    // Toggle inverted flag
+    this.inverted = !this.inverted;
   }
 
   @Override
@@ -105,18 +91,38 @@ public class TalonFX extends BrushlessMotorController {
 
   @Override
   public void setCurrentLimit(double limit) {
-    // Configure TalonFX supply current limit
+    // Get configurator
     TalonFXConfigurator cfg = talonFX.getConfigurator();
-    cfg.refresh(configuration.CurrentLimits);
-    cfg.apply(
-        configuration.CurrentLimits.withStatorCurrentLimit(limit)
-                                   .withStatorCurrentLimitEnable(true));
+
+    // Instantiate current limits configuration
+    CurrentLimitsConfigs currentLimits = new CurrentLimitsConfigs()
+        .withStatorCurrentLimit(limit)
+        .withStatorCurrentLimitEnable(true);
+
+    // Apply configuration
+    cfg.apply(currentLimits);
+  }
+
+  @Override
+  public void setSoftLimits(double lowerLimit, double higherLimit) {
+    // Get configurator
+    TalonFXConfigurator cfg = talonFX.getConfigurator();
+
+    // Instantiate soft limits configuration
+    SoftwareLimitSwitchConfigs softLimits = new SoftwareLimitSwitchConfigs()
+      .withReverseSoftLimitThreshold(lowerLimit)
+      .withReverseSoftLimitEnable(true)
+      .withForwardSoftLimitThreshold(higherLimit)
+      .withForwardSoftLimitEnable(true);
+
+    // Apply configuration
+    cfg.apply(softLimits);
   }
 
   @Override
   public void zero() {
     // Check if internal encoder is being used
-    if (useInternalEncoder) {
+    if (canCoder == null) {
       // If so zero the internal encoder
       talonFX.setPosition(0);
     } else {
@@ -133,12 +139,12 @@ public class TalonFX extends BrushlessMotorController {
       return pidController.getSetpoint();
 
     // Check if internal encoder is being used
-    if (useInternalEncoder) {
+    if (canCoder == null) {
       // If so return internal encoder position
-      return talonFX.getPosition().getValueAsDouble();
+      return positionUnitsFunction.apply(talonFX.getPosition().getValueAsDouble());
     } else {
-      // Otherwise return CANCoder angle in degrees
-      return canCoder.getAngle().getDegrees();
+      // Otherwise return CANCoder position
+      return canCoder.getPosition();
     }
   }
 
@@ -147,15 +153,21 @@ public class TalonFX extends BrushlessMotorController {
     // Check if this is a simulation
     if (Robot.isSimulation()) {
       // Adjust simulated distance depending on PID velocity setpoint and motor inversion
-      simDistance += pidController.getSetpoint() * Robot.kDefaultPeriod * 10 * (
-        talonFX.getInverted() ? -1.0 : 1.0
+      simDistance += pidController.getSetpoint() * Robot.kDefaultPeriod * (
+        inverted ? -1.0 : 1.0
       );
 
       // If so just return the setpoint
       return pidController.getSetpoint();
     }
 
-    // Return the internal encoder velocity
-    return talonFX.getVelocity().getValueAsDouble();
+    // Check if internal encoder is being used
+    if (canCoder == null) {
+      // If so return internal encoder velocity
+      return velocityUnitsFunction.apply(talonFX.getVelocity().getValueAsDouble());
+    } else {
+      // Otherwise return CANCoder velocity
+      return canCoder.getVelocity();
+    }
   }
 }

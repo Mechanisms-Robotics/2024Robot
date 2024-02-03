@@ -30,11 +30,14 @@ public class SwerveDrive extends SubsystemBase {
   private final SwerveModule brModule; // Back right module
   private final SwerveModule blModule; // Back left module
 
+  // Kinematics
+  private final SwerveDriveKinematics kinematics;
+
   // Gyro
   private final Pigeon2 gyro;
 
-  // Kinematics
-  private final SwerveDriveKinematics kinematics;
+  // Heading controller
+  private final HeadingController headingController;
 
   // Pose estimator
   private final SwerveDrivePoseEstimator poseEstimator;
@@ -54,91 +57,83 @@ public class SwerveDrive extends SubsystemBase {
   // Swerve stopped
   private boolean stopped = true;
 
+  // Heading lock
+  private boolean headingLocked = false;
+  private Rotation2d desiredHeading = new Rotation2d();
+
   /**
    * SwerveDrive constructor
    *
    * @param flSteerMotorID CAN ID of FL steer motor
    * @param flSteerEncoderID CAN ID of FL steer CANCoder
-   * @param flSteerOffset Absolute offset of FL steer CANCoder
-   * @param flSteerInverted Inversion of FL steer motor
    * @param flDriveMotorID CAN ID of FL drive motor
    *
    * @param frSteerMotorID CAN ID of FR steer motor
    * @param frSteerEncoderID CAN ID of FR steer CANCoder
-   * @param frSteerOffset Absolute offset of FR steer CANCoder
-   * @param frSteerInverted Inversion of FR steer motor
    * @param frDriveMotorID CAN ID of FR drive motor
    *
    * @param brSteerMotorID CAN ID of BR steer motor
    * @param brSteerEncoderID CAN ID of BR steer CANCoder
-   * @param brSteerOffset Absolute offset of BR steer CANCoder
-   * @param brSteerInverted Inversion of BR steer motor
    * @param brDriveMotorID CAN ID of BR drive motor
    *
    * @param blSteerMotorID CAN ID of BL steer motor
    * @param blSteerEncoderID CAN ID of BL steer CANCoder
-   * @param blSteerOffset Absolute offset of BL steer CANCoder
-   * @param blSteerInverted Inversion of BL steer motor
    * @param blDriveMotorID CAN ID of BL drive motor
    *
    * @param driveBrushlessMotorControllerType Drive brushless motor controller type
    * @param steerBrushlessMotorControllerType Steer brushless motor controller type
    *
-   * @param driveGearRatio Gear ratio of drive motor
-   * @param wheelDiameter Diameter of wheel (meters)
+   * @param moduleConfiguration Swerve module configuration
+   *
+   * @param flModuleLocation FL Module location (meters relative to center of robot)
+   * @param frModuleLocation FR Module location (meters relative to center of robot)
+   * @param brModuleLocation BR Module location (meters relative to center of robot)
+   * @param blModuleLocation BL Module location (meters relative to center of robot)
    *
    * @param gyroID CAN ID of gyro
+   *
+   * @param headingControllerConfiguration Heading controller configuration
    */
   public SwerveDrive(
     int flSteerMotorID,
     int flSteerEncoderID,
-    double flSteerOffset,
-    boolean flSteerInverted,
     int flDriveMotorID,
 
     int frSteerMotorID,
     int frSteerEncoderID,
-    double frSteerOffset,
-    boolean frSteerInverted,
     int frDriveMotorID,
 
     int brSteerMotorID,
     int brSteerEncoderID,
-    double brSteerOffset,
-    boolean brSteerInverted,
     int brDriveMotorID,
 
     int blSteerMotorID,
     int blSteerEncoderID,
-    double blSteerOffset,
-    boolean blSteerInverted,
     int blDriveMotorID,
 
     BrushlessMotorControllerType driveBrushlessMotorControllerType,
     BrushlessMotorControllerType steerBrushlessMotorControllerType,
 
-    double driveGearRatio,
-    double wheelDiameter,
+    SwerveModuleConfiguration moduleConfiguration,
 
     Translation2d flModuleLocation,
     Translation2d frModuleLocation,
     Translation2d brModuleLocation,
     Translation2d blModuleLocation,
 
-    int gyroID
+    int gyroID,
+
+    HeadingControllerConfiguration headingControllerConfiguration
   ) {
     // Instantiate FL module
     flModule = new SwerveModule(
       "FL Module",
       flSteerMotorID,
       flSteerEncoderID,
-      flSteerOffset,
-      flSteerInverted,
       flDriveMotorID,
       driveBrushlessMotorControllerType,
       steerBrushlessMotorControllerType,
-      driveGearRatio,
-      wheelDiameter
+      moduleConfiguration
     );
 
     // Instantiate FR module
@@ -146,13 +141,10 @@ public class SwerveDrive extends SubsystemBase {
       "FR Module",
       frSteerMotorID,
       frSteerEncoderID,
-      frSteerOffset,
-      frSteerInverted,
       frDriveMotorID,
       driveBrushlessMotorControllerType,
       steerBrushlessMotorControllerType,
-      driveGearRatio,
-      wheelDiameter
+      moduleConfiguration
     );
 
     // Instantiate BR module
@@ -160,13 +152,10 @@ public class SwerveDrive extends SubsystemBase {
       "BR Module",
       brSteerMotorID,
       brSteerEncoderID,
-      brSteerOffset,
-      brSteerInverted,
       brDriveMotorID,
       driveBrushlessMotorControllerType,
       steerBrushlessMotorControllerType,
-      driveGearRatio,
-      wheelDiameter
+      moduleConfiguration
     );
 
     // Instantiate BL module
@@ -174,17 +163,11 @@ public class SwerveDrive extends SubsystemBase {
       "BL Module",
       blSteerMotorID,
       blSteerEncoderID,
-      blSteerOffset,
-      blSteerInverted,
       blDriveMotorID,
       driveBrushlessMotorControllerType,
       steerBrushlessMotorControllerType,
-      driveGearRatio,
-      wheelDiameter
+      moduleConfiguration
     );
-
-    // Instantiate gyro
-    gyro = new Pigeon2(gyroID);
 
     // Instantiate kinematics
     kinematics = new SwerveDriveKinematics(
@@ -193,6 +176,12 @@ public class SwerveDrive extends SubsystemBase {
       brModuleLocation,
       blModuleLocation
     );
+
+    // Instantiate gyro
+    gyro = new Pigeon2(gyroID);
+
+    // Instantiate heading controller
+    headingController = new HeadingController(headingControllerConfiguration);
 
     // Instantiate pose estimator
     poseEstimator = new SwerveDrivePoseEstimator(
@@ -309,6 +298,34 @@ public class SwerveDrive extends SubsystemBase {
   }
 
   /**
+   * Locks heading to given value
+   *
+   * @param desiredHeading Desired heading
+   */
+  public void lockHeading(Rotation2d desiredHeading) {
+    // Set heading lock
+    this.headingLocked = true;
+    this.desiredHeading = desiredHeading;
+  }
+
+  /**
+   * Aims SwerveDrive at target pose
+   *
+   * @param target Target translation
+   * @param relativeHeading Heading relative to target
+   */
+  public void aimAt(Translation2d target, Rotation2d relativeHeading) {
+    // Calculate error vector
+    Translation2d errorVec = target.minus(getEstimatedPose().getTranslation());
+
+    // Calculate target heading
+    Rotation2d targetHeading = errorVec.getAngle().rotateBy(relativeHeading);
+
+    // Lock heading to target heading
+    lockHeading(targetHeading);
+  }
+
+  /**
    * Drives the swerve drive given desired velocities
    *
    * @param vx Velocity in the X direction (m/s)
@@ -330,15 +347,43 @@ public class SwerveDrive extends SubsystemBase {
       stopped = false;
     }
 
+    // Initialize actualOmega
+    double actualOmega;
+
+    // Check if headingLocked is true
+    if (headingLocked) {
+      // Lock heading
+      actualOmega = headingController.lock(
+        getHeading(),
+        desiredHeading
+      );
+
+      // Check if omega is non-zero
+      if (omega != 0)
+        // If so disable heading lock
+        headingLocked = false;
+    } else {
+      // Stabilize heading
+      actualOmega = headingController.stabilize(
+        vx,
+        vy,
+        omega,
+        getHeading()
+      );
+    }
+
+    // Output omega to SmartDashboard
+    SmartDashboard.putNumber("[Swerve] Omega", actualOmega);
+
     // Get the desired swerve module states
     SwerveModuleState[] desiredStates =  kinematics.toSwerveModuleStates(
       (
         // Check if field relative is true
         fieldOriented ?
           // If so convert to robot relative speeds
-          ChassisSpeeds.fromFieldRelativeSpeeds(vx, vy, omega, getHeading()) :
+          ChassisSpeeds.fromFieldRelativeSpeeds(vx, vy, actualOmega, getHeading()) :
           // Otherwise just use robot relative speeds
-          new ChassisSpeeds(vx, vy, omega)
+          new ChassisSpeeds(vx, vy, actualOmega)
       )
     );
 
@@ -351,7 +396,7 @@ public class SwerveDrive extends SubsystemBase {
     // Check if this is a simulation
     if (Robot.isSimulation()) {
       // If so update simulated heading depending on omega
-      simHeading = simHeading.rotateBy(new Rotation2d(omega * Robot.kDefaultPeriod));
+      simHeading = simHeading.rotateBy(new Rotation2d(actualOmega * Robot.kDefaultPeriod));
     }
   }
 

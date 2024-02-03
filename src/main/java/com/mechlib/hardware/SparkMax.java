@@ -1,9 +1,10 @@
 package com.mechlib.hardware;
 
+import com.revrobotics.CANSparkBase.SoftLimitDirection;
+import frc.robot.Robot;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
-import frc.robot.Robot;
 
 /**
  * MechLib SparkMax class
@@ -12,9 +13,6 @@ import frc.robot.Robot;
  */
 public class SparkMax extends BrushlessMotorController {
   private final CANSparkMax sparkMax; // CANSparkMax instance
-
-  private CANCoder canCoder; // CANCoder instance
-  private boolean useInternalEncoder = true; // Internal encoder flag
 
   /**
    * SparkMax constructor
@@ -37,37 +35,10 @@ public class SparkMax extends BrushlessMotorController {
    */
   public SparkMax(int id, CANCoder canCoder) {
     // Call super constructor
-    super(id);
+    super(id, canCoder);
 
     // Instantiate CANSparkMax
     this.sparkMax = new CANSparkMax(id, MotorType.kBrushless);
-
-    // Set CANCoder and disable internal encoder
-    this.canCoder = canCoder;
-    useInternalEncoder = false;
-  }
-
-  /**
-   * SparkMax constructor w/ CANCoder
-   *
-   * @param id CAN ID of motor controller
-   * @param canCoderID CAN ID of CANCoder
-   */
-  public SparkMax(int id, int canCoderID) {
-    // Call constructor with a newly instantiated CANCoder
-    this(id, new CANCoder(canCoderID));
-  }
-
-  /**
-   * SparkMax constructor w/ CANCoder and absolute offset
-   *
-   * @param id CAN ID of motor controller
-   * @param canCoderID CAN ID of CANCoder
-   * @param absoluteOffset Absolute offset of CANCoder
-   */
-  public SparkMax(int id, int canCoderID, double absoluteOffset) {
-    // Call constructor with a newly instantiated CANCoder with a given absolute offset
-    this(id, new CANCoder(canCoderID, absoluteOffset));
   }
 
   @Override
@@ -110,9 +81,20 @@ public class SparkMax extends BrushlessMotorController {
   }
 
   @Override
+  public void setSoftLimits(double lowerLimit, double higherLimit) {
+    // Set and enable reverse soft limit
+    sparkMax.setSoftLimit(SoftLimitDirection.kReverse, (float)lowerLimit);
+    sparkMax.enableSoftLimit(SoftLimitDirection.kReverse, true);
+
+    // Set and enable forward soft limit
+    sparkMax.setSoftLimit(SoftLimitDirection.kForward, (float)higherLimit);
+    sparkMax.enableSoftLimit(SoftLimitDirection.kForward, true);
+  }
+
+  @Override
   public void zero() {
     // Check if internal encoder is being used
-    if (useInternalEncoder) {
+    if (canCoder == null) {
       // If so zero the internal encoder
       sparkMax.getEncoder().setPosition(0);
     } else {
@@ -129,12 +111,12 @@ public class SparkMax extends BrushlessMotorController {
       return pidController.getSetpoint();
 
     // Check if internal encoder is being used
-    if (useInternalEncoder) {
+    if (canCoder == null) {
       // If so return internal encoder position
-      return sparkMax.getEncoder().getPosition();
+      return positionUnitsFunction.apply(sparkMax.getEncoder().getPosition());
     } else {
-      // Otherwise return CANCoder angle in degrees
-      return canCoder.getAngle().getDegrees();
+      // Otherwise return CANCoder position
+      return canCoder.getPosition();
     }
   }
 
@@ -151,7 +133,12 @@ public class SparkMax extends BrushlessMotorController {
       return pidController.getSetpoint();
     }
 
-    // Return the internal encoder velocity
-    return sparkMax.getEncoder().getVelocity();
+    if (canCoder == null) {
+      // Return the internal encoder velocity
+      return velocityUnitsFunction.apply(sparkMax.getEncoder().getVelocity());
+    } else {
+      // Return the CANCoder velocity
+      return canCoder.getVelocity();
+    }
   }
 }

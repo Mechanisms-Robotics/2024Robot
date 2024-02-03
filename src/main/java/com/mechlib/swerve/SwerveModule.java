@@ -2,9 +2,9 @@ package com.mechlib.swerve;
 
 import com.mechlib.hardware.BrushlessMotorController;
 import com.mechlib.hardware.BrushlessMotorControllerType;
+import com.mechlib.hardware.CANCoder;
 import com.mechlib.hardware.SparkMax;
 import com.mechlib.hardware.TalonFX;
-import com.mechlib.util.Units;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -17,17 +17,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  * Contains all the code required for a generic swerve module
  */
 public class SwerveModule extends SubsystemBase {
-  // Constants
-  private static final double STEER_KP = 0.0025; // P gain
-  private static final double STEER_KF = 0.05; // Feedforward (percent)
-  private static final double STEER_TOLERANCE = Math.toRadians(1.0); // (rads)
-
-  private static final double DRIVE_KP = 0.0001;
-  private static final double DRIVE_KF = 0.05;
-  private static final double DRIVE_TOLERANCE = 0.5; // (m/s)
-  private static final double DRIVE_MAX_VELOCITY = 4.5; // (m/s)
-  private static final double DRIVE_MAX_ACCEL = 2.5; // (m/s^2)
-
   // Module name
   private final String moduleName;
 
@@ -36,10 +25,8 @@ public class SwerveModule extends SubsystemBase {
   // Drive motor instance
   private final BrushlessMotorController driveMotor;
 
-  // Drive motor gear ratio
-  private final double driveGearRatio;
-  // Wheel diameter
-  private final double wheelDiameter; // (meters)
+  // Module configuration
+  private final SwerveModuleConfiguration moduleConfiguration;
 
   private Rotation2d curAngle = new Rotation2d(); // Current angle
   private Rotation2d desiredAngle = new Rotation2d(); // Desired angle
@@ -50,30 +37,47 @@ public class SwerveModule extends SubsystemBase {
    * SwerveModule constructor
    *
    * @param moduleName Module name
+   *
    * @param steerMotorID CAN ID of steer motor
    * @param steerEncoderID CAN ID of steer CANCoder
-   * @param steerOffset Absolute offset of steer CANCoder
-   * @param steerInverted Steer motor inverted
+   *
    * @param driveMotorID CAN ID of drive motor
+   *
    * @param driveBrushlessMotorControllerType Drive brushless motor controller type
    * @param steerBrushlessMotorControllerType Steer brushless motor controller type
-   * @param driveGearRatio Gear ratio of drive motor
-   * @param wheelDiameter Diameter of wheel (meters)
+   *
+   * @param moduleConfiguration SwerveModuleConfiguration instance
    */
   public SwerveModule(
     String moduleName,
+
     int steerMotorID,
     int steerEncoderID,
-    double steerOffset,
-    boolean steerInverted,
+
     int driveMotorID,
+
     BrushlessMotorControllerType driveBrushlessMotorControllerType,
     BrushlessMotorControllerType steerBrushlessMotorControllerType,
-    double driveGearRatio,
-    double wheelDiameter
+
+    SwerveModuleConfiguration moduleConfiguration
   ) {
     // Set module name
     this.moduleName = moduleName;
+
+    // Check which brushless motor controller type to use for steer
+    switch (steerBrushlessMotorControllerType) {
+      // Default
+      default -> {
+        // Instantiate TalonFX
+        steerMotor = new TalonFX(steerMotorID, new CANCoder(steerEncoderID));
+      }
+
+      // SparkMax
+      case SparkMax -> {
+        // Instantiate SparkMax
+        steerMotor = new SparkMax(steerMotorID, new CANCoder(steerEncoderID));
+      }
+    }
 
     // Check which brushless motor controller type to use for drive
     switch (driveBrushlessMotorControllerType) {
@@ -90,70 +94,121 @@ public class SwerveModule extends SubsystemBase {
       }
     }
 
-    // Check which brushless motor controller type to use for drive
-    switch (steerBrushlessMotorControllerType) {
-      // Default
-      default -> {
-        // Instantiate TalonFX
-        steerMotor = new TalonFX(steerMotorID, steerEncoderID, steerOffset);
-      }
+    // Set module configuration
+    this.moduleConfiguration = moduleConfiguration;
 
-      // SparkMax
-      case SparkMax -> {
-        // Instantiate SparkMax
-        steerMotor = new SparkMax(steerMotorID, steerEncoderID, steerOffset);
-      }
-    }
+    // Configure motors
+    configureMotors();
+  }
 
+  /**
+   * Converts CANCoder units to radians
+   *
+   * @param canCoderUnits CANCoder units
+   *
+   * @return Radians
+   */
+  private double steerCANCoderToRadians(double canCoderUnits) {
+    // radians = rotations * pi * 2
+    return canCoderUnits * Math.PI * 2;
+  }
 
+  /**
+   * Converts Falcon units to meters
+   *
+   * @param falconUnits Falcon units
+   *
+   * @return Meters
+   */
+  private double driveFalconToMeters(double falconUnits) {
+    // meters = (rotations / gearRatio) * (pi * wheelDiameter)
+    return (falconUnits / moduleConfiguration.driveGearRatio) *
+      (Math.PI * moduleConfiguration.wheelDiameter);
+  }
+
+  /**
+   * Converts NEO units to meters (only use for position not velocity)
+   *
+   * @param neoUnits NEO units
+   *
+   * @return Position (meters)
+   */
+  private double driveNEOToMeters(double neoUnits) {
+    // meters = (rotations / gearRatio) * (pi * wheelDiameter)
+    return (neoUnits / moduleConfiguration.driveGearRatio) *
+      (Math.PI * moduleConfiguration.wheelDiameter);
+  }
+
+  /**
+   * Converts NEO units to m/s
+   *
+   * @param neoUnits NEO units
+   * @return Velocity (m/s)
+   */
+  private double driveNEOToMPS(double neoUnits) {
+    // mps = ((rpm / 60) / gearRatio) * (pi * wheelDiameter)
+    return ((neoUnits / 60) / moduleConfiguration.driveGearRatio) *
+      (Math.PI * moduleConfiguration.wheelDiameter);
+  }
+
+  /**
+   * Configures motors
+   */
+  private void configureMotors() {
     // Set the steer motor inversion and switch it to brake mode
-    steerMotor.setInverted(steerInverted);
+    steerMotor.setInverted(moduleConfiguration.steerInverted);
     steerMotor.brakeMode();
 
     // Configure the steer motor PPIDF controller
-    steerMotor.setKP(STEER_KP);
-    steerMotor.setKF(STEER_KF);
+    steerMotor.setKP(moduleConfiguration.steerKP);
+    steerMotor.setKI(moduleConfiguration.steerKI);
+    steerMotor.setKD(moduleConfiguration.steerKD);
+    steerMotor.setKF(moduleConfiguration.steerKF);
     steerMotor.setDirectionalFeedforward(true);
 
     // Set the steer motor PIDF tolerance
-    steerMotor.setTolerance(STEER_TOLERANCE);
+    steerMotor.setTolerance(moduleConfiguration.steerTolerance);
+
+    // Set the steer motor position units function
+    steerMotor.setPositionUnitsFunction(this::steerCANCoderToRadians);
 
     // Set the drive motor inversion and switch it to brake mode
     driveMotor.setInverted(driveInverted);
     driveMotor.brakeMode();
 
     // Configure the drive motor PIDF controller
-    driveMotor.setKP(DRIVE_KP);
-    driveMotor.setKF(DRIVE_KF);
+    driveMotor.setKP(moduleConfiguration.driveKP);
+    driveMotor.setKI(moduleConfiguration.driveKI);
+    driveMotor.setKD(moduleConfiguration.driveKD);
+    driveMotor.setKF(moduleConfiguration.driveKF);
     driveMotor.setDirectionalFeedforward(true);
 
     // Set the max velocity and max acceleration for the drive motor PPIDF controller
-    driveMotor.setMaxVelocity(
-      Units.metersPerSecondToFalconTicksPer100ms(DRIVE_MAX_VELOCITY, driveGearRatio, wheelDiameter)
-    );
-    driveMotor.setMaxAcceleration(
-      Units.metersPerSecondToFalconTicksPer100ms(DRIVE_MAX_ACCEL, driveGearRatio, wheelDiameter)
-    );
+    driveMotor.setMaxVelocity(moduleConfiguration.maxVelocity);
+    driveMotor.setMaxAcceleration(moduleConfiguration.maxAccel);
 
     // Set the drive motor PIDF tolerance
-    driveMotor.setTolerance(DRIVE_TOLERANCE);
+    driveMotor.setTolerance(moduleConfiguration.driveTolerance);
 
-    // Set drive gear ratio
-    this.driveGearRatio = driveGearRatio;
-
-    // Set wheel diameter
-    this.wheelDiameter = wheelDiameter;
+    // Set the drive motor units functions
+    if (driveMotor instanceof TalonFX) {
+      driveMotor.setPositionUnitsFunction(this::driveFalconToMeters);
+      driveMotor.setVelocityUnitsFunction(this::driveFalconToMeters);
+    } else if (driveMotor instanceof SparkMax) {
+      driveMotor.setPositionUnitsFunction(this::driveNEOToMeters);
+      driveMotor.setVelocityUnitsFunction(this::driveNEOToMPS);
+    }
   }
 
   /**
    * Returns current module position as a SwerveModulePosition
    *
-   * @return Current module position
+   * @return Current module transposition
    */
   public SwerveModulePosition getModulePosition() {
     // Create a new SwerveModulePosition and return it
     return new SwerveModulePosition(
-      Units.falconTicksToMeters(driveMotor.getDistance(), driveGearRatio, wheelDiameter),
+      driveMotor.getDistance(),
       curAngle
     );
   }
@@ -175,11 +230,7 @@ public class SwerveModule extends SubsystemBase {
    */
   public void drive(double speed) {
     // Set the drive motor PPIDF setpoint
-    driveMotor.setSetpoint(Units.metersPerSecondToFalconTicksPer100ms(
-      speed * (driveInverted ? -1.0 : 1.0),
-      driveGearRatio,
-      wheelDiameter
-    ));
+    driveMotor.setSetpoint(speed * (driveInverted ? -1.0 : 1.0));
   }
 
   /**
@@ -245,7 +296,7 @@ public class SwerveModule extends SubsystemBase {
   @Override
   public void periodic() {
     // Update curAngle
-    curAngle = Rotation2d.fromDegrees(steerMotor.getPosition());
+    curAngle = new Rotation2d(steerMotor.getPosition());
 
     // Output curAngle to SmartDashboard
     SmartDashboard.putNumber("[" + moduleName + "] Steer Angle", curAngle.getDegrees());
@@ -257,26 +308,18 @@ public class SwerveModule extends SubsystemBase {
     SmartDashboard.putNumber("[" + moduleName + "] Desired Angle", desiredAngle.getDegrees());
 
     // Set the steer motor PIDF setpoint
-    steerMotor.setSetpoint(desiredAngle.getDegrees());
+    steerMotor.setSetpoint(desiredAngle.getRadians());
 
     // Run the steer motor PIDF controller
-    steerMotor.periodicPIDF(curAngle.getDegrees());
+    steerMotor.periodicPIDF(curAngle.getRadians());
+
+    // Run the drive motor PPIDF controller
+    driveMotor.periodicPPIDF(driveMotor.getVelocity());
 
     // Output module speed to SmartDashboard
     SmartDashboard.putNumber(
       "[" + moduleName + "] Speed",
-      Units.falconTicksPer100msToMetersPerSecond(
-        driveMotor.getVelocity(),
-        driveGearRatio,
-        wheelDiameter
-      )
+      driveMotor.getVelocity()
     );
-
-    // Run the drive motor PPIDF controller
-    driveMotor.periodicPPIDF(Units.falconTicksPer100msToMetersPerSecond(
-      driveMotor.getVelocity(),
-      driveGearRatio,
-      wheelDiameter
-    ));
   }
 }

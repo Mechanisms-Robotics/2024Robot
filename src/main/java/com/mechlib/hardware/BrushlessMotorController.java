@@ -1,12 +1,12 @@
 package com.mechlib.hardware;
 
 import edu.wpi.first.math.Pair;
+import java.util.function.Function;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
-import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Robot;
+import edu.wpi.first.wpilibj.RobotController;
 import java.util.ArrayList;
 
 /**
@@ -20,6 +20,13 @@ public abstract class BrushlessMotorController {
 
   // Followers
   protected ArrayList<Pair<BrushlessMotorController, Boolean>> followers = new ArrayList<>();
+
+  // CANCoder
+  protected CANCoder canCoder = null;
+
+  // Unit functions
+  protected Function<Double, Double> positionUnitsFunction = (Double x) -> x;
+  protected Function<Double, Double> velocityUnitsFunction = (Double x) -> x;
 
   // PID Controller
   protected final PIDController pidController = new PIDController(
@@ -52,7 +59,22 @@ public abstract class BrushlessMotorController {
    * @param id CAN ID of motor controller
    */
   public BrushlessMotorController(int id) {
+    // Set ID
     this.id = id;
+  }
+
+  /**
+   * BrushlessMotorController constructor
+   *
+   * @param id CAN ID of motor controller
+   * @param canCoder CANCoder to use instead of internal encoder
+   */
+  public BrushlessMotorController(int id, CANCoder canCoder) {
+    // Set ID
+    this.id = id;
+
+    // Set CANCoder
+    this.canCoder = canCoder;
   }
 
   /**
@@ -274,11 +296,9 @@ public abstract class BrushlessMotorController {
       if (directionalFeedforward) {
         // If directional feedforward apply feedforward in direction of error
         setPercent(feedforward * Math.signum(error));
-        SmartDashboard.putNumber("[" + id + "] PIDF Output", feedforward * Math.signum(error));
       } else {
         // If standard feedforward apply feedforward
         setPercent(feedforward);
-        SmartDashboard.putNumber("[" + id + "] PIDF Output", feedforward);
       }
 
       // Return without calculating PIDF output
@@ -286,13 +306,11 @@ public abstract class BrushlessMotorController {
     }
 
     // Calculate PIDF Output
-    double pidfOutput = pidController.calculate(
-      currentValue
-    ) + (directionalFeedforward ? feedforward * Math.signum(error) : feedforward);
+    double pidfOutput = pidController.calculate(currentValue)
+            + (directionalFeedforward ? feedforward * Math.signum(error) : feedforward);
 
     // Set the percentage of the motor to the PIDF output
     setPercent(pidfOutput);
-    SmartDashboard.putNumber("[" + id + "] PIDF Output", pidfOutput);
   }
 
   /**
@@ -306,11 +324,9 @@ public abstract class BrushlessMotorController {
       if (directionalFeedforward) {
         // If directional feedforward apply feedforward in direction of error
         setPercent(feedforward * Math.signum(error));
-        SmartDashboard.putNumber("[" + id + "] PPIDF Output", feedforward * Math.signum(error));
       } else {
         // If standard feedforward apply feedforward
         setPercent(feedforward);
-        SmartDashboard.putNumber("[" + id + "] PPIDF Output", feedforward);
       }
 
       // Return without calculating PPIDF output
@@ -324,13 +340,48 @@ public abstract class BrushlessMotorController {
 
     // Set the percentage of the motor to the PPIDF output
     setPercent(ppidfOutput);
-    SmartDashboard.putNumber("[" + id + "] PPIDF Output", ppidfOutput);
   }
+
+  /**
+   * Sets position units function
+   *
+   * @param positionUnitsFunction Function that takes in native units and returns desired units
+   */
+  public void setPositionUnitsFunction(Function<Double, Double> positionUnitsFunction) {
+    // Set position units function
+    this.positionUnitsFunction = positionUnitsFunction;
+
+    // If using a CANCoder set its position units function
+    if (canCoder != null)
+      canCoder.setPositionUnitsFunction(positionUnitsFunction);
+  }
+
+  /**
+   * Sets velocity units function
+   *
+   * @param velocityUnitsFunction Function that takes in native units and returns desired units
+   */
+  public void setVelocityUnitsFunction(Function<Double, Double> velocityUnitsFunction) {
+    // Set velocity units function
+    this.velocityUnitsFunction = velocityUnitsFunction;
+
+    // If using a CANCoder set its velocity units function
+    if (canCoder != null)
+      canCoder.setVelocityUnitsFunction(velocityUnitsFunction);
+  }
+
+  /**
+   * Sets soft limit on motor
+   *
+   * @param lowerLimit Lower limit (native units)
+   * @param higherLimit Higher limit (native units)
+   */
+  public void setSoftLimits(double lowerLimit, double higherLimit) {}
 
   /**
    * Returns the position of the internal encoder if one exists
    *
-   * @return Position of internal encoder (native units)
+   * @return Position of encoder
    */
   public double getPosition() { return 0.0; }
 
@@ -338,7 +389,7 @@ public abstract class BrushlessMotorController {
    * Returns the distance the encoder has moved in ticks
    * (Equivalent to getPosition if not running in simulation)
    *
-   * @return Distance (ticks)
+   * @return Distance
    */
   public double getDistance() {
     // Check if this is a simulation
@@ -351,9 +402,9 @@ public abstract class BrushlessMotorController {
   }
 
   /**
-   * Returns the velocity of the internal encoder if one exists
+   * Returns the velocity of the encoder if one exists
    *
-   * @return Velocity of internal encoder (native velocity units)
+   * @return Velocity of encoder
    */
   public double getVelocity() { return 0.0; }
 }
