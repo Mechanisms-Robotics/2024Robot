@@ -104,6 +104,7 @@ public class SwerveTeleopDriveCommand extends Command {
     double vy = vyLimiter.calculate(deadband(ySupplier.get()) * maxVelocity);
     double omega = omegaLimiter.calculate(deadband(rSupplier.get()) * maxAngularVelocity);
 
+    System.out.println(vx + " " + vy + " " + omega);
     // Drive swerve at calculated velocities
     swerve.drive(vx, vy, omega);
   }

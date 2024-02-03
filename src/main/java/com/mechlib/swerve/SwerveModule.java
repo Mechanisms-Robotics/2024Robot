@@ -243,7 +243,7 @@ public class SwerveModule extends SubsystemBase {
     steerTo(state.angle);
 
     // Drive at state speed
-    drive(state.speedMetersPerSecond);
+//    drive(state.speedMetersPerSecond);
   }
 
   /**

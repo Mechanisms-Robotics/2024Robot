@@ -30,19 +30,19 @@ public class SwerveModuleConfiguration {
 
   // Default SwerveModuleConfiguration (SDS Mk4i L3 w/ Falcons)
   public static SwerveModuleConfiguration DEFAULT = new SwerveModuleConfiguration(
-    0.0025,
+    0.1,
     0.0,
     0.0,
-    0.05,
+    0.001,
 
     Math.toRadians(1.0),
 
-    false,
+    true,
 
-    0.0025,
+    0.00,
     0.0,
     0.0,
-    0.05,
+    0.0,
 
     0.5,
 
