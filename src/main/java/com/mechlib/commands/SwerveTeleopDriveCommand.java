@@ -11,14 +11,6 @@ import java.util.function.Supplier;
  * Contains all the code required to drive a generic swerve drive
  */
 public class SwerveTeleopDriveCommand extends Command {
-  // Constants
-  private static final double MAX_VELOCITY = 1.5; // (m/s)
-  private static final double MAX_ACCEL = 3.0; // (m/s^2)
-  private static final double MAX_ANGULAR_VELOCITY = Math.PI; // (rads/s)
-  private static final double MAX_ANGULAR_ACCEL = Math.PI; // (rads/s^2)
-
-  private static final double JOYSTICK_DEADBAND = 0.1; // (percent)
-
   // Swerve instance
   private final SwerveDrive swerve;
 
@@ -27,31 +19,51 @@ public class SwerveTeleopDriveCommand extends Command {
   private final Supplier<Double> ySupplier;
   private final Supplier<Double> rSupplier;
 
-  // X velocity rate limiter
-  private final SlewRateLimiter vxLimiter = new SlewRateLimiter(
-    MAX_ACCEL
-  );
+  // Joystick deadband
+  private final double joystickDeadband; // (percent)
 
-  // Y velocity rate limiter
-  private final SlewRateLimiter vyLimiter = new SlewRateLimiter(
-    MAX_ACCEL
-  );
+  // Max velocities
+  private final double maxVelocity; // (m/s)
+  private final double maxAngularVelocity; // (rads/s)
 
-  // Angular velocity rate limiter
-  private final SlewRateLimiter omegaLimiter = new SlewRateLimiter(
-    MAX_ANGULAR_ACCEL
-  );
+  // Rate limiters
+  private final SlewRateLimiter vxLimiter;
+  private final SlewRateLimiter vyLimiter;
+  private final SlewRateLimiter omegaLimiter;
 
   /**
    * SwerveTeleopDriveCommand constructor
    *
    * @param swerve Instance of SwerveDrive
+   *
+   * @param xSupplier Supplier of joystick left x value
+   * @param ySupplier Supplier of joystick left y value
+   * @param rSupplier Supplier of joystick right x value
+   *
+   * @param maxVelocity Max velocity (m/s)
+   * @param maxAccel Max acceleration (m/s^2)
+   *
+   * @param maxAngularVelocity Max angular velocity (rads/s)
+   * @param maxAngularAccel Max angular acceleration (rads/s^2)
+   *
+   * @param fieldOriented Field oriented driving
    */
   public SwerveTeleopDriveCommand(
     SwerveDrive swerve,
+
     Supplier<Double> xSupplier,
     Supplier<Double> ySupplier,
-    Supplier<Double> rSupplier
+    Supplier<Double> rSupplier,
+
+    double joystickDeadband,
+
+    double maxVelocity,
+    double maxAccel,
+
+    double maxAngularVelocity,
+    double maxAngularAccel,
+
+    boolean fieldOriented
   ) {
     // Set swerve
     this.swerve = swerve;
@@ -60,6 +72,21 @@ public class SwerveTeleopDriveCommand extends Command {
     this.xSupplier = xSupplier;
     this.ySupplier = ySupplier;
     this.rSupplier = rSupplier;
+
+    // Set joystick deadband
+    this.joystickDeadband = joystickDeadband;
+
+    // Set max velocities
+    this.maxVelocity = maxVelocity;
+    this.maxAngularVelocity = maxAngularVelocity;
+
+    // Instantiate rate limiters
+    this.vxLimiter = new SlewRateLimiter(maxAccel);
+    this.vyLimiter = new SlewRateLimiter(maxAccel);
+    this.omegaLimiter = new SlewRateLimiter(maxAngularAccel);
+
+    // Set field oriented
+    swerve.setFieldOriented(fieldOriented);
 
     // Add subsystem requirements
     addRequirements(swerve);
@@ -74,15 +101,15 @@ public class SwerveTeleopDriveCommand extends Command {
    */
   private double deadband(double value) {
     // Return value if the abs(value) is greater than JOYSTICK_DEADBAND, otherwise return 0
-    return Math.abs(value) >= JOYSTICK_DEADBAND ? value : 0.0;
+    return Math.abs(value) >= joystickDeadband ? value : 0.0;
   }
 
   @Override
   public void execute() {
     // Calculate velocities
-    double vx = vxLimiter.calculate(deadband(xSupplier.get()) * MAX_VELOCITY);
-    double vy = vyLimiter.calculate(deadband(ySupplier.get()) * MAX_VELOCITY);
-    double omega = omegaLimiter.calculate(deadband(rSupplier.get()) * MAX_ANGULAR_VELOCITY);
+    double vx = vxLimiter.calculate(deadband(xSupplier.get()) * maxVelocity);
+    double vy = vyLimiter.calculate(deadband(ySupplier.get()) * maxVelocity);
+    double omega = omegaLimiter.calculate(deadband(rSupplier.get()) * maxAngularVelocity);
 
     // Drive swerve at calculated velocities
     swerve.drive(vx, vy, omega);

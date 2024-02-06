@@ -306,9 +306,8 @@ public abstract class BrushlessMotorController {
     }
 
     // Calculate PIDF Output
-    double pidfOutput = pidController.calculate(
-      currentValue
-    ) + (directionalFeedforward ? feedforward * Math.signum(error) : feedforward);
+    double pidfOutput = pidController.calculate(currentValue)
+            + (directionalFeedforward ? feedforward * Math.signum(error) : feedforward);
 
     // Set the percentage of the motor to the PIDF output
     setPercent(pidfOutput);

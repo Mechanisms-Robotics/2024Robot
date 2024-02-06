@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import com.mechlib.hardware.BrushlessMotorControllerType;
+import com.mechlib.swerve.HeadingControllerConfiguration;
 import com.mechlib.swerve.SwerveDrive;
 import com.mechlib.swerve.SwerveModuleConfiguration;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -63,21 +64,25 @@ public class Swerve extends SwerveDrive {
                 FL_STEER_ENCODER_ID,
                 FL_DRIVE_MOTOR_ID,
                 FL_STEER_OFFSET,
+                true,
 
                 FR_STEER_MOTOR_ID,
                 FR_STEER_ENCODER_ID,
                 FR_DRIVE_MOTOR_ID,
                 FR_STEER_OFFSET,
+                true,
 
                 BR_STEER_MOTOR_ID,
                 BR_STEER_ENCODER_ID,
                 BR_DRIVE_MOTOR_ID,
                 BR_STEER_OFFSET,
+                true,
 
                 BL_STEER_MOTOR_ID,
                 BL_STEER_ENCODER_ID,
                 BL_DRIVE_MOTOR_ID,
                 BL_STEER_OFFSET,
+                true,
 
                 BrushlessMotorControllerType.TalonFX,
                 BrushlessMotorControllerType.SparkMax,
@@ -89,7 +94,7 @@ public class Swerve extends SwerveDrive {
                 BL_MODULE_LOCATION,
 
                 GYRO_ID,
-                HeadingConstants.DEFAULT
+                HeadingControllerConfiguration.DEFAULT
         );
     }
 }

@@ -119,5 +119,5 @@ public class CANCoder {
   /**
    * Zeroes the CANCoder
    */
-  public void zero() { setPosition(0.0); }
+  public void zero() { setPosition(-magnetOffset); }
 }
