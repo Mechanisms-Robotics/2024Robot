@@ -39,7 +39,7 @@ public class RobotContainer {
             new FunctionalCommand(
                     () -> {},
                     () -> {
-                      swerve.aimAt(new Translation2d(17, 5.7), new Rotation2d());
+//                      swerve.aimAt(new Translation2d(17, 5.7), new Rotation2d());
                     },
                     (interupted) -> {},
                     () -> false
@@ -52,12 +52,12 @@ public class RobotContainer {
             swerve,
             () -> -xboxController.getLeftY(),
             () -> -xboxController.getLeftX(),
-            () -> -xboxController.getRightX(),
-            0.1,
-            2,
-            3,
-            Math.PI,
-            2*Math.PI
+            () -> -xboxController.getRightX()
+//            0.1,
+//            2,
+//            3,
+//            Math.PI,
+//            2*Math.PI
     ));
   }
 

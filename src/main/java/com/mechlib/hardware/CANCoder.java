@@ -16,6 +16,9 @@ public class CANCoder {
   // CANcoder
   private final CANcoder canCoder;
 
+  // Magnet offset
+  private final double magnetOffset;
+
   // Unit functions
   private Function<Double, Double> positionUnitsFunction = (Double x) -> x;
   private Function<Double, Double> velocityUnitsFunction = (Double x) -> x;
@@ -26,7 +29,17 @@ public class CANCoder {
    * @param id CAN ID of CANCoder
    */
   public CANCoder(int id) {
-    this(id, SensorDirectionValue.CounterClockwise_Positive);
+    this(id, SensorDirectionValue.CounterClockwise_Positive, 0.0);
+  }
+
+  /**
+   * CANCoder constructor
+   *
+   * @param id CAN ID of CANCoder
+   * @param magnetOffset Absolute position magnet offset (rotations)
+   */
+  public CANCoder(int id, double magnetOffset) {
+    this(id, SensorDirectionValue.CounterClockwise_Positive, magnetOffset);
   }
 
   /**
@@ -34,8 +47,9 @@ public class CANCoder {
    *
    * @param id CAN ID of CANCoder
    * @param sensorDirection Direction of CANcoder
+   * @param magnetOffset Absolute position magnet offset (rotations)
    */
-  public CANCoder(int id, SensorDirectionValue sensorDirection) {
+  public CANCoder(int id, SensorDirectionValue sensorDirection, double magnetOffset) {
     // Instantiate CANCoder
     canCoder = new CANcoder(id);
 
@@ -47,6 +61,9 @@ public class CANCoder {
         sensorDirection
       )
     );
+
+    // Set magnet offset
+    this.magnetOffset = magnetOffset;
 
     // Apply configuration
     canCoder.getConfigurator().apply(config);
@@ -76,7 +93,9 @@ public class CANCoder {
    * @return Position (position units)
    */
   public double getPosition() {
-    return positionUnitsFunction.apply(canCoder.getPosition().getValueAsDouble());
+    return positionUnitsFunction.apply(
+      canCoder.getAbsolutePosition().getValueAsDouble() + magnetOffset
+    );
   }
 
   /**

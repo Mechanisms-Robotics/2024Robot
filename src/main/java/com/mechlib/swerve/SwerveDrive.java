@@ -1,6 +1,8 @@
 package com.mechlib.swerve;
 
 import com.mechlib.hardware.BrushlessMotorControllerType;
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -30,17 +32,34 @@ public class SwerveDrive extends SubsystemBase {
   private final SwerveModule brModule; // Back right module
   private final SwerveModule blModule; // Back left module
 
-  // Kinematics
-  private final SwerveDriveKinematics kinematics;
-
   // Gyro
   private final Pigeon2 gyro;
 
-  // Heading controller
-  private final HeadingController headingController;
+  // Kinematics
+  private final SwerveDriveKinematics kinematics;
 
   // Pose estimator
   private final SwerveDrivePoseEstimator poseEstimator;
+
+  // Heading controller
+  private final PIDController headingController;
+
+  // PID constants struct for the heading controller
+  public static class HeadingConstants {
+    public static final HeadingConstants DEFAULT = new HeadingConstants(
+            0.25, 0, 0
+    );
+
+    public final double kP;
+    public final double kI;
+    public final double kD;
+
+    public HeadingConstants(double kP, double kI, double kD) {
+      this.kP = kP;
+      this.kI = kI;
+      this.kD = kD;
+    }
+  }
 
   // Field2d
   private final Field2d field2d = new Field2d();
@@ -51,15 +70,14 @@ public class SwerveDrive extends SubsystemBase {
   // Field oriented driving
   private boolean fieldOriented = true;
 
+  private Rotation2d prevOmega = new Rotation2d();
+  private Rotation2d prevHeading = new Rotation2d();
+
   // Simulated heading
   private Rotation2d simHeading = new Rotation2d();
 
   // Swerve stopped
   private boolean stopped = true;
-
-  // Heading lock
-  private boolean headingLocked = false;
-  private Rotation2d desiredHeading = new Rotation2d();
 
   /**
    * SwerveDrive constructor
@@ -67,18 +85,22 @@ public class SwerveDrive extends SubsystemBase {
    * @param flSteerMotorID CAN ID of FL steer motor
    * @param flSteerEncoderID CAN ID of FL steer CANCoder
    * @param flDriveMotorID CAN ID of FL drive motor
+   * @param flMagnetOffset Absolute position magnet offset of FL encoder
    *
    * @param frSteerMotorID CAN ID of FR steer motor
    * @param frSteerEncoderID CAN ID of FR steer CANCoder
    * @param frDriveMotorID CAN ID of FR drive motor
+   * @param frMagnetOffset Absolute position magnet offset of FR encoder
    *
    * @param brSteerMotorID CAN ID of BR steer motor
    * @param brSteerEncoderID CAN ID of BR steer CANCoder
    * @param brDriveMotorID CAN ID of BR drive motor
+   * @param brMagnetOffset Absolute position magnet offset of BR encoder
    *
    * @param blSteerMotorID CAN ID of BL steer motor
    * @param blSteerEncoderID CAN ID of BL steer CANCoder
    * @param blDriveMotorID CAN ID of BL drive motor
+   * @param blMagnetOffset Absolute position magnet offset of BL encoder
    *
    * @param driveBrushlessMotorControllerType Drive brushless motor controller type
    * @param steerBrushlessMotorControllerType Steer brushless motor controller type
@@ -91,25 +113,27 @@ public class SwerveDrive extends SubsystemBase {
    * @param blModuleLocation BL Module location (meters relative to center of robot)
    *
    * @param gyroID CAN ID of gyro
-   *
-   * @param headingControllerConfiguration Heading controller configuration
    */
   public SwerveDrive(
     int flSteerMotorID,
     int flSteerEncoderID,
     int flDriveMotorID,
+    double flMagnetOffset,
 
     int frSteerMotorID,
     int frSteerEncoderID,
     int frDriveMotorID,
+    double frMagnetOffset,
 
     int brSteerMotorID,
     int brSteerEncoderID,
     int brDriveMotorID,
+    double brMagnetOffset,
 
     int blSteerMotorID,
     int blSteerEncoderID,
     int blDriveMotorID,
+    double blMagnetOffset,
 
     BrushlessMotorControllerType driveBrushlessMotorControllerType,
     BrushlessMotorControllerType steerBrushlessMotorControllerType,
@@ -123,7 +147,7 @@ public class SwerveDrive extends SubsystemBase {
 
     int gyroID,
 
-    HeadingControllerConfiguration headingControllerConfiguration
+    HeadingConstants headingConstants
   ) {
     // Instantiate FL module
     flModule = new SwerveModule(
@@ -131,6 +155,7 @@ public class SwerveDrive extends SubsystemBase {
       flSteerMotorID,
       flSteerEncoderID,
       flDriveMotorID,
+      flMagnetOffset,
       driveBrushlessMotorControllerType,
       steerBrushlessMotorControllerType,
       moduleConfiguration
@@ -142,6 +167,7 @@ public class SwerveDrive extends SubsystemBase {
       frSteerMotorID,
       frSteerEncoderID,
       frDriveMotorID,
+      frMagnetOffset,
       driveBrushlessMotorControllerType,
       steerBrushlessMotorControllerType,
       moduleConfiguration
@@ -153,6 +179,7 @@ public class SwerveDrive extends SubsystemBase {
       brSteerMotorID,
       brSteerEncoderID,
       brDriveMotorID,
+      brMagnetOffset,
       driveBrushlessMotorControllerType,
       steerBrushlessMotorControllerType,
       moduleConfiguration
@@ -164,10 +191,14 @@ public class SwerveDrive extends SubsystemBase {
       blSteerMotorID,
       blSteerEncoderID,
       blDriveMotorID,
+      blMagnetOffset,
       driveBrushlessMotorControllerType,
       steerBrushlessMotorControllerType,
       moduleConfiguration
     );
+
+    // Instantiate gyro
+    gyro = new Pigeon2(gyroID);
 
     // Instantiate kinematics
     kinematics = new SwerveDriveKinematics(
@@ -177,18 +208,19 @@ public class SwerveDrive extends SubsystemBase {
       blModuleLocation
     );
 
-    // Instantiate gyro
-    gyro = new Pigeon2(gyroID);
-
-    // Instantiate heading controller
-    headingController = new HeadingController(headingControllerConfiguration);
-
     // Instantiate pose estimator
     poseEstimator = new SwerveDrivePoseEstimator(
       kinematics,
       getHeading(),
       getModulePositions(),
       new Pose2d()
+    );
+
+    // Instantiate heading controller
+    headingController = new PIDController(
+            headingConstants.kP,
+            headingConstants.kI,
+            headingConstants.kD
     );
 
     // Put Field2d on SmartDashboard
@@ -298,34 +330,6 @@ public class SwerveDrive extends SubsystemBase {
   }
 
   /**
-   * Locks heading to given value
-   *
-   * @param desiredHeading Desired heading
-   */
-  public void lockHeading(Rotation2d desiredHeading) {
-    // Set heading lock
-    this.headingLocked = true;
-    this.desiredHeading = desiredHeading;
-  }
-
-  /**
-   * Aims SwerveDrive at target pose
-   *
-   * @param target Target translation
-   * @param relativeHeading Heading relative to target
-   */
-  public void aimAt(Translation2d target, Rotation2d relativeHeading) {
-    // Calculate error vector
-    Translation2d errorVec = target.minus(getEstimatedPose().getTranslation());
-
-    // Calculate target heading
-    Rotation2d targetHeading = errorVec.getAngle().rotateBy(relativeHeading);
-
-    // Lock heading to target heading
-    lockHeading(targetHeading);
-  }
-
-  /**
    * Drives the swerve drive given desired velocities
    *
    * @param vx Velocity in the X direction (m/s)
@@ -347,29 +351,20 @@ public class SwerveDrive extends SubsystemBase {
       stopped = false;
     }
 
-    // Initialize actualOmega
-    double actualOmega;
+    // Stabilize heading
+    // author: Alex
+    double stabilizedOmega = -headingController.calculate(
+      getHeading().getRadians(),
+      prevHeading.getRadians()
+    );
 
-    // Check if headingLocked is true
-    if (headingLocked) {
-      // Lock heading
-      actualOmega = headingController.lock(
-        getHeading(),
-        desiredHeading
-      );
+    // Actual omega
+    double actualOmega = omega;
 
-      // Check if omega is non-zero
-      if (omega != 0)
-        // If so disable heading lock
-        headingLocked = false;
-    } else {
-      // Stabilize heading
-      actualOmega = headingController.stabilize(
-        vx,
-        vy,
-        omega,
-        getHeading()
-      );
+    // Check if omega is zero and the translational velocity is greater than 0.25 m/s
+    if (omega == 0 && Math.sqrt(Math.pow(vx, 2) + Math.pow(vy, 2)) >= 0.25) {
+      // If so change to stabilized omega
+      actualOmega = stabilizedOmega;
     }
 
     // Output omega to SmartDashboard
@@ -396,8 +391,16 @@ public class SwerveDrive extends SubsystemBase {
     // Check if this is a simulation
     if (Robot.isSimulation()) {
       // If so update simulated heading depending on omega
-      simHeading = simHeading.rotateBy(new Rotation2d(actualOmega * Robot.kDefaultPeriod));
+      simHeading = simHeading.rotateBy(new Rotation2d(omega * Robot.kDefaultPeriod));
     }
+
+    SmartDashboard.putNumber("prevheading", prevHeading.getDegrees());
+
+    // Detect change in rotation input
+    if (MathUtil.isNear(0.0, omega, 0.01)  && !MathUtil.isNear(0.0, prevOmega.getRadians(), 0.01))
+      prevHeading = getHeading();
+
+    prevOmega = Rotation2d.fromRadians(omega);
   }
 
   /**

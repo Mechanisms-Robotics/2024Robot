@@ -43,6 +43,8 @@ public class SwerveModule extends SubsystemBase {
    *
    * @param driveMotorID CAN ID of drive motor
    *
+   * @param magnetOffset Absolute position magnet offset
+   *
    * @param driveBrushlessMotorControllerType Drive brushless motor controller type
    * @param steerBrushlessMotorControllerType Steer brushless motor controller type
    *
@@ -55,6 +57,8 @@ public class SwerveModule extends SubsystemBase {
     int steerEncoderID,
 
     int driveMotorID,
+
+    double magnetOffset,
 
     BrushlessMotorControllerType driveBrushlessMotorControllerType,
     BrushlessMotorControllerType steerBrushlessMotorControllerType,
@@ -69,13 +73,13 @@ public class SwerveModule extends SubsystemBase {
       // Default
       default -> {
         // Instantiate TalonFX
-        steerMotor = new TalonFX(steerMotorID, new CANCoder(steerEncoderID));
+        steerMotor = new TalonFX(steerMotorID, new CANCoder(steerEncoderID, magnetOffset));
       }
 
       // SparkMax
       case SparkMax -> {
         // Instantiate SparkMax
-        steerMotor = new SparkMax(steerMotorID, new CANCoder(steerEncoderID));
+        steerMotor = new SparkMax(steerMotorID, new CANCoder(steerEncoderID, magnetOffset));
       }
     }
 
@@ -203,7 +207,7 @@ public class SwerveModule extends SubsystemBase {
   /**
    * Returns current module position as a SwerveModulePosition
    *
-   * @return Current module transposition
+   * @return Current module position
    */
   public SwerveModulePosition getModulePosition() {
     // Create a new SwerveModulePosition and return it
@@ -243,7 +247,7 @@ public class SwerveModule extends SubsystemBase {
     steerTo(state.angle);
 
     // Drive at state speed
-//    drive(state.speedMetersPerSecond);
+    drive(state.speedMetersPerSecond);
   }
 
   /**
@@ -313,13 +317,15 @@ public class SwerveModule extends SubsystemBase {
     // Run the steer motor PIDF controller
     steerMotor.periodicPIDF(curAngle.getRadians());
 
+    double vel = driveMotor.getVelocity();
     // Run the drive motor PPIDF controller
-    driveMotor.periodicPPIDF(driveMotor.getVelocity());
+    driveMotor.periodicPIDF(vel);
 
+    System.out.println(vel);
     // Output module speed to SmartDashboard
     SmartDashboard.putNumber(
       "[" + moduleName + "] Speed",
-      driveMotor.getVelocity()
+      vel
     );
   }
 }
