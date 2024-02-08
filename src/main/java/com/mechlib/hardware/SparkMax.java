@@ -25,6 +25,9 @@ public class SparkMax extends BrushlessMotorController {
 
     // Instantiate CANSparkMax
     this.sparkMax = new CANSparkMax(id, MotorType.kBrushless);
+
+    // Restore factory defaults
+    sparkMax.restoreFactoryDefaults();
   }
 
   /**
@@ -78,6 +81,12 @@ public class SparkMax extends BrushlessMotorController {
   public void setCurrentLimit(double limit) {
     // Set CANSparkMax smart current limit
     sparkMax.setSmartCurrentLimit((int)limit, (int)limit);
+  }
+
+  @Override
+  public void setVoltageCompensation(double nominalVoltage) {
+    // Enable voltage compensation on the CANSparkMax
+    sparkMax.enableVoltageCompensation(nominalVoltage);
   }
 
   @Override

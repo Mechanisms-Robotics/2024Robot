@@ -52,12 +52,13 @@ public class RobotContainer {
             swerve,
             () -> -xboxController.getLeftY(),
             () -> -xboxController.getLeftX(),
-            () -> -xboxController.getRightX()
-//            0.1,
-//            2,
-//            3,
-//            Math.PI,
-//            2*Math.PI
+            xboxController::getRightX,
+            0.1,
+            1,
+            2,
+            Math.PI,
+            2*Math.PI,
+            false
     ));
   }
 

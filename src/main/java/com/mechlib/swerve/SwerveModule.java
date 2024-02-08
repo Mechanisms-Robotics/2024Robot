@@ -6,6 +6,8 @@ import com.mechlib.hardware.CANCoder;
 import com.mechlib.hardware.SparkMax;
 import com.mechlib.hardware.TalonFX;
 import com.mechlib.util.MechMath;
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -25,6 +27,10 @@ public class SwerveModule extends SubsystemBase {
   private final BrushlessMotorController steerMotor;
   // Drive motor instance
   private final BrushlessMotorController driveMotor;
+
+  // Drive feedforward
+  private final SimpleMotorFeedforward driveFeedforward =
+    new SimpleMotorFeedforward(0.3, 1.0, 0.05); // 2.2544, 0.063528
 
   // Steer motor inversion
   private final boolean steerInverted;
@@ -192,7 +198,7 @@ public class SwerveModule extends SubsystemBase {
     driveMotor.setKI(moduleConfiguration.driveKI);
     driveMotor.setKD(moduleConfiguration.driveKD);
     driveMotor.setKF(moduleConfiguration.driveKF);
-    driveMotor.setDirectionalFeedforward(true);
+    driveMotor.setDirectionalFeedforward(false);
 
     // Set the drive motor PIDF tolerance
     driveMotor.setTolerance(moduleConfiguration.driveTolerance);
@@ -205,6 +211,22 @@ public class SwerveModule extends SubsystemBase {
       driveMotor.setPositionUnitsFunction(this::driveNEOToMeters);
       driveMotor.setVelocityUnitsFunction(this::driveNEOToMPS);
     }
+
+    // Set steer motor current limit if provided
+    if (!Double.isNaN(moduleConfiguration.steerCurrentLimit))
+      steerMotor.setCurrentLimit(moduleConfiguration.steerCurrentLimit);
+
+    // Set steer motor voltage compensation if provided
+    if (!Double.isNaN(moduleConfiguration.steerVoltageComp))
+      steerMotor.setVoltageCompensation(moduleConfiguration.steerVoltageComp);
+
+    // Set drive motor current limit if provided
+    if (!Double.isNaN(moduleConfiguration.driveCurrentLimit))
+      driveMotor.setCurrentLimit(moduleConfiguration.driveCurrentLimit);
+
+    // Set drive motor voltage compensation if provided
+    if (!Double.isNaN(moduleConfiguration.driveVoltageComp))
+      driveMotor.setVoltageCompensation(moduleConfiguration.driveVoltageComp);
   }
 
   /**
@@ -236,9 +258,12 @@ public class SwerveModule extends SubsystemBase {
    * @param speed Speed (m/s)
    */
   public void drive(double speed) {
-    // Set the drive motor PPIDF setpoint
-    driveMotor.setSetpoint(speed * (driveInverted ? -1.0 : 1.0));
+    // Set the drive motor PIDF setpoint
+//    driveMotor.setSetpoint(speed * (driveInverted ? -1.0 : 1.0));
+    driveMotor.setPercent(speed / 4.5 * (driveInverted ? -1.0 : 1.0));
+    System.out.println(driveMotor.getVelocity());
   }
+
 
   /**
    * Sets the module state
@@ -316,13 +341,26 @@ public class SwerveModule extends SubsystemBase {
     // Get current velocity
     double curVelocity = driveMotor.getVelocity();
 
-    // Run the drive motor PIDF controller
-    driveMotor.periodicPIDF(curVelocity);
+    // Check if there is a desired velocity
+//    if (!MathUtil.isNear(0.0, driveMotor.getSetpoint(), 0.05)) {
+//      // If so run the drive motor PIDF controller
+////      driveMotor.periodicPIDF(curVelocity, driveFeedforward);
+////      driveMotor.setPercent();
+//    } else {
+//      // Otherwise stop drive motor
+//      driveMotor.setPercent(0.0);
+//    }
 
     // Output module speed to SmartDashboard
     SmartDashboard.putNumber(
       "[" + moduleName + "] Speed",
       curVelocity
+    );
+
+    // Output module speed to SmartDashboard
+    SmartDashboard.putNumber(
+            "[" + moduleName + "] Desired Speed",
+            driveMotor.getVelocity()
     );
   }
 }

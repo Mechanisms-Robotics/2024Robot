@@ -1,6 +1,7 @@
 package com.mechlib.hardware;
 
 import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
+import com.ctre.phoenix6.configs.VoltageConfigs;
 import frc.robot.Robot;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -96,11 +97,27 @@ public class TalonFX extends BrushlessMotorController {
 
     // Instantiate current limits configuration
     CurrentLimitsConfigs currentLimits = new CurrentLimitsConfigs()
+        .withSupplyCurrentLimit(limit)
+        .withSupplyCurrentLimitEnable(true)
         .withStatorCurrentLimit(limit)
         .withStatorCurrentLimitEnable(true);
 
     // Apply configuration
     cfg.apply(currentLimits);
+  }
+
+  @Override
+  public void setVoltageCompensation(double nominalVoltage) {
+    // Get configurator
+    TalonFXConfigurator cfg = talonFX.getConfigurator();
+
+    // Instantiate voltage compensation configuration
+    VoltageConfigs voltageComp = new VoltageConfigs()
+      .withPeakReverseVoltage(nominalVoltage)
+      .withPeakForwardVoltage(nominalVoltage);
+
+    // Apply configuration
+    cfg.apply(voltageComp);
   }
 
   @Override

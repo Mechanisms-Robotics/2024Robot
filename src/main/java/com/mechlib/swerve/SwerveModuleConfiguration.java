@@ -23,6 +23,12 @@ public class SwerveModuleConfiguration {
   public final double driveGearRatio; // Drive gear ratio (6.12:1)
   public final double wheelDiameter; // Wheel diameter (meters)
 
+  public final double steerCurrentLimit; // Steer motor current limit (amps)
+  public final double steerVoltageComp; // Steer motor voltage compensation (volts)
+
+  public final double driveCurrentLimit; // Drive motor current limit (amps)
+  public final double driveVoltageComp; // Drive motor voltage compensation (volts)
+
   // Default SwerveModuleConfiguration (SDS Mk4i L3 w/ Falcons)
   public static SwerveModuleConfiguration DEFAULT = new SwerveModuleConfiguration(
     0.25,
@@ -32,15 +38,21 @@ public class SwerveModuleConfiguration {
 
     Math.toRadians(1.0),
 
-    0.1,
+    0.0007298,
     0.0,
     0.0,
-    0.01,
+    0.0,
 
     0.1,
 
     6.12,
-    0.1016
+    0.1016,
+
+    Double.NaN,
+    Double.NaN,
+
+    30.0,
+    Double.NaN
   );
 
   /**
@@ -60,6 +72,12 @@ public class SwerveModuleConfiguration {
    *
    * @param driveGearRatio Gear ratio of drive motor (x:1)
    * @param wheelDiameter Diameter of wheel (meters)
+   *
+   * @param steerCurrentLimit Steer motor current limit (amps)
+   * @param steerVoltageComp Steer motor voltage compensation (volts)
+
+   * @param driveCurrentLimit Drive motor current limit (amps)
+   * @param driveVoltageComp Drive motor voltage compensation (volts)
    */
   public SwerveModuleConfiguration(
     double steerKP,
@@ -77,7 +95,13 @@ public class SwerveModuleConfiguration {
     double driveTolerance,
 
     double driveGearRatio,
-    double wheelDiameter
+    double wheelDiameter,
+
+    double steerCurrentLimit,
+    double steerVoltageComp,
+
+    double driveCurrentLimit,
+    double driveVoltageComp
     ) {
     // Set config parameters
     this.steerKP = steerKP;
@@ -96,5 +120,11 @@ public class SwerveModuleConfiguration {
 
     this.driveGearRatio = driveGearRatio;
     this.wheelDiameter = wheelDiameter;
+
+    this.steerCurrentLimit = steerCurrentLimit;
+    this.steerVoltageComp = steerVoltageComp;
+
+    this.driveCurrentLimit = driveCurrentLimit;
+    this.driveVoltageComp = driveVoltageComp;
   }
 }
