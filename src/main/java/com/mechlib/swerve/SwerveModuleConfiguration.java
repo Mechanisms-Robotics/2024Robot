@@ -45,7 +45,7 @@ public class SwerveModuleConfiguration {
 
     0.1,
 
-    6.12,
+    6.75,
     0.1016,
 
     Double.NaN,

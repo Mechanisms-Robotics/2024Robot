@@ -28,9 +28,9 @@ public class SwerveModule extends SubsystemBase {
   // Drive motor instance
   private final BrushlessMotorController driveMotor;
 
-  // Drive feedforward
+  // Wheel feedforward
   private final SimpleMotorFeedforward driveFeedforward =
-    new SimpleMotorFeedforward(0.3, 1.0, 0.05); // 2.2544, 0.063528
+    new SimpleMotorFeedforward(0.319185544, 2.2544, 0.063528);
 
   // Steer motor inversion
   private final boolean steerInverted;
@@ -198,7 +198,7 @@ public class SwerveModule extends SubsystemBase {
     driveMotor.setKI(moduleConfiguration.driveKI);
     driveMotor.setKD(moduleConfiguration.driveKD);
     driveMotor.setKF(moduleConfiguration.driveKF);
-    driveMotor.setDirectionalFeedforward(false);
+    driveMotor.setDirectionalFeedforward(true);
 
     // Set the drive motor PIDF tolerance
     driveMotor.setTolerance(moduleConfiguration.driveTolerance);
@@ -258,12 +258,9 @@ public class SwerveModule extends SubsystemBase {
    * @param speed Speed (m/s)
    */
   public void drive(double speed) {
-    // Set the drive motor PIDF setpoint
-//    driveMotor.setSetpoint(speed * (driveInverted ? -1.0 : 1.0));
-    driveMotor.setPercent(speed / 4.5 * (driveInverted ? -1.0 : 1.0));
-    System.out.println(driveMotor.getVelocity());
+    // Set the drive motor percentage
+    driveMotor.setPercent(speed / 4.0);
   }
-
 
   /**
    * Sets the module state
@@ -310,7 +307,6 @@ public class SwerveModule extends SubsystemBase {
       driveInverted = true;
     }
 
-
     // Optimize closest angle rotation
     closestAngle = MechMath.optimizeRotation(curAngle, closestAngle);
 
@@ -341,26 +337,10 @@ public class SwerveModule extends SubsystemBase {
     // Get current velocity
     double curVelocity = driveMotor.getVelocity();
 
-    // Check if there is a desired velocity
-//    if (!MathUtil.isNear(0.0, driveMotor.getSetpoint(), 0.05)) {
-//      // If so run the drive motor PIDF controller
-////      driveMotor.periodicPIDF(curVelocity, driveFeedforward);
-////      driveMotor.setPercent();
-//    } else {
-//      // Otherwise stop drive motor
-//      driveMotor.setPercent(0.0);
-//    }
-
     // Output module speed to SmartDashboard
     SmartDashboard.putNumber(
       "[" + moduleName + "] Speed",
       curVelocity
-    );
-
-    // Output module speed to SmartDashboard
-    SmartDashboard.putNumber(
-            "[" + moduleName + "] Desired Speed",
-            driveMotor.getVelocity()
     );
   }
 }
