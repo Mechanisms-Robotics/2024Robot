@@ -276,7 +276,7 @@ public class SwerveDrive extends SubsystemBase {
       return simHeading;
 
     // Get the angle from the gyro and create a Rotation2d with it
-    return Rotation2d.fromDegrees(gyro.getYaw().getValueAsDouble());
+    return Rotation2d.fromDegrees(gyro.getYaw().getValueAsDouble()).rotateBy(new Rotation2d());
   }
 
   /**

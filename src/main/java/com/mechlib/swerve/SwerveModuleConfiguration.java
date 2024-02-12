@@ -52,7 +52,7 @@ public class SwerveModuleConfiguration {
     Double.NaN,
 
     30.0,
-    Double.NaN
+    10
   );
 
   /**

@@ -259,7 +259,7 @@ public class SwerveModule extends SubsystemBase {
    */
   public void drive(double speed) {
     // Set the drive motor percentage
-    driveMotor.setPercent(speed / 4.0);
+    driveMotor.setPercent(speed / 4.2 * (driveInverted ? -1 : 1));
   }
 
   /**
@@ -316,6 +316,8 @@ public class SwerveModule extends SubsystemBase {
 
   @Override
   public void periodic() {
+
+
     // Update curAngle
     curAngle = new Rotation2d(steerMotor.getPosition());
 

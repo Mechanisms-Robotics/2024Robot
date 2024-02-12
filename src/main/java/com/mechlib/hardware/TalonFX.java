@@ -87,7 +87,7 @@ public class TalonFX extends BrushlessMotorController {
   @Override
   public void brakeMode() {
     // Set TalonFX to Brake mode
-    talonFX.setNeutralMode(NeutralModeValue.Coast);
+    talonFX.setNeutralMode(NeutralModeValue.Brake);
   }
 
   @Override

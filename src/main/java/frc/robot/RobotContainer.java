@@ -54,11 +54,11 @@ public class RobotContainer {
             () -> -xboxController.getLeftX(),
             xboxController::getRightX,
             0.1,
-            1,
-            2,
+            4.5,
+            5,
             Math.PI,
             2*Math.PI,
-            false
+            true
     ));
   }
 

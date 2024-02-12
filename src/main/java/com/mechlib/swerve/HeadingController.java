@@ -81,10 +81,17 @@ public class HeadingController {
 
     // Check if current omega is zero and translational velocity is at least 0.25 m/s
     if (omega == 0 && Math.sqrt(Math.pow(vx, 2) + Math.pow(vy, 2)) >= 0.25) {
+      if (Math.abs(prevHeading.getRadians() - heading.getRadians()) > 1 * Math.PI) {
+        System.out.println("PrevHeading: " + prevHeading.getDegrees() + " heading: " + heading.getDegrees() + " diff: (" + Math.abs(prevHeading.getDegrees() - heading.getDegrees()) + ")");
+        return 0;
+      }
       // If so change omega such that the heading is stabilized
       stabilizedOmega = -stabilizeController.calculate(
         heading.getRadians(),
-        prevHeading.getRadians()
+        MechMath.optimizeRotation(
+                heading,
+                prevHeading
+        ).getRadians()
       );
     }
 
