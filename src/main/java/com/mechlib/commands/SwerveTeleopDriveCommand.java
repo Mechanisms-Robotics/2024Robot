@@ -45,6 +45,8 @@ public class SwerveTeleopDriveCommand extends Command {
    *
    * @param maxAngularVelocity Max angular velocity (rads/s)
    * @param maxAngularAccel Max angular acceleration (rads/s^2)
+   *
+   * @param fieldOriented Field oriented driving
    */
   public SwerveTeleopDriveCommand(
     SwerveDrive swerve,
@@ -59,7 +61,9 @@ public class SwerveTeleopDriveCommand extends Command {
     double maxAccel,
 
     double maxAngularVelocity,
-    double maxAngularAccel
+    double maxAngularAccel,
+
+    boolean fieldOriented
   ) {
     // Set swerve
     this.swerve = swerve;
@@ -80,6 +84,9 @@ public class SwerveTeleopDriveCommand extends Command {
     this.vxLimiter = new SlewRateLimiter(maxAccel);
     this.vyLimiter = new SlewRateLimiter(maxAccel);
     this.omegaLimiter = new SlewRateLimiter(maxAngularAccel);
+
+    // Set field oriented
+    swerve.setFieldOriented(fieldOriented);
 
     // Add subsystem requirements
     addRequirements(swerve);

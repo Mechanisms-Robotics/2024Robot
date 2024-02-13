@@ -5,6 +5,9 @@ import com.mechlib.hardware.BrushlessMotorControllerType;
 import com.mechlib.hardware.CANCoder;
 import com.mechlib.hardware.SparkMax;
 import com.mechlib.hardware.TalonFX;
+import com.mechlib.util.MechMath;
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -25,6 +28,13 @@ public class SwerveModule extends SubsystemBase {
   // Drive motor instance
   private final BrushlessMotorController driveMotor;
 
+  // Wheel feedforward
+  private final SimpleMotorFeedforward driveFeedforward =
+    new SimpleMotorFeedforward(0.319185544, 2.2544, 0.063528);
+
+  // Steer motor inversion
+  private final boolean steerInverted;
+
   // Module configuration
   private final SwerveModuleConfiguration moduleConfiguration;
 
@@ -40,8 +50,10 @@ public class SwerveModule extends SubsystemBase {
    *
    * @param steerMotorID CAN ID of steer motor
    * @param steerEncoderID CAN ID of steer CANCoder
-   *
    * @param driveMotorID CAN ID of drive motor
+   *
+   * @param magnetOffset Absolute position magnet offset
+   * @param steerInverted Inversion of steer motor
    *
    * @param driveBrushlessMotorControllerType Drive brushless motor controller type
    * @param steerBrushlessMotorControllerType Steer brushless motor controller type
@@ -53,8 +65,10 @@ public class SwerveModule extends SubsystemBase {
 
     int steerMotorID,
     int steerEncoderID,
-
     int driveMotorID,
+
+    double magnetOffset,
+    boolean steerInverted,
 
     BrushlessMotorControllerType driveBrushlessMotorControllerType,
     BrushlessMotorControllerType steerBrushlessMotorControllerType,
@@ -69,13 +83,13 @@ public class SwerveModule extends SubsystemBase {
       // Default
       default -> {
         // Instantiate TalonFX
-        steerMotor = new TalonFX(steerMotorID, new CANCoder(steerEncoderID));
+        steerMotor = new TalonFX(steerMotorID, new CANCoder(steerEncoderID, magnetOffset));
       }
 
       // SparkMax
       case SparkMax -> {
         // Instantiate SparkMax
-        steerMotor = new SparkMax(steerMotorID, new CANCoder(steerEncoderID));
+        steerMotor = new SparkMax(steerMotorID, new CANCoder(steerEncoderID, magnetOffset));
       }
     }
 
@@ -93,6 +107,9 @@ public class SwerveModule extends SubsystemBase {
         driveMotor = new SparkMax(driveMotorID);
       }
     }
+
+    // Set steer inversion
+    this.steerInverted = steerInverted;
 
     // Set module configuration
     this.moduleConfiguration = moduleConfiguration;
@@ -156,7 +173,7 @@ public class SwerveModule extends SubsystemBase {
    */
   private void configureMotors() {
     // Set the steer motor inversion and switch it to brake mode
-    steerMotor.setInverted(moduleConfiguration.steerInverted);
+    steerMotor.setInverted(steerInverted);
     steerMotor.brakeMode();
 
     // Configure the steer motor PPIDF controller
@@ -183,10 +200,6 @@ public class SwerveModule extends SubsystemBase {
     driveMotor.setKF(moduleConfiguration.driveKF);
     driveMotor.setDirectionalFeedforward(true);
 
-    // Set the max velocity and max acceleration for the drive motor PPIDF controller
-    driveMotor.setMaxVelocity(moduleConfiguration.maxVelocity);
-    driveMotor.setMaxAcceleration(moduleConfiguration.maxAccel);
-
     // Set the drive motor PIDF tolerance
     driveMotor.setTolerance(moduleConfiguration.driveTolerance);
 
@@ -198,6 +211,22 @@ public class SwerveModule extends SubsystemBase {
       driveMotor.setPositionUnitsFunction(this::driveNEOToMeters);
       driveMotor.setVelocityUnitsFunction(this::driveNEOToMPS);
     }
+
+    // Set steer motor current limit if provided
+    if (!Double.isNaN(moduleConfiguration.steerCurrentLimit))
+      steerMotor.setCurrentLimit(moduleConfiguration.steerCurrentLimit);
+
+    // Set steer motor voltage compensation if provided
+    if (!Double.isNaN(moduleConfiguration.steerVoltageComp))
+      steerMotor.setVoltageCompensation(moduleConfiguration.steerVoltageComp);
+
+    // Set drive motor current limit if provided
+    if (!Double.isNaN(moduleConfiguration.driveCurrentLimit))
+      driveMotor.setCurrentLimit(moduleConfiguration.driveCurrentLimit);
+
+    // Set drive motor voltage compensation if provided
+    if (!Double.isNaN(moduleConfiguration.driveVoltageComp))
+      driveMotor.setVoltageCompensation(moduleConfiguration.driveVoltageComp);
   }
 
   /**
@@ -229,8 +258,8 @@ public class SwerveModule extends SubsystemBase {
    * @param speed Speed (m/s)
    */
   public void drive(double speed) {
-    // Set the drive motor PPIDF setpoint
-    driveMotor.setSetpoint(speed * (driveInverted ? -1.0 : 1.0));
+    // Set the drive motor percentage
+    driveMotor.setPercent(speed / 4.2 * (driveInverted ? -1 : 1));
   }
 
   /**
@@ -267,27 +296,19 @@ public class SwerveModule extends SubsystemBase {
     if (desiredDist <= oppDist) {
       // Set closestAngle to desiredAngle
       closestAngle = desiredAngle;
+
+      // Set drive inversion
+      driveInverted = false;
     } else {
       // Set closestAngle to oppAngle
       closestAngle = oppAngle;
-    }
 
-    // Check if we are in the wrap around zone
-    if (curAngle.getRadians() > (Math.PI * 3/4) && desiredAngle.getRadians() < (-Math.PI * 3/4)) {
-      // If curAngle is positive wrap around positive
-      closestAngle = new Rotation2d(Math.PI + (Math.PI - Math.abs(desiredAngle.getRadians())));
-    } else if (curAngle.getRadians() < (-Math.PI * 3/4) && desiredAngle.getRadians() > (Math.PI * 3/4)) {
-      // If curAngle is negative wrap around negative
-      closestAngle = new Rotation2d(-Math.PI - (Math.PI - Math.abs(desiredAngle.getRadians())));
-    }
-
-    // Check if the closest angle was the opposite angle
-    if (closestAngle.getRadians() == oppAngle.getRadians()) {
-      // If it was invert the drive motor
+      // Set drive inversion
       driveInverted = true;
-    } else {
-      driveInverted = false;
     }
+
+    // Optimize closest angle rotation
+    closestAngle = MechMath.optimizeRotation(curAngle, closestAngle);
 
     // Return the closest angle
     return closestAngle;
@@ -295,6 +316,8 @@ public class SwerveModule extends SubsystemBase {
 
   @Override
   public void periodic() {
+
+
     // Update curAngle
     curAngle = new Rotation2d(steerMotor.getPosition());
 
@@ -313,13 +336,13 @@ public class SwerveModule extends SubsystemBase {
     // Run the steer motor PIDF controller
     steerMotor.periodicPIDF(curAngle.getRadians());
 
-    // Run the drive motor PPIDF controller
-    driveMotor.periodicPPIDF(driveMotor.getVelocity());
+    // Get current velocity
+    double curVelocity = driveMotor.getVelocity();
 
     // Output module speed to SmartDashboard
     SmartDashboard.putNumber(
       "[" + moduleName + "] Speed",
-      driveMotor.getVelocity()
+      curVelocity
     );
   }
 }

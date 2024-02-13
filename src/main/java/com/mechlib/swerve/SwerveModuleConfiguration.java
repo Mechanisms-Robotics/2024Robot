@@ -13,8 +13,6 @@ public class SwerveModuleConfiguration {
 
   public final double steerTolerance; // Steer tolerance (rads)
 
-  public final boolean steerInverted; // Steer motor inverted
-
   public final double driveKP; // Drive p gain
   public final double driveKI; // Drive i gain
   public final double driveKD; // Drive d gain
@@ -22,35 +20,39 @@ public class SwerveModuleConfiguration {
 
   public final double driveTolerance; // Drive tolerance (m/s)
 
-  public final double maxVelocity; // Max velocity (m/s)
-  public final double maxAccel; // Max acceleration (m/s^2)
-
   public final double driveGearRatio; // Drive gear ratio (6.12:1)
   public final double wheelDiameter; // Wheel diameter (meters)
 
+  public final double steerCurrentLimit; // Steer motor current limit (amps)
+  public final double steerVoltageComp; // Steer motor voltage compensation (volts)
+
+  public final double driveCurrentLimit; // Drive motor current limit (amps)
+  public final double driveVoltageComp; // Drive motor voltage compensation (volts)
+
   // Default SwerveModuleConfiguration (SDS Mk4i L3 w/ Falcons)
   public static SwerveModuleConfiguration DEFAULT = new SwerveModuleConfiguration(
-    0.0025,
+    0.25,
     0.0,
     0.0,
-    0.05,
+    0.01,
 
     Math.toRadians(1.0),
 
-    false,
-
-    0.0025,
+    0.0007298,
     0.0,
     0.0,
-    0.05,
+    0.0,
 
-    0.5,
+    0.1,
 
-    4.5,
-    2.5,
+    6.75,
+    0.1016,
 
-    6.12,
-    0.1016
+    Double.NaN,
+    Double.NaN,
+
+    30.0,
+    10
   );
 
   /**
@@ -62,19 +64,20 @@ public class SwerveModuleConfiguration {
    * @param steerKF Steer feedforward (percent)
    * @param steerTolerance Steer tolerance (rads)
    *
-   * @param steerInverted Steer motor inverted
-   *
    * @param driveKP Drive p gain
    * @param driveKI Drive i gain
    * @param driveKD Drive d gain
    * @param driveKF Drive feedforward (percent)
    * @param driveTolerance Drive tolerance (m/s)
    *
-   * @param maxVelocity Max velocity (m/s)
-   * @param maxAccel Max acceleration (m/s^2)
-   *
    * @param driveGearRatio Gear ratio of drive motor (x:1)
    * @param wheelDiameter Diameter of wheel (meters)
+   *
+   * @param steerCurrentLimit Steer motor current limit (amps)
+   * @param steerVoltageComp Steer motor voltage compensation (volts)
+
+   * @param driveCurrentLimit Drive motor current limit (amps)
+   * @param driveVoltageComp Drive motor voltage compensation (volts)
    */
   public SwerveModuleConfiguration(
     double steerKP,
@@ -84,8 +87,6 @@ public class SwerveModuleConfiguration {
 
     double steerTolerance,
 
-    boolean steerInverted,
-
     double driveKP,
     double driveKI,
     double driveKD,
@@ -93,11 +94,14 @@ public class SwerveModuleConfiguration {
 
     double driveTolerance,
 
-    double maxVelocity,
-    double maxAccel,
-
     double driveGearRatio,
-    double wheelDiameter
+    double wheelDiameter,
+
+    double steerCurrentLimit,
+    double steerVoltageComp,
+
+    double driveCurrentLimit,
+    double driveVoltageComp
     ) {
     // Set config parameters
     this.steerKP = steerKP;
@@ -107,8 +111,6 @@ public class SwerveModuleConfiguration {
 
     this.steerTolerance = steerTolerance;
 
-    this.steerInverted = steerInverted;
-
     this.driveKP = driveKP;
     this.driveKI = driveKI;
     this.driveKD = driveKD;
@@ -116,10 +118,13 @@ public class SwerveModuleConfiguration {
 
     this.driveTolerance = driveTolerance;
 
-    this.maxVelocity = maxVelocity;
-    this.maxAccel = maxAccel;
-
     this.driveGearRatio = driveGearRatio;
     this.wheelDiameter = wheelDiameter;
+
+    this.steerCurrentLimit = steerCurrentLimit;
+    this.steerVoltageComp = steerVoltageComp;
+
+    this.driveCurrentLimit = driveCurrentLimit;
+    this.driveVoltageComp = driveVoltageComp;
   }
 }

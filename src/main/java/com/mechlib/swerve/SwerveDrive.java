@@ -54,8 +54,8 @@ public class SwerveDrive extends SubsystemBase {
   // Simulated heading
   private Rotation2d simHeading = new Rotation2d();
 
-  // Swerve stopped
-  private boolean stopped = true;
+  // Wheels locked (in X configuration)
+  private boolean wheelsLocked = true;
 
   // Heading lock
   private boolean headingLocked = false;
@@ -68,17 +68,29 @@ public class SwerveDrive extends SubsystemBase {
    * @param flSteerEncoderID CAN ID of FL steer CANCoder
    * @param flDriveMotorID CAN ID of FL drive motor
    *
+   * @param flMagnetOffset Absolute position magnet offset of FL encoder
+   * @param flSteerMotorInverted Inversion of FL steer motor
+   *
    * @param frSteerMotorID CAN ID of FR steer motor
    * @param frSteerEncoderID CAN ID of FR steer CANCoder
    * @param frDriveMotorID CAN ID of FR drive motor
+
+   * @param frMagnetOffset Absolute position magnet offset of FR encoder
+   * @param frSteerMotorInverted Inversion of FR steer motor
    *
    * @param brSteerMotorID CAN ID of BR steer motor
    * @param brSteerEncoderID CAN ID of BR steer CANCoder
    * @param brDriveMotorID CAN ID of BR drive motor
+
+   * @param brMagnetOffset Absolute position magnet offset of BR encoder
+   * @param brSteerMotorInverted Inversion of BR steer motor
    *
    * @param blSteerMotorID CAN ID of BL steer motor
    * @param blSteerEncoderID CAN ID of BL steer CANCoder
    * @param blDriveMotorID CAN ID of BL drive motor
+
+   * @param blMagnetOffset Absolute position magnet offset of BL encoder
+   * @param blSteerMotorInverted Inversion of BL steer motor
    *
    * @param driveBrushlessMotorControllerType Drive brushless motor controller type
    * @param steerBrushlessMotorControllerType Steer brushless motor controller type
@@ -99,17 +111,29 @@ public class SwerveDrive extends SubsystemBase {
     int flSteerEncoderID,
     int flDriveMotorID,
 
+    double flMagnetOffset,
+    boolean flSteerMotorInverted,
+
     int frSteerMotorID,
     int frSteerEncoderID,
     int frDriveMotorID,
+
+    double frMagnetOffset,
+    boolean frSteerMotorInverted,
 
     int brSteerMotorID,
     int brSteerEncoderID,
     int brDriveMotorID,
 
+    double brMagnetOffset,
+    boolean brSteerMotorInverted,
+
     int blSteerMotorID,
     int blSteerEncoderID,
     int blDriveMotorID,
+
+    double blMagnetOffset,
+    boolean blSteerMotorInverted,
 
     BrushlessMotorControllerType driveBrushlessMotorControllerType,
     BrushlessMotorControllerType steerBrushlessMotorControllerType,
@@ -128,44 +152,68 @@ public class SwerveDrive extends SubsystemBase {
     // Instantiate FL module
     flModule = new SwerveModule(
       "FL Module",
+
       flSteerMotorID,
       flSteerEncoderID,
       flDriveMotorID,
+
+      flMagnetOffset,
+      flSteerMotorInverted,
+
       driveBrushlessMotorControllerType,
       steerBrushlessMotorControllerType,
+
       moduleConfiguration
     );
 
     // Instantiate FR module
     frModule = new SwerveModule(
       "FR Module",
+
       frSteerMotorID,
       frSteerEncoderID,
       frDriveMotorID,
+
+      frMagnetOffset,
+      frSteerMotorInverted,
+
       driveBrushlessMotorControllerType,
       steerBrushlessMotorControllerType,
+
       moduleConfiguration
     );
 
     // Instantiate BR module
     brModule = new SwerveModule(
       "BR Module",
+
       brSteerMotorID,
       brSteerEncoderID,
       brDriveMotorID,
+
+      brMagnetOffset,
+      brSteerMotorInverted,
+
       driveBrushlessMotorControllerType,
       steerBrushlessMotorControllerType,
+
       moduleConfiguration
     );
 
     // Instantiate BL module
     blModule = new SwerveModule(
       "BL Module",
+
       blSteerMotorID,
       blSteerEncoderID,
       blDriveMotorID,
+
+      blMagnetOffset,
+      blSteerMotorInverted,
+
       driveBrushlessMotorControllerType,
       steerBrushlessMotorControllerType,
+
       moduleConfiguration
     );
 
@@ -228,7 +276,7 @@ public class SwerveDrive extends SubsystemBase {
       return simHeading;
 
     // Get the angle from the gyro and create a Rotation2d with it
-    return Rotation2d.fromDegrees(gyro.getYaw().getValueAsDouble());
+    return Rotation2d.fromDegrees(gyro.getYaw().getValueAsDouble()).rotateBy(new Rotation2d());
   }
 
   /**
@@ -290,11 +338,14 @@ public class SwerveDrive extends SubsystemBase {
    * Locks wheels in X configuration
    */
   public void lock() {
-    // Steer modules in an x configuration
+    // Steer modules in an X configuration
     flModule.steerTo(new Rotation2d( Math.PI/4));
     frModule.steerTo(new Rotation2d( -Math.PI/4));
     brModule.steerTo(new Rotation2d( Math.PI/4));
     blModule.steerTo(new Rotation2d( -Math.PI/4));
+
+    // Set wheels locked to true
+    wheelsLocked = true;
   }
 
   /**
@@ -333,18 +384,13 @@ public class SwerveDrive extends SubsystemBase {
    * @param omega Angular velocity (rads/s)
    */
   public void drive(double vx, double vy, double omega) {
-    // Check if all velocities are zero
-    if (vx == 0 && vy == 0 && omega == 0) {
-      // Check if stopped flag is set
-      if (stopped)
-        // If so return
-        return;
-
-      // Set stopped flag to true
-      stopped = true;
-    } else {
-      // Set stopped flag to false
-      stopped = false;
+    // Check if no desired velocity is given and wheels are locked
+    if (vx == 0 && vy == 0 && omega == 0 && wheelsLocked) {
+      // If so return
+      return;
+    } else if (wheelsLocked) {
+      // If wheels are locked but a desired velocity is given unlock wheels
+      wheelsLocked = false;
     }
 
     // Initialize actualOmega
@@ -372,7 +418,9 @@ public class SwerveDrive extends SubsystemBase {
       );
     }
 
-    // Output omega to SmartDashboard
+    // Output velocities to SmartDashboard
+    SmartDashboard.putNumber("[Swerve] vX", vx);
+    SmartDashboard.putNumber("[Swerve] vY", vy);
     SmartDashboard.putNumber("[Swerve] Omega", actualOmega);
 
     // Get the desired swerve module states

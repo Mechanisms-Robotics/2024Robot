@@ -1,6 +1,7 @@
 package com.mechlib.hardware;
 
 import edu.wpi.first.math.Pair;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import java.util.function.Function;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -122,6 +123,13 @@ public abstract class BrushlessMotorController {
    * @param limit The amount of current to limit to (amps)
    */
   public void setCurrentLimit(double limit) {}
+
+  /**
+   * Sets voltage compensation for the motor controller
+   *
+   * @param nominalVoltage Nominal voltage to run motor at
+   */
+  public void setVoltageCompensation(double nominalVoltage) {}
 
   /**
    * Updates the PIDF and PPIDF, kP values
@@ -308,6 +316,36 @@ public abstract class BrushlessMotorController {
     // Calculate PIDF Output
     double pidfOutput = pidController.calculate(currentValue)
             + (directionalFeedforward ? feedforward * Math.signum(error) : feedforward);
+
+    // Set the percentage of the motor to the PIDF output
+    setPercent(pidfOutput);
+  }
+
+  /**
+   * Runs the periodic code for the PID controller using a provided current value and feedforward
+   */
+  public void periodicPIDF(double currentValue, SimpleMotorFeedforward feedforward) {
+    // Check if within tolerance
+    double error = getSetpoint() - currentValue;
+    if (Math.abs(error) <= tolerance) {
+      // If within tolerance check for directional feedforward
+      if (directionalFeedforward) {
+        // If directional feedforward apply feedforward in direction of error
+        setPercent((feedforward.calculate(currentValue) / 12.0) * Math.signum(error));
+      } else {
+        // If standard feedforward apply feedforward
+        setPercent(feedforward.calculate(currentValue) / 12.0);
+      }
+
+      // Return without calculating PIDF output
+      return;
+    }
+
+    // Calculate PIDF Output
+    double pidfOutput = pidController.calculate(currentValue)
+      + (directionalFeedforward ?
+      (feedforward.calculate(currentValue) / 12.0) * Math.signum(error) :
+      feedforward.calculate(currentValue) / 12.0);
 
     // Set the percentage of the motor to the PIDF output
     setPercent(pidfOutput);
