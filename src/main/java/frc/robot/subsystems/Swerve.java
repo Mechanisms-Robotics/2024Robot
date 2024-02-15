@@ -35,24 +35,25 @@ public class Swerve extends SwerveDrive {
     private static final double DRIVE_GEAR_RATIO = 6.12;
     private static final double WHEEL_DIAMETER = 0.1012;
 
+    // Module locations of the modules (the center of the wheel), all .24 meters from the center
     private static final Translation2d FL_MODULE_LOCATION = new Translation2d(
-            .315,
-            .315
+            .24,
+            .24
     );
 
     private static final Translation2d FR_MODULE_LOCATION = new Translation2d(
-            .315,
-            -.315
+            .24,
+            -.24
     );
 
     private static final Translation2d BR_MODULE_LOCATION = new Translation2d(
-            -.315,
-            -.315
+            -.24,
+            -.24
     );
 
     private static final Translation2d BL_MODULE_LOCATION = new Translation2d(
-            -.315,
-            .315
+            -.24,
+            .24
     );
 
     private static final int GYRO_ID = 0;
