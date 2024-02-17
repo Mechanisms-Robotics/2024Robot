@@ -10,7 +10,7 @@ import frc.robot.Robot;
 public class HeadingControllerConfiguration {
   // Default HeadingControllerConfiguration
   public static final HeadingControllerConfiguration DEFAULT = new HeadingControllerConfiguration(
-    5, 0, 0,
+    7.5, 0, 0.01,
     Math.toRadians(1.0),
     Robot.isReal() ? 0.25 : 5.0, 0, 0,
     Math.toRadians(1.0),

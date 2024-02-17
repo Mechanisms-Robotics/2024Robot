@@ -7,6 +7,7 @@ package frc.robot;
 import com.mechlib.commands.SwerveTeleopDriveCommand;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
@@ -20,14 +21,17 @@ public class RobotContainer {
 
   private final CommandXboxController xboxController = new CommandXboxController(0);
 
+  private final SendableChooser<Command> m_chooser = new SendableChooser<>();
+
   public RobotContainer() {
     configureBindings();
 
     configureDefaultCommands();
+//    m_chooser.setDefaultOption("TopLeave");
   }
 
   public void configureBindings() {
-    xboxController.a().onTrue(
+    xboxController.a().onTrue( // a is uh x cuh
             new InstantCommand(swerve::zeroGyro)
     );
 
@@ -64,9 +68,7 @@ public class RobotContainer {
 
 
   public Command getAutonomousCommand() {
-    return Commands.print("No autonomous command configured");
+    return m_chooser.getSelected();
   }
-
-
   
 }

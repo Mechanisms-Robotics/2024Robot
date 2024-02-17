@@ -42,6 +42,7 @@ public class SwerveModule extends SubsystemBase {
   private Rotation2d desiredAngle = new Rotation2d(); // Desired angle
 
   private boolean driveInverted = false; // Drive inverted
+  private double desiredSpeed = 0;
 
   /**
    * SwerveModule constructor
@@ -258,8 +259,9 @@ public class SwerveModule extends SubsystemBase {
    * @param speed Speed (m/s)
    */
   public void drive(double speed) {
+    this.desiredSpeed = speed * (driveInverted ? -1 : 1);
     // Set the drive motor percentage
-    driveMotor.setPercent(speed / 4.2 * (driveInverted ? -1 : 1));
+    driveMotor.setPercent(speed / 4.4 * (driveInverted ? -1 : 1));
   }
 
   /**
@@ -342,7 +344,11 @@ public class SwerveModule extends SubsystemBase {
     // Output module speed to SmartDashboard
     SmartDashboard.putNumber(
       "[" + moduleName + "] Speed",
-      curVelocity
+      curVelocity * (driveInverted ? -1 : 1)
+    );
+    SmartDashboard.putNumber(
+            "[" + moduleName + "] Desired Speed",
+            desiredSpeed
     );
   }
 }
