@@ -61,6 +61,12 @@ public class TalonFX extends BrushlessMotorController {
   }
 
   @Override
+  public void setVoltage(double voltage) {
+    // Set TalonFX voltage
+    talonFX.setVoltage(voltage);
+  }
+
+  @Override
   public void setInverted(boolean inverted) {
     // Set TalonFX inversion
     talonFX.setInverted(inverted);

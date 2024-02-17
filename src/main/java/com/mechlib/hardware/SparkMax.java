@@ -54,6 +54,12 @@ public class SparkMax extends BrushlessMotorController {
   }
 
   @Override
+  public void setVoltage(double voltage) {
+    // Set CANSparkMax voltage output
+    sparkMax.setVoltage(voltage);
+  }
+
+  @Override
   public void setInverted(boolean inverted) {
     // Set CANSparkMax inversion
     sparkMax.setInverted(inverted);

@@ -1,5 +1,8 @@
 package com.mechlib.swerve;
 
+import static edu.wpi.first.units.Units.Volts;
+
+import com.ctre.phoenix6.SignalLogger;
 import com.mechlib.hardware.BrushlessMotorControllerType;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -9,10 +12,14 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.ctre.phoenix6.hardware.Pigeon2;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Robot;
 
 /**
@@ -60,6 +67,49 @@ public class SwerveDrive extends SubsystemBase {
   // Heading lock
   private boolean headingLocked = false;
   private Rotation2d desiredHeading = new Rotation2d();
+
+  // SysID routine types
+  public enum SysIDRoutineType {
+    Translational,
+    Rotational,
+    Steer
+  }
+
+  /* Use one of these sysidroutines for your particular test */
+  private SysIdRoutine sysIdRoutineTranslation = new SysIdRoutine(
+    new SysIdRoutine.Config(
+      null,
+      Volts.of(4),
+      null,
+      (state) -> SignalLogger.writeString("state", state.toString())),
+    new SysIdRoutine.Mechanism(
+      this::translationSysID,
+      null,
+      this));
+
+  private final SysIdRoutine sysIdRoutineRotation = new SysIdRoutine(
+    new SysIdRoutine.Config(
+      null,
+      Volts.of(4),
+      null,
+      (state) -> SignalLogger.writeString("state", state.toString())),
+    new SysIdRoutine.Mechanism(
+      this::rotationSysID,
+      null,
+      this));
+  private final SysIdRoutine sysIdRoutineSteer = new SysIdRoutine(
+    new SysIdRoutine.Config(
+      null,
+      Volts.of(7),
+      null,
+      (state) -> SignalLogger.writeString("state", state.toString())),
+    new SysIdRoutine.Mechanism(
+      this::steerSysID,
+      null,
+      this));
+
+  /* Change this to the sysid routine you want to test */
+  private SysIdRoutine routineToApply = sysIdRoutineTranslation;
 
   /**
    * SwerveDrive constructor
@@ -504,6 +554,77 @@ public class SwerveDrive extends SubsystemBase {
         blModule.getModulePosition().angle.rotateBy(getHeading())
       )
     );
+  }
+
+  /**
+   * Runs drive motors at specified voltage for translational system identification
+   *
+   * @param voltageMeasure Voltage measurement
+   */
+  private void translationSysID(Measure<Voltage> voltageMeasure) {
+    flModule.steerTo(new Rotation2d());
+    frModule.steerTo(new Rotation2d());
+    brModule.steerTo(new Rotation2d());
+    blModule.steerTo(new Rotation2d());
+
+    flModule.setVoltage(voltageMeasure.baseUnitMagnitude());
+    frModule.setVoltage(voltageMeasure.baseUnitMagnitude());
+    brModule.setVoltage(voltageMeasure.baseUnitMagnitude());
+    blModule.setVoltage(voltageMeasure.baseUnitMagnitude());
+  }
+
+  /**
+   * Runs drive motors at specified voltage for rotational system identification
+   *
+   * @param voltageMeasure Voltage measurement
+   */
+  private void rotationSysID(Measure<Voltage> voltageMeasure) {
+    flModule.steerTo(new Rotation2d(-Math.PI / 4.0));
+    frModule.steerTo(new Rotation2d(Math.PI / 4.0));
+    brModule.steerTo(new Rotation2d(-Math.PI / 4.0));
+    blModule.steerTo(new Rotation2d(Math.PI / 4.0));
+
+    flModule.setVoltage(voltageMeasure.baseUnitMagnitude());
+    frModule.setVoltage(voltageMeasure.baseUnitMagnitude());
+    brModule.setVoltage(voltageMeasure.baseUnitMagnitude());
+    blModule.setVoltage(voltageMeasure.baseUnitMagnitude());
+  }
+
+  /**
+   * Runs steer motors at specified voltage for steer system identification
+   *
+   * @param voltageMeasure Voltage measurement
+   */
+  private void steerSysID(Measure<Voltage> voltageMeasure) {
+    flModule.setSteerVoltage(voltageMeasure.baseUnitMagnitude());
+    frModule.setSteerVoltage(voltageMeasure.baseUnitMagnitude());
+    brModule.setSteerVoltage(voltageMeasure.baseUnitMagnitude());
+    blModule.setSteerVoltage(voltageMeasure.baseUnitMagnitude());
+  }
+
+  /**
+   * Sets SysID routine
+   *
+   * @param routineType Routine type (Translational, Rotational, or Steer)
+   */
+  public void setRoutine(SysIDRoutineType routineType) {
+    switch (routineType) {
+      case Translational -> routineToApply = sysIdRoutineTranslation;
+      case Rotational -> routineToApply = sysIdRoutineRotation;
+      case Steer -> routineToApply = sysIdRoutineSteer;
+    }
+  }
+
+  /*
+   * Both the sysid commands are specific to one particular sysid routine, change
+   * which one you're trying to characterize
+   */
+  public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+    return routineToApply.quasistatic(direction);
+  }
+
+  public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+    return routineToApply.dynamic(direction);
   }
 
   @Override

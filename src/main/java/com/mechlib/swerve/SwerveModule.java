@@ -281,6 +281,24 @@ public class SwerveModule extends SubsystemBase {
   }
 
   /**
+   * Sets voltage of drive motor
+   *
+   * @param volts Volts
+   */
+  public void setVoltage(double volts) {
+    driveMotor.setVoltage(volts);
+  }
+
+  /**
+   * Sets voltage of steer motor
+   *
+   * @param volts Volts
+   */
+  public void setSteerVoltage(double volts) {
+    steerMotor.setVoltage(volts);
+  }
+
+  /**
    * Sets the module state
    *
    * @param state SwerveModuleState
@@ -354,9 +372,6 @@ public class SwerveModule extends SubsystemBase {
 
     // Get current velocity
     double curVelocity = driveMotor.getVelocity();
-    if (driveClosedLoop) {
-      driveMotor.periodicPIDF(curVelocity);
-    }
 
     // Output current velocity to SmartDashboard
     SmartDashboard.putNumber(
@@ -368,11 +383,6 @@ public class SwerveModule extends SubsystemBase {
     SmartDashboard.putNumber(
       "[" + moduleName + "] Desired Velocity",
       desiredVelocity
-    );
-
-    SmartDashboard.putNumber(
-            "[" + moduleName + "] Error",
-            Math.abs(curVelocity - desiredVelocity)
     );
   }
 }
