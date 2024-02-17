@@ -6,8 +6,6 @@ import com.mechlib.hardware.CANCoder;
 import com.mechlib.hardware.SparkMax;
 import com.mechlib.hardware.TalonFX;
 import com.mechlib.util.MechMath;
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -28,10 +26,6 @@ public class SwerveModule extends SubsystemBase {
   // Drive motor instance
   private final BrushlessMotorController driveMotor;
 
-  // Wheel feedforward
-  private final SimpleMotorFeedforward driveFeedforward =
-    new SimpleMotorFeedforward(0.319185544, 2.2544, 0.063528);
-
   // Steer motor inversion
   private final boolean steerInverted;
 
@@ -41,8 +35,10 @@ public class SwerveModule extends SubsystemBase {
   private Rotation2d curAngle = new Rotation2d(); // Current angle
   private Rotation2d desiredAngle = new Rotation2d(); // Desired angle
 
+  private double desiredVelocity = 0.0; // Desired velocity (m/s)
+
   private boolean driveInverted = false; // Drive inverted
-  private double desiredSpeed = 0;
+  private boolean driveClosedLoop = false; // Drive in closed-loop mode
 
   /**
    * SwerveModule constructor
@@ -177,32 +173,43 @@ public class SwerveModule extends SubsystemBase {
     steerMotor.setInverted(steerInverted);
     steerMotor.brakeMode();
 
-    // Configure the steer motor PPIDF controller
+    // Set steer motor current limit if provided
+    if (!Double.isNaN(moduleConfiguration.steerCurrentLimit))
+      steerMotor.setCurrentLimit(moduleConfiguration.steerCurrentLimit);
+
+    // Set steer motor voltage compensation if provided
+    if (!Double.isNaN(moduleConfiguration.steerVoltageComp))
+      steerMotor.setVoltageCompensation(moduleConfiguration.steerVoltageComp);
+
+    // Configure the steer motor feedforward controller
+    steerMotor.setFeedforwardController(moduleConfiguration.steerFeedforwardController);
+
+    // Set the steer motor units functions
+    steerMotor.setPositionUnitsFunction(this::steerCANCoderToRadians);
+    steerMotor.setVelocityUnitsFunction(this::steerCANCoderToRadians);
+
+    // Configure the steer motor PID controller
     steerMotor.setKP(moduleConfiguration.steerKP);
     steerMotor.setKI(moduleConfiguration.steerKI);
     steerMotor.setKD(moduleConfiguration.steerKD);
-    steerMotor.setKF(moduleConfiguration.steerKF);
-    steerMotor.setDirectionalFeedforward(true);
 
-    // Set the steer motor PIDF tolerance
+    // Set the steer motor PID tolerance
     steerMotor.setTolerance(moduleConfiguration.steerTolerance);
-
-    // Set the steer motor position units function
-    steerMotor.setPositionUnitsFunction(this::steerCANCoderToRadians);
 
     // Set the drive motor inversion and switch it to brake mode
     driveMotor.setInverted(driveInverted);
     driveMotor.brakeMode();
 
-    // Configure the drive motor PIDF controller
-    driveMotor.setKP(moduleConfiguration.driveKP);
-    driveMotor.setKI(moduleConfiguration.driveKI);
-    driveMotor.setKD(moduleConfiguration.driveKD);
-    driveMotor.setKF(moduleConfiguration.driveKF);
-    driveMotor.setDirectionalFeedforward(true);
+    // Set drive motor current limit if provided
+    if (!Double.isNaN(moduleConfiguration.driveCurrentLimit))
+      driveMotor.setCurrentLimit(moduleConfiguration.driveCurrentLimit);
 
-    // Set the drive motor PIDF tolerance
-    driveMotor.setTolerance(moduleConfiguration.driveTolerance);
+    // Set drive motor voltage compensation if provided
+    if (!Double.isNaN(moduleConfiguration.driveVoltageComp))
+      driveMotor.setVoltageCompensation(moduleConfiguration.driveVoltageComp);
+
+    // Configure the drive motor feedforward controller
+    driveMotor.setFeedforwardController(moduleConfiguration.driveFeedforwardController);
 
     // Set the drive motor units functions
     if (driveMotor instanceof TalonFX) {
@@ -213,21 +220,13 @@ public class SwerveModule extends SubsystemBase {
       driveMotor.setVelocityUnitsFunction(this::driveNEOToMPS);
     }
 
-    // Set steer motor current limit if provided
-    if (!Double.isNaN(moduleConfiguration.steerCurrentLimit))
-      steerMotor.setCurrentLimit(moduleConfiguration.steerCurrentLimit);
+    // Configure the drive motor PIDF controller
+    driveMotor.setKP(moduleConfiguration.driveKP);
+    driveMotor.setKI(moduleConfiguration.driveKI);
+    driveMotor.setKD(moduleConfiguration.driveKD);
 
-    // Set steer motor voltage compensation if provided
-    if (!Double.isNaN(moduleConfiguration.steerVoltageComp))
-      steerMotor.setVoltageCompensation(moduleConfiguration.steerVoltageComp);
-
-    // Set drive motor current limit if provided
-    if (!Double.isNaN(moduleConfiguration.driveCurrentLimit))
-      driveMotor.setCurrentLimit(moduleConfiguration.driveCurrentLimit);
-
-    // Set drive motor voltage compensation if provided
-    if (!Double.isNaN(moduleConfiguration.driveVoltageComp))
-      driveMotor.setVoltageCompensation(moduleConfiguration.driveVoltageComp);
+    // Set the drive motor PIDF tolerance
+    driveMotor.setTolerance(moduleConfiguration.driveTolerance);
   }
 
   /**
@@ -244,6 +243,15 @@ public class SwerveModule extends SubsystemBase {
   }
 
   /**
+   * Sets drive closed-loop flag
+   *
+   * @param driveClosedLoop Drive closed-loop flag
+   */
+  public void setDriveClosedLoop(boolean driveClosedLoop) {
+    this.driveClosedLoop = driveClosedLoop;
+  }
+
+  /**
    * Steers swerve module to a desired angle
    *
    * @param desiredAngle Desired angle (Rotation2d)
@@ -254,14 +262,22 @@ public class SwerveModule extends SubsystemBase {
   }
 
   /**
-   * Drives wheel at specified speed
+   * Drives wheel at specified velocity
    *
-   * @param speed Speed (m/s)
+   * @param desiredVelocity Desired velocity (m/s)
    */
-  public void drive(double speed) {
-    this.desiredSpeed = speed * (driveInverted ? -1 : 1);
-    // Set the drive motor percentage
-    driveMotor.setPercent(speed / 4.4 * (driveInverted ? -1 : 1));
+  public void drive(double desiredVelocity) {
+    // Set desired velocity
+    this.desiredVelocity = desiredVelocity * (driveInverted ? -1 : 1);
+
+    // Check if drive closed-loop mode is enabled
+    if (driveClosedLoop) {
+      // Set the drive motor setpoint
+      driveMotor.setSetpoint(this.desiredVelocity);
+    } else {
+      // Set the drive motor percentage
+      driveMotor.setPercent(this.desiredVelocity / 4.4);
+    };
   }
 
   /**
@@ -318,13 +334,11 @@ public class SwerveModule extends SubsystemBase {
 
   @Override
   public void periodic() {
-
-
     // Update curAngle
     curAngle = new Rotation2d(steerMotor.getPosition());
 
-    // Output curAngle to SmartDashboard
-    SmartDashboard.putNumber("[" + moduleName + "] Steer Angle", curAngle.getDegrees());
+    // Output current angle to SmartDashboard
+    SmartDashboard.putNumber("[" + moduleName + "] Current Angle", curAngle.getDegrees());
 
     // Optimize desired angle
     desiredAngle = optimizeAngle(desiredAngle);
@@ -336,19 +350,29 @@ public class SwerveModule extends SubsystemBase {
     steerMotor.setSetpoint(desiredAngle.getRadians());
 
     // Run the steer motor PIDF controller
-    steerMotor.periodicPIDF(curAngle.getRadians());
+    steerMotor.periodicPIDF(curAngle.getRadians(), steerMotor.getVelocity());
 
     // Get current velocity
     double curVelocity = driveMotor.getVelocity();
+    if (driveClosedLoop) {
+      driveMotor.periodicPIDF(curVelocity);
+    }
 
-    // Output module speed to SmartDashboard
+    // Output current velocity to SmartDashboard
     SmartDashboard.putNumber(
-      "[" + moduleName + "] Speed",
-      curVelocity * (driveInverted ? -1 : 1)
+      "[" + moduleName + "] Current Velocity",
+      curVelocity
     );
+
+    // Output desired velocity to SmartDashboard
     SmartDashboard.putNumber(
-            "[" + moduleName + "] Desired Speed",
-            desiredSpeed
+      "[" + moduleName + "] Desired Velocity",
+      desiredVelocity
+    );
+
+    SmartDashboard.putNumber(
+            "[" + moduleName + "] Error",
+            Math.abs(curVelocity - desiredVelocity)
     );
   }
 }

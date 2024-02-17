@@ -22,7 +22,7 @@ import frc.robot.Robot;
  */
 public class SwerveDrive extends SubsystemBase {
   // Constants
-  private static final double MAX_ATTAINABLE_SPEED = 4.5; // (m/s)
+  private static final double MAX_ATTAINABLE_SPEED = 4.25; // (m/s)
 
   // Modules
   private final SwerveModule flModule; // Front left module
@@ -276,6 +276,7 @@ public class SwerveDrive extends SubsystemBase {
       return simHeading;
 
     // Get the angle from the gyro and create a Rotation2d with it
+    // (The rotateBy is so that the angle is wrapped)
     return Rotation2d.fromDegrees(gyro.getYaw().getValueAsDouble()).rotateBy(new Rotation2d());
   }
 
@@ -346,6 +347,26 @@ public class SwerveDrive extends SubsystemBase {
 
     // Set wheels locked to true
     wheelsLocked = true;
+  }
+
+  /**
+   * Sets drive closed-loop mode to false
+   */
+  public void driveOpenLoop() {
+    flModule.setDriveClosedLoop(false);
+    frModule.setDriveClosedLoop(false);
+    brModule.setDriveClosedLoop(false);
+    blModule.setDriveClosedLoop(false);
+  }
+
+  /**
+   * Sets drive closed-loop mode to true
+   */
+  public void driveClosedLoop() {
+    flModule.setDriveClosedLoop(true);
+    frModule.setDriveClosedLoop(true);
+    brModule.setDriveClosedLoop(true);
+    blModule.setDriveClosedLoop(true);
   }
 
   /**

@@ -30,12 +30,10 @@ public class Gerald extends SubsystemBase {
         ampMotor.setKP(SHOOTER_KP);
         ampMotor.setKI(SHOOTER_KI);
         ampMotor.setKD(SHOOTER_KD);
-        ampMotor.setKF(SHOOTER_KF);
 
         shooterMotor.setKP(SHOOTER_KP);
         shooterMotor.setKI(SHOOTER_KI);
         shooterMotor.setKD(SHOOTER_KD);
-        shooterMotor.setKF(SHOOTER_KF);
 
         ampMotor.setTolerance(SHOOTER_TOLERANCE);
         shooterMotor.setTolerance(SHOOTER_TOLERANCE);

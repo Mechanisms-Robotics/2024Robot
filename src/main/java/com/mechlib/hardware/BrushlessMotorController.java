@@ -29,6 +29,13 @@ public abstract class BrushlessMotorController {
   protected Function<Double, Double> positionUnitsFunction = (Double x) -> x;
   protected Function<Double, Double> velocityUnitsFunction = (Double x) -> x;
 
+  // Feedforward Controller
+  protected SimpleMotorFeedforward feedforwardController = new SimpleMotorFeedforward(
+    0.0,
+    0.0,
+    0.0
+  );
+
   // PID Controller
   protected final PIDController pidController = new PIDController(
     0.0,
@@ -43,9 +50,6 @@ public abstract class BrushlessMotorController {
     0.0,
     new Constraints(0.0, 0.0)
   );
-
-  protected double feedforward = 0.0; // Feedforward value
-  private boolean directionalFeedforward = false; // Should be in the direction of PID
 
   private double tolerance = 0.0; // Tolerance of PID controllers
 
@@ -96,6 +100,13 @@ public abstract class BrushlessMotorController {
   }
 
   /**
+   * Stops running motor
+   */
+  public void stop() {
+    setPercent(0.0);
+  }
+
+  /**
    * Sets the motor inverted flag
    *
    * @param inverted Whether the motor is inverted
@@ -132,6 +143,93 @@ public abstract class BrushlessMotorController {
   public void setVoltageCompensation(double nominalVoltage) {}
 
   /**
+   * Sets position units function
+   *
+   * @param positionUnitsFunction Function that takes in native units and returns desired units
+   */
+  public void setPositionUnitsFunction(Function<Double, Double> positionUnitsFunction) {
+    // Set position units function
+    this.positionUnitsFunction = positionUnitsFunction;
+
+    // If using a CANCoder set its position units function
+    if (canCoder != null)
+      canCoder.setPositionUnitsFunction(positionUnitsFunction);
+  }
+
+  /**
+   * Sets velocity units function
+   *
+   * @param velocityUnitsFunction Function that takes in native units and returns desired units
+   */
+  public void setVelocityUnitsFunction(Function<Double, Double> velocityUnitsFunction) {
+    // Set velocity units function
+    this.velocityUnitsFunction = velocityUnitsFunction;
+
+    // If using a CANCoder set its velocity units function
+    if (canCoder != null)
+      canCoder.setVelocityUnitsFunction(velocityUnitsFunction);
+  }
+
+  /**
+   * Sets feedforward controller
+   *
+   * @param feedforwardController SimpleMotorFeedforward instance
+   */
+  public void setFeedforwardController(SimpleMotorFeedforward feedforwardController) {
+    this.feedforwardController = feedforwardController;
+  }
+
+  /**
+   * Sets feedforward controller
+   *
+   * @param kS S gain, overcomes static friction (volts)
+   * @param kV V gain, models how voltage should affect velocity (volts * seconds / distance)
+   * @param kA A gain, models how voltage should affect acceleration (volts * seconds^2 / distance)
+   */
+  public void setFeedforwardController(double kS, double kV, double kA) {
+    this.feedforwardController = new SimpleMotorFeedforward(kS, kV, kA);
+  }
+
+  /**
+   * Sets S gain of feedforward controller
+   *
+   * @param kS S gain, overcomes static friction (volts)
+   */
+  public void setKS(double kS) {
+    this.feedforwardController = new SimpleMotorFeedforward(
+      kS,
+      this.feedforwardController.kv,
+      this.feedforwardController.ka
+    );
+  }
+
+  /**
+   * Sets V gain of feedforward controller
+   *
+   * @param kV V gain, models how voltage should affect velocity (volts * seconds / distance)
+   */
+  public void setKV(double kV) {
+    this.feedforwardController = new SimpleMotorFeedforward(
+      this.feedforwardController.ks,
+      kV,
+      this.feedforwardController.ka
+    );
+  }
+
+  /**
+   * Sets A gain of feedforward controller
+   *
+   * @param kA A gain, models how voltage should affect acceleration (volts * seconds^2 / distance)
+   */
+  public void setKA(double kA) {
+    this.feedforwardController = new SimpleMotorFeedforward(
+      this.feedforwardController.ks,
+      this.feedforwardController.kv,
+      kA
+    );
+  }
+
+  /**
    * Updates the PIDF and PPIDF, kP values
    *
    * @param kP The P gain
@@ -162,26 +260,6 @@ public abstract class BrushlessMotorController {
     // Set the D gains
     this.pidController.setD(kD);
     this.ppidController.setD(kD);
-  }
-
-  /**
-   * Updates the PIDF and PPIDF, kF values
-   *
-   * @param kF the feedforward value (volts)
-   */
-  public void setKF(double kF) {
-    // Set feedforward
-    this.feedforward = kF;
-  }
-
-  /**
-   * Sets whether the feedforward should be in the same direction as the PID
-   *
-   * @param directionalFeedforward Directional feedforward value
-   */
-  public void setDirectionalFeedforward(boolean directionalFeedforward) {
-    // Set directionalFeedforward
-    this.directionalFeedforward = directionalFeedforward;
   }
 
   /**
@@ -294,118 +372,87 @@ public abstract class BrushlessMotorController {
   }
 
   /**
-   * Runs the periodic code for the PIDF controller using a provided current value
+   * Runs the periodic code for the PID controller given a current measurement
+   *
+   * @param currentMeasurement Current measurement
    */
-  public void periodicPIDF(double currentValue) {
-    // Check if within tolerance
-    double error = getSetpoint() - currentValue;
-    if (Math.abs(error) <= tolerance) {
-      // If within tolerance check for directional feedforward
-      if (directionalFeedforward) {
-        // If directional feedforward apply feedforward in direction of error
-        setPercent(feedforward * Math.signum(error));
-      } else {
-        // If standard feedforward apply feedforward
-        setPercent(feedforward);
-      }
+  public void periodicPID(double currentMeasurement) {
+    // Calculate PID output
+    double pidOutput = pidController.calculate(currentMeasurement);
 
-      // Return without calculating PIDF output
-      return;
-    }
+    // Set the percentage of the motor to the PIDF output
+    setPercent(pidOutput);
+  }
 
-    // Calculate PIDF Output
-    double pidfOutput = pidController.calculate(currentValue)
-            + (directionalFeedforward ? feedforward * Math.signum(error) : feedforward);
+  /**
+   * Runs the periodic code for the feedforward and PID controller given a current measurement
+   *
+   * @param currentMeasurement Current measurement
+   */
+  public void periodicPIDF(double currentMeasurement) {
+    // Calculate PIDF output
+    double pidfOutput = pidController.calculate(currentMeasurement) + (
+      feedforwardController.calculate(
+        pidController.getSetpoint()
+      ) / RobotController.getBatteryVoltage()
+    );
 
     // Set the percentage of the motor to the PIDF output
     setPercent(pidfOutput);
   }
 
   /**
-   * Runs the periodic code for the PID controller using a provided current value and feedforward
+   * Runs the periodic code for the feedforward and PID controller given a current position and
+   * current velocity
+   *
+   * @param currentPosition Current position
+   * @param currentVelocity Current velocity
    */
-  public void periodicPIDF(double currentValue, SimpleMotorFeedforward feedforward) {
-    // Check if within tolerance
-    double error = getSetpoint() - currentValue;
-    if (Math.abs(error) <= tolerance) {
-      // If within tolerance check for directional feedforward
-      if (directionalFeedforward) {
-        // If directional feedforward apply feedforward in direction of error
-        setPercent((feedforward.calculate(currentValue) / 12.0) * Math.signum(error));
-      } else {
-        // If standard feedforward apply feedforward
-        setPercent(feedforward.calculate(currentValue) / 12.0);
-      }
-
-      // Return without calculating PIDF output
-      return;
-    }
-
-    // Calculate PIDF Output
-    double pidfOutput = pidController.calculate(currentValue)
-      + (directionalFeedforward ?
-      (feedforward.calculate(currentValue) / 12.0) * Math.signum(error) :
-      feedforward.calculate(currentValue) / 12.0);
+  public void periodicPIDF(double currentPosition, double currentVelocity) {
+    // Calculate PIDF output
+    double pidfOutput = pidController.calculate(currentPosition) + (
+      feedforwardController.calculate(
+        currentVelocity
+      ) / RobotController.getBatteryVoltage()
+    );
 
     // Set the percentage of the motor to the PIDF output
     setPercent(pidfOutput);
   }
 
   /**
-   * Runs the periodic code for the PPIDF controller using a provided current value
+   * Runs the periodic code for the feedforward and PPID controller given a current measurement
+   *
+   * @param currentMeasurement Current measurement
    */
-  public void periodicPPIDF(double currentValue) {
-    // Check if within tolerance
-    double error = getSetpoint() - currentValue;
-    if (Math.abs(error) <= tolerance) {
-      // If within tolerance check for directional feedforward
-      if (directionalFeedforward) {
-        // If directional feedforward apply feedforward in direction of error
-        setPercent(feedforward * Math.signum(error));
-      } else {
-        // If standard feedforward apply feedforward
-        setPercent(feedforward);
-      }
-
-      // Return without calculating PPIDF output
-      return;
-    }
-
-    // Calculate PPIDF Output
-    double ppidfOutput = ppidController.calculate(
-      currentValue
-    ) + (directionalFeedforward ? feedforward * Math.signum(error) : feedforward);
+  public void periodicPPIDF(double currentMeasurement) {
+    // Calculate PPIDF output
+    double ppidfOutput = ppidController.calculate(currentMeasurement) + (
+      feedforwardController.calculate(
+        pidController.getSetpoint()
+      ) / RobotController.getBatteryVoltage()
+    );
 
     // Set the percentage of the motor to the PPIDF output
     setPercent(ppidfOutput);
   }
 
   /**
-   * Sets position units function
+   * Runs the periodic code for the feedforward and PPID controller given a current measurement
    *
-   * @param positionUnitsFunction Function that takes in native units and returns desired units
+   * @param currentPosition Current position
+   * @param currentVelocity Current velocity
    */
-  public void setPositionUnitsFunction(Function<Double, Double> positionUnitsFunction) {
-    // Set position units function
-    this.positionUnitsFunction = positionUnitsFunction;
+  public void periodicPPIDF(double currentPosition, double currentVelocity) {
+    // Calculate PPIDF output
+    double ppidfOutput = ppidController.calculate(currentPosition) + (
+      feedforwardController.calculate(
+        currentVelocity
+      ) / RobotController.getBatteryVoltage()
+    );
 
-    // If using a CANCoder set its position units function
-    if (canCoder != null)
-      canCoder.setPositionUnitsFunction(positionUnitsFunction);
-  }
-
-  /**
-   * Sets velocity units function
-   *
-   * @param velocityUnitsFunction Function that takes in native units and returns desired units
-   */
-  public void setVelocityUnitsFunction(Function<Double, Double> velocityUnitsFunction) {
-    // Set velocity units function
-    this.velocityUnitsFunction = velocityUnitsFunction;
-
-    // If using a CANCoder set its velocity units function
-    if (canCoder != null)
-      canCoder.setVelocityUnitsFunction(velocityUnitsFunction);
+    // Set the percentage of the motor to the PPIDF output
+    setPercent(ppidfOutput);
   }
 
   /**

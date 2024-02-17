@@ -17,7 +17,7 @@ import frc.robot.subsystems.Swerve;
 
 public class RobotContainer {
 
-  private final Swerve swerve = new Swerve();
+  public final Swerve swerve = new Swerve();
 
   private final CommandXboxController xboxController = new CommandXboxController(0);
 
