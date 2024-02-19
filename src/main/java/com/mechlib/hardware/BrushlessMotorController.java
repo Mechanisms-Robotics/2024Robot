@@ -6,9 +6,13 @@ import java.util.function.Function;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.units.*;
 import frc.robot.Robot;
 import edu.wpi.first.wpilibj.RobotController;
 import java.util.ArrayList;
+
+import static edu.wpi.first.units.MutableMeasure.mutable;
+import static edu.wpi.first.units.Units.*;
 
 /**
  * MechLib BrushlessMotorController Class
@@ -50,6 +54,10 @@ public abstract class BrushlessMotorController {
     0.0,
     new Constraints(0.0, 0.0)
   );
+
+  protected final MutableMeasure<Voltage> voltageMeasure = mutable(Volts.of(0));
+  protected final MutableMeasure<Distance> distanceMeasure = mutable(Meters.of(0));
+  protected final MutableMeasure<Velocity<Distance>> velocityMeasure = mutable(MetersPerSecond.of(0));
 
   private double tolerance = 0.0; // Tolerance of PID controllers
 
@@ -492,4 +500,12 @@ public abstract class BrushlessMotorController {
    * @return Velocity of encoder
    */
   public double getVelocity() { return 0.0; }
+
+  public double getVoltage() { return 0.0; }
+
+  public MutableMeasure<Voltage> getVoltageMeasure() { return voltageMeasure; }
+
+  public MutableMeasure<Velocity<Distance>> getVelocityMeasure() { return velocityMeasure; }
+
+  public MutableMeasure<Distance> getDistanceMeasure() { return distanceMeasure; }
 }

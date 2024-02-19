@@ -4,19 +4,21 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.SignalLogger;
 import com.mechlib.commands.SwerveTeleopDriveCommand;
+import com.mechlib.swerve.SwerveDrive;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.FunctionalCommand;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.subsystems.Swerve;
 
 public class RobotContainer {
-
+  private final SendableChooser<Command> routineChooser = new SendableChooser<>();
+  private final SendableChooser<Boolean> quasistaticChooser = new SendableChooser<>();
   public final Swerve swerve = new Swerve();
 
   private final CommandXboxController xboxController = new CommandXboxController(0);
@@ -27,7 +29,31 @@ public class RobotContainer {
     configureBindings();
 
     configureDefaultCommands();
-//    m_chooser.setDefaultOption("TopLeave");
+
+
+    routineChooser.addOption(
+            "Translational Quasistatic SysID",
+            new InstantCommand(() -> swerve.setRoutine(SwerveDrive.SysIDRoutineType.Translational))
+    );
+
+    routineChooser.addOption(
+            "Rotational Quasistatic SysID",
+            new InstantCommand(() -> swerve.setRoutine(SwerveDrive.SysIDRoutineType.Rotational))
+    );
+
+    routineChooser.addOption(
+            "Steer Quasistatic SysID",
+            new InstantCommand(() -> swerve.setRoutine(SwerveDrive.SysIDRoutineType.Steer))
+    );
+
+    quasistaticChooser.addOption("Quasistatic", true);
+    quasistaticChooser.addOption("Dynamic", false);
+
+    SmartDashboard.putData("SysID Routine Chooser", routineChooser);
+    SmartDashboard.putData("SysID Routine Type", quasistaticChooser);
+
+    SignalLogger.setPath("home.lvuser/logs/");
+    SignalLogger.start();
   }
 
   public void configureBindings() {
@@ -68,7 +94,17 @@ public class RobotContainer {
 
 
   public Command getAutonomousCommand() {
-    return m_chooser.getSelected();
+    if (quasistaticChooser.getSelected()) {
+      return new SequentialCommandGroup(
+              swerve.sysIdQuasistatic(SysIdRoutine.Direction.kForward),
+              swerve.sysIdQuasistatic(SysIdRoutine.Direction.kReverse)
+      );
+    } else {
+      return new SequentialCommandGroup(
+              swerve.sysIdDynamic(SysIdRoutine.Direction.kForward),
+              swerve.sysIdDynamic(SysIdRoutine.Direction.kReverse)
+      );
+    }
   }
   
 }

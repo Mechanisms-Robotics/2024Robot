@@ -76,37 +76,9 @@ public class SwerveDrive extends SubsystemBase {
   }
 
   /* Use one of these sysidroutines for your particular test */
-  private SysIdRoutine sysIdRoutineTranslation = new SysIdRoutine(
-    new SysIdRoutine.Config(
-      null,
-      Volts.of(4),
-      null,
-      (state) -> SignalLogger.writeString("state", state.toString())),
-    new SysIdRoutine.Mechanism(
-      this::translationSysID,
-      null,
-      this));
-
-  private final SysIdRoutine sysIdRoutineRotation = new SysIdRoutine(
-    new SysIdRoutine.Config(
-      null,
-      Volts.of(4),
-      null,
-      (state) -> SignalLogger.writeString("state", state.toString())),
-    new SysIdRoutine.Mechanism(
-      this::rotationSysID,
-      null,
-      this));
-  private final SysIdRoutine sysIdRoutineSteer = new SysIdRoutine(
-    new SysIdRoutine.Config(
-      null,
-      Volts.of(7),
-      null,
-      (state) -> SignalLogger.writeString("state", state.toString())),
-    new SysIdRoutine.Mechanism(
-      this::steerSysID,
-      null,
-      this));
+  private SysIdRoutine sysIdRoutineTranslation;
+  private final SysIdRoutine sysIdRoutineRotation;
+  private final SysIdRoutine sysIdRoutineSteer;
 
   /* Change this to the sysid routine you want to test */
   private SysIdRoutine routineToApply = sysIdRoutineTranslation;
@@ -299,6 +271,54 @@ public class SwerveDrive extends SubsystemBase {
       brModuleLocation,
       blModuleLocation
     };
+
+    sysIdRoutineTranslation = new SysIdRoutine(
+            new SysIdRoutine.Config(
+                    null,
+                    Volts.of(4),
+                    null,
+                    null),
+                    new SysIdRoutine.Mechanism(
+                            this::translationSysID,
+                            log -> {
+                              flModule.logDrive(log);
+                              frModule.logDrive(log);
+                              blModule.logDrive(log);
+                              brModule.logDrive(log);
+                            },
+                            this));
+
+    sysIdRoutineRotation = new SysIdRoutine(
+            new SysIdRoutine.Config(
+                    null,
+                    Volts.of(4),
+                    null,
+                    null),
+            new SysIdRoutine.Mechanism(
+                    this::rotationSysID,
+                    log -> {
+                      flModule.logSteer(log);
+                      frModule.logSteer(log);
+                      blModule.logSteer(log);
+                      brModule.logSteer(log);
+                    },
+                    this));
+    sysIdRoutineSteer = new SysIdRoutine(
+            new SysIdRoutine.Config(
+                    null,
+                    Volts.of(7),
+                    null,
+                    null),
+                    new SysIdRoutine.Mechanism(
+                    this::steerSysID,
+                    log -> {
+                      flModule.logDrive(log);
+                      frModule.logDrive(log);
+                      blModule.logDrive(log);
+                      brModule.logDrive(log);
+                    },
+                    this));
+
   }
 
   /**
@@ -620,11 +640,11 @@ public class SwerveDrive extends SubsystemBase {
    * which one you're trying to characterize
    */
   public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
-    return routineToApply.quasistatic(direction);
+    return routineToApply.quasistatic(direction).withTimeout(5);
   }
 
   public Command sysIdDynamic(SysIdRoutine.Direction direction) {
-    return routineToApply.dynamic(direction);
+    return routineToApply.dynamic(direction).withTimeout(3);
   }
 
   @Override

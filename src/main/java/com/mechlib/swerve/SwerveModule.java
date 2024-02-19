@@ -9,8 +9,13 @@ import com.mechlib.util.MechMath;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.MutableMeasure;
+import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 /**
  * MechLib SwerveModule class
@@ -286,7 +291,7 @@ public class SwerveModule extends SubsystemBase {
    * @param volts Volts
    */
   public void setVoltage(double volts) {
-    driveMotor.setVoltage(volts);
+    driveMotor.setVoltage(volts * (driveInverted ? -1 : 1));
   }
 
   /**
@@ -350,6 +355,13 @@ public class SwerveModule extends SubsystemBase {
     return closestAngle;
   }
 
+  public void logDrive(SysIdRoutineLog log) {
+    log.motor(moduleName + " drive").voltage(driveMotor.getVoltageMeasure()).linearPosition(driveMotor.getDistanceMeasure());
+  }
+  public void logSteer(SysIdRoutineLog log) {
+    log.motor(moduleName + " steer").voltage(steerMotor.getVoltageMeasure()).linearPosition(steerMotor.getDistanceMeasure());
+  }
+
   @Override
   public void periodic() {
     // Update curAngle
@@ -372,6 +384,9 @@ public class SwerveModule extends SubsystemBase {
 
     // Get current velocity
     double curVelocity = driveMotor.getVelocity();
+    if (driveClosedLoop) {
+      driveMotor.periodicPIDF(curVelocity);
+    }
 
     // Output current velocity to SmartDashboard
     SmartDashboard.putNumber(

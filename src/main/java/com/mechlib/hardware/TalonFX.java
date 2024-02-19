@@ -2,11 +2,17 @@ package com.mechlib.hardware;
 
 import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.VoltageConfigs;
+import edu.wpi.first.units.Distance;
+import edu.wpi.first.units.MutableMeasure;
+import edu.wpi.first.units.Velocity;
+import edu.wpi.first.units.Voltage;
 import frc.robot.Robot;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
+
+import static edu.wpi.first.units.Units.*;
 
 /**
  * MechLib TalonFX class
@@ -192,5 +198,25 @@ public class TalonFX extends BrushlessMotorController {
       // Otherwise return CANCoder velocity
       return canCoder.getVelocity();
     }
+  }
+
+  @Override
+  public double getVoltage() {
+    return talonFX.getMotorVoltage().getValueAsDouble();
+  }
+
+  @Override
+  public MutableMeasure<Voltage> getVoltageMeasure() {
+    return voltageMeasure.mut_replace(getVoltage(), Volts);
+  }
+
+  @Override
+  public MutableMeasure<Distance> getDistanceMeasure() {
+    return distanceMeasure.mut_replace(getPosition(), Meters);
+  }
+
+  @Override
+  public MutableMeasure<Velocity<Distance>> getVelocityMeasure() {
+    return velocityMeasure.mut_replace(getVelocity(), MetersPerSecond);
   }
 }

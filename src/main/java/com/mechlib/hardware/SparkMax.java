@@ -1,10 +1,14 @@
 package com.mechlib.hardware;
 
 import com.revrobotics.CANSparkBase.SoftLimitDirection;
+import edu.wpi.first.units.MutableMeasure;
+import edu.wpi.first.units.Voltage;
 import frc.robot.Robot;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
+
+import static edu.wpi.first.units.Units.Volts;
 
 /**
  * MechLib SparkMax class
@@ -156,4 +160,15 @@ public class SparkMax extends BrushlessMotorController {
       return canCoder.getVelocity();
     }
   }
+
+  @Override
+  public double getVoltage() {
+    return sparkMax.getBusVoltage();
+  }
+
+  @Override
+  public MutableMeasure<Voltage> getVoltageMeasure() {
+    return voltageMeasure.mut_replace(getVoltage(), Volts);
+  }
+
 }
