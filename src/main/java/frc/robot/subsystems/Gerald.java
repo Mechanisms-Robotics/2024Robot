@@ -9,22 +9,23 @@ public class Gerald extends SubsystemBase {
     // intake percent speed for the intake motor to run at
     private static final double INTAKE_SPEED = 0.2; // percent
     private static final double OUTTAKE_SPEED = 0.0; // percent
-    private static final double SHOOTER_RPM = 1; // rpm
+    private static final double SHOOTER_RPM = 20; // rpm
     private static final double FEED_SPEED = 0.3; // percent
     // PID values for the shooter
     private static final double SHOOTER_KP = 0.01;
     private static final double SHOOTER_KI = 0;
     private static final double SHOOTER_KD = 0;
     private static final double SHOOTER_KF = 0.01;
-    private static final double SHOOTER_TOLERANCE = 0;
+    private static final double SHOOTER_TOLERANCE = 0.1;
 
     // naming is based off of the unique function
     private final TalonFX intakeMotor = new TalonFX(14);
     // allows for amp and assists shooter
     private final TalonFX ampMotor = new TalonFX(15);
     private final TalonFX shooterMotor = new TalonFX(16);
+    private static final double kPULLEY_RATIO = 1;
 
-    private double rpsToRPM(double rps) {return rps * 60;}
+    private double rpsToRPM(double rps) {return (rps / kPULLEY_RATIO ) * 60;}
     public Gerald() {
         intakeMotor.coastMode();
         ampMotor.coastMode();
@@ -54,12 +55,11 @@ public class Gerald extends SubsystemBase {
     }
 
     public void spinup() {
-        SmartDashboard.putBoolean("Spin up", true);
-        ampMotor.setSetpoint(SHOOTER_RPM);
+        ampMotor.setSetpoint(-SHOOTER_RPM);
         shooterMotor.setSetpoint(SHOOTER_RPM);
         SmartDashboard.putNumber("[Shooter Motor] Set Point", shooterMotor.getSetpoint());
 
-        ampMotor.periodicPIDF(ampMotor.getVelocity());
+        ampMotor.periodicPIDF(-ampMotor.getVelocity());
         shooterMotor.periodicPIDF(shooterMotor.getVelocity());
     }
 
@@ -68,7 +68,6 @@ public class Gerald extends SubsystemBase {
             spinup();
             return;
         }
-        SmartDashboard.putBoolean("Spin up", false);
         intakeMotor.setPercent(FEED_SPEED);
     }
 
