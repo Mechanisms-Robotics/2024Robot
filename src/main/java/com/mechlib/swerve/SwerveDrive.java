@@ -9,10 +9,14 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.ctre.phoenix6.hardware.Pigeon2;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Robot;
 
 /**
@@ -22,7 +26,7 @@ import frc.robot.Robot;
  */
 public class SwerveDrive extends SubsystemBase {
   // Constants
-  private static final double MAX_ATTAINABLE_SPEED = 4.5; // (m/s)
+  private static final double MAX_ATTAINABLE_SPEED = 4.25; // (m/s)
 
   // Modules
   private final SwerveModule flModule; // Front left module
@@ -276,6 +280,7 @@ public class SwerveDrive extends SubsystemBase {
       return simHeading;
 
     // Get the angle from the gyro and create a Rotation2d with it
+    // (The rotateBy is so that the angle is wrapped)
     return Rotation2d.fromDegrees(gyro.getYaw().getValueAsDouble()).rotateBy(new Rotation2d());
   }
 
@@ -346,6 +351,26 @@ public class SwerveDrive extends SubsystemBase {
 
     // Set wheels locked to true
     wheelsLocked = true;
+  }
+
+  /**
+   * Sets drive closed-loop mode to false
+   */
+  public void driveOpenLoop() {
+    flModule.setDriveClosedLoop(false);
+    frModule.setDriveClosedLoop(false);
+    brModule.setDriveClosedLoop(false);
+    blModule.setDriveClosedLoop(false);
+  }
+
+  /**
+   * Sets drive closed-loop mode to true
+   */
+  public void driveClosedLoop() {
+    flModule.setDriveClosedLoop(true);
+    frModule.setDriveClosedLoop(true);
+    brModule.setDriveClosedLoop(true);
+    blModule.setDriveClosedLoop(true);
   }
 
   /**
@@ -483,6 +508,52 @@ public class SwerveDrive extends SubsystemBase {
         blModule.getModulePosition().angle.rotateBy(getHeading())
       )
     );
+  }
+
+  /**
+   * Runs drive motors at specified voltage for translational system identification
+   *
+   * @param voltageMeasure Voltage measurement
+   */
+  private void translationSysID(Measure<Voltage> voltageMeasure) {
+    flModule.steerTo(new Rotation2d());
+    frModule.steerTo(new Rotation2d());
+    brModule.steerTo(new Rotation2d());
+    blModule.steerTo(new Rotation2d());
+
+    flModule.setVoltage(voltageMeasure.baseUnitMagnitude());
+    frModule.setVoltage(voltageMeasure.baseUnitMagnitude());
+    brModule.setVoltage(voltageMeasure.baseUnitMagnitude());
+    blModule.setVoltage(voltageMeasure.baseUnitMagnitude());
+  }
+
+  /**
+   * Runs drive motors at specified voltage for rotational system identification
+   *
+   * @param voltageMeasure Voltage measurement
+   */
+  private void rotationSysID(Measure<Voltage> voltageMeasure) {
+    flModule.steerTo(new Rotation2d(-Math.PI / 4.0));
+    frModule.steerTo(new Rotation2d(Math.PI / 4.0));
+    brModule.steerTo(new Rotation2d(-Math.PI / 4.0));
+    blModule.steerTo(new Rotation2d(Math.PI / 4.0));
+
+    flModule.setVoltage(voltageMeasure.baseUnitMagnitude());
+    frModule.setVoltage(voltageMeasure.baseUnitMagnitude());
+    brModule.setVoltage(voltageMeasure.baseUnitMagnitude());
+    blModule.setVoltage(voltageMeasure.baseUnitMagnitude());
+  }
+
+  /**
+   * Runs steer motors at specified voltage for steer system identification
+   *
+   * @param voltageMeasure Voltage measurement
+   */
+  private void steerSysID(Measure<Voltage> voltageMeasure) {
+    flModule.setSteerVoltage(voltageMeasure.baseUnitMagnitude());
+    frModule.setSteerVoltage(voltageMeasure.baseUnitMagnitude());
+    brModule.setSteerVoltage(voltageMeasure.baseUnitMagnitude());
+    blModule.setSteerVoltage(voltageMeasure.baseUnitMagnitude());
   }
 
   @Override

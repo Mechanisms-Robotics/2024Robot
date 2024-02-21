@@ -1,5 +1,11 @@
 package com.mechlib.hardware;
 
+import com.ctre.phoenix6.configs.ClosedLoopGeneralConfigs;
+import com.ctre.phoenix6.configs.CustomParamsConfigs;
+import com.ctre.phoenix6.configs.DifferentialSensorsConfigs;
+import com.ctre.phoenix6.configs.FeedbackConfigs;
+import com.ctre.phoenix6.configs.HardwareLimitSwitchConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.VoltageConfigs;
 import frc.robot.Robot;
@@ -16,7 +22,8 @@ import com.ctre.phoenix6.configs.TalonFXConfigurator;
 public class TalonFX extends BrushlessMotorController {
   private final com.ctre.phoenix6.hardware.TalonFX talonFX; // WPI_TalonFX instance
 
-  private boolean inverted = false; // Motor inverted
+  private boolean inverted = false; // Inverted flag
+  private boolean sensorInverted = false; // Sensor inverted flag
 
   /**
    * TalonFX constructor
@@ -61,21 +68,51 @@ public class TalonFX extends BrushlessMotorController {
   }
 
   @Override
-  public void setInverted(boolean inverted) {
-    // Set TalonFX inversion
-    talonFX.setInverted(inverted);
+  public void setVoltage(double voltage) {
+    // Set TalonFX voltage
+    talonFX.setVoltage(voltage);
 
+    // Update followers
+    updateFollowersVoltage(voltage);
+  }
+
+  @Override
+  public void setInverted(boolean inverted) {
     // Set inverted flag
     this.inverted = inverted;
+
+    // Set TalonFX inversion
+    talonFX.setInverted(inverted);
+  }
+
+  @Override
+  public void setSensorInverted(boolean sensorInverted) {
+    // Set sensor inverted flag
+    this.sensorInverted = sensorInverted;
+
+    // Check if CANCoder is not null
+    if (canCoder != null) {
+      // Set CANCoder inversion
+      canCoder.setInverted(sensorInverted);
+    }
+  }
+
+  @Override
+  public void setInternalSensorPosition(double position) {
+    // Set TalonFX encoder position
+    talonFX.setPosition(position);
   }
 
   @Override
   public void invert() {
-    // Toggle TalonFX inversion
-    talonFX.setInverted(!talonFX.getInverted());
+    // Toggle inverted
+    setInverted(!inverted);
+  }
 
-    // Toggle inverted flag
-    this.inverted = !this.inverted;
+  @Override
+  public void invertSensor() {
+    // Toggle sensor inverted
+    setSensorInverted(!sensorInverted);
   }
 
   @Override

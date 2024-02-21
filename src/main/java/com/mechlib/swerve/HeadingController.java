@@ -81,16 +81,24 @@ public class HeadingController {
 
     // Check if current omega is zero and translational velocity is at least 0.25 m/s
     if (omega == 0 && Math.sqrt(Math.pow(vx, 2) + Math.pow(vy, 2)) >= 0.25) {
-      if (Math.abs(prevHeading.getRadians() - heading.getRadians()) > 1 * Math.PI) {
-        System.out.println("PrevHeading: " + prevHeading.getDegrees() + " heading: " + heading.getDegrees() + " diff: (" + Math.abs(prevHeading.getDegrees() - heading.getDegrees()) + ")");
-        return 0;
+      // Check if the heading error is erroneous
+      if (Math.abs(prevHeading.getRadians() - heading.getRadians()) > Math.PI) {
+        // If so print out error and values
+        System.out.println("[ERROR] Large heading error detected!");
+        System.out.println("[Previous Heading] " + prevHeading.getDegrees());
+        System.out.println("[Current Heading] " + heading.getDegrees());
+        System.out.println();
+
+        // Return 0 for safety
+        return 0.0;
       }
-      // If so change omega such that the heading is stabilized
-      stabilizedOmega = -stabilizeController.calculate(
+
+      // Change omega such that the heading is stabilized
+      stabilizedOmega = stabilizeController.calculate(
         heading.getRadians(),
         MechMath.optimizeRotation(
-                heading,
-                prevHeading
+          heading,
+          prevHeading
         ).getRadians()
       );
     }

@@ -19,6 +19,9 @@ public class CANCoder {
   // Magnet offset
   private final double magnetOffset;
 
+  // Sensor direction
+  private SensorDirectionValue sensorDirection = SensorDirectionValue.CounterClockwise_Positive;
+
   // Unit functions
   private Function<Double, Double> positionUnitsFunction = (Double x) -> x;
   private Function<Double, Double> velocityUnitsFunction = (Double x) -> x;
@@ -53,6 +56,9 @@ public class CANCoder {
     // Instantiate CANCoder
     canCoder = new CANcoder(id);
 
+    // Set sensor direction
+    this.sensorDirection = sensorDirection;
+
     // Create configuration
     CANcoderConfiguration config = new CANcoderConfiguration().withMagnetSensor(
       new MagnetSensorConfigs().withAbsoluteSensorRange(
@@ -67,6 +73,39 @@ public class CANCoder {
 
     // Apply configuration
     canCoder.getConfigurator().apply(config);
+  }
+
+  /**
+   * Sets sensor direction inverted
+   *
+   * @param inverted Sensor direction inverted
+   */
+  public void setInverted(boolean inverted) {
+    // Check if inverted is true
+    if (inverted) {
+      // Set sensor direction to clockwise
+      sensorDirection = SensorDirectionValue.Clockwise_Positive;
+    } else {
+      // Set sensor direction to counter-clockwise
+      sensorDirection = SensorDirectionValue.CounterClockwise_Positive;
+    }
+
+    // Apply new magnet sensor configuration
+    canCoder.getConfigurator().apply(
+      new MagnetSensorConfigs().withAbsoluteSensorRange(
+        AbsoluteSensorRangeValue.Signed_PlusMinusHalf
+      ).withSensorDirection(
+        sensorDirection
+      )
+    );
+  }
+
+  /**
+   * Inverts sensor direction
+   */
+  public void invert() {
+    // Toggle inverted
+    setInverted(sensorDirection != SensorDirectionValue.Clockwise_Positive);
   }
 
   /**
