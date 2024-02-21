@@ -33,7 +33,6 @@ public class RobotContainer {
     configureBindings();
 
     configureDefaultCommands();
-
   }
 
   public void configureBindings() {
@@ -58,19 +57,26 @@ public class RobotContainer {
     // left trigger: intake
     xboxController.leftTrigger().onTrue(
             new InstantCommand(gerald::intake)
-    );
-    // left bumper: stop intake
-    xboxController.leftBumper().onTrue(
-            new InstantCommand(gerald::stopIntake)
-    );
+    ).onFalse(new InstantCommand(gerald::stopIntake));
+
     // right trigger: shoot
-    xboxController.rightTrigger().onTrue(
+    xboxController.rightTrigger().whileTrue(
             new InstantCommand(gerald::shoot)
+    ).onFalse(new InstantCommand(gerald::stopShooter));
+
+    xboxController.x().onTrue(
+            new InstantCommand(arm::intake)
     );
-    // right bumper: stop shoot
-    xboxController.rightBumper().onTrue(
-            new InstantCommand(gerald::stopShooter)
+    xboxController.y().onTrue(
+            new InstantCommand(arm::shoot)
     );
+//    xboxController.povDown().whileTrue(
+//            new InstantCommand(arm::down)
+//    ).onFalse(new InstantCommand(arm::stop));
+//
+//    xboxController.povUp().whileTrue(
+//            new InstantCommand(arm::up)
+//    ).onFalse(new InstantCommand(arm::stop));
   }
 
   private void configureDefaultCommands() {
