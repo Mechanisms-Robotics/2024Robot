@@ -59,14 +59,15 @@ public class RobotContainer {
     xboxController.leftTrigger().onTrue(
             new InstantCommand(gerald::intake)
     );
+    // left bumper: stop intake
     xboxController.leftBumper().onTrue(
             new InstantCommand(gerald::stopIntake)
     );
-
     // right trigger: shoot
     xboxController.rightTrigger().onTrue(
             new InstantCommand(gerald::shoot)
     );
+    // right bumper: stop shoot
     xboxController.rightBumper().onTrue(
             new InstantCommand(gerald::stopShooter)
     );
