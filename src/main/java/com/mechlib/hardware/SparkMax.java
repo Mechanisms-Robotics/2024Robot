@@ -1,14 +1,10 @@
 package com.mechlib.hardware;
 
 import com.revrobotics.CANSparkBase.SoftLimitDirection;
-import edu.wpi.first.units.MutableMeasure;
-import edu.wpi.first.units.Voltage;
 import frc.robot.Robot;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
-
-import static edu.wpi.first.units.Units.Volts;
 
 /**
  * MechLib SparkMax class
@@ -17,6 +13,9 @@ import static edu.wpi.first.units.Units.Volts;
  */
 public class SparkMax extends BrushlessMotorController {
   private final CANSparkMax sparkMax; // CANSparkMax instance
+
+  private boolean inverted = false; // Inverted flag
+  private boolean sensorInverted = false; // Sensor inverted flag
 
   /**
    * SparkMax constructor
@@ -61,18 +60,51 @@ public class SparkMax extends BrushlessMotorController {
   public void setVoltage(double voltage) {
     // Set CANSparkMax voltage output
     sparkMax.setVoltage(voltage);
+
+    // Update followers
+    updateFollowersVoltage(voltage);
   }
 
   @Override
   public void setInverted(boolean inverted) {
+    // Set inverted flag
+    this.inverted = inverted;
+
     // Set CANSparkMax inversion
     sparkMax.setInverted(inverted);
   }
 
   @Override
+  public void setSensorInverted(boolean sensorInverted) {
+    // Set sensor inverted flag
+    this.sensorInverted = sensorInverted;
+
+    // Check if CANCoder is null
+    if (canCoder == null) {
+      // Set CANSparkMax RelativeEncoder inversion
+      sparkMax.getEncoder().setInverted(sensorInverted);
+    } else {
+      // Set CANCoder inversion
+      canCoder.setInverted(sensorInverted);
+    }
+  }
+
+  @Override
+  public void setInternalSensorPosition(double position) {
+    // Set CANSparkMax encoder position
+    sparkMax.getEncoder().setPosition(position);
+  }
+
+  @Override
   public void invert() {
-    // Toggle CANSparkMax inversion
-    sparkMax.setInverted(!sparkMax.getInverted());
+    // Toggle inverted
+    setInverted(!inverted);
+  }
+
+  @Override
+  public void invertSensor() {
+    // Toggle sensor inverted
+    setSensorInverted(!sensorInverted);
   }
 
   @Override
@@ -160,15 +192,4 @@ public class SparkMax extends BrushlessMotorController {
       return canCoder.getVelocity();
     }
   }
-
-  @Override
-  public double getVoltage() {
-    return sparkMax.getBusVoltage();
-  }
-
-  @Override
-  public MutableMeasure<Voltage> getVoltageMeasure() {
-    return voltageMeasure.mut_replace(getVoltage(), Volts);
-  }
-
 }

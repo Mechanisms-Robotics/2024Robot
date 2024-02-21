@@ -1,8 +1,5 @@
 package com.mechlib.swerve;
 
-import static edu.wpi.first.units.Units.Volts;
-
-import com.ctre.phoenix6.SignalLogger;
 import com.mechlib.hardware.BrushlessMotorControllerType;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -67,21 +64,6 @@ public class SwerveDrive extends SubsystemBase {
   // Heading lock
   private boolean headingLocked = false;
   private Rotation2d desiredHeading = new Rotation2d();
-
-  // SysID routine types
-  public enum SysIDRoutineType {
-    Translational,
-    Rotational,
-    Steer
-  }
-
-  /* Use one of these sysidroutines for your particular test */
-  private SysIdRoutine sysIdRoutineTranslation;
-  private final SysIdRoutine sysIdRoutineRotation;
-  private final SysIdRoutine sysIdRoutineSteer;
-
-  /* Change this to the sysid routine you want to test */
-  private SysIdRoutine routineToApply = sysIdRoutineTranslation;
 
   /**
    * SwerveDrive constructor
@@ -271,54 +253,6 @@ public class SwerveDrive extends SubsystemBase {
       brModuleLocation,
       blModuleLocation
     };
-
-    sysIdRoutineTranslation = new SysIdRoutine(
-            new SysIdRoutine.Config(
-                    null,
-                    Volts.of(4),
-                    null,
-                    null),
-                    new SysIdRoutine.Mechanism(
-                            this::translationSysID,
-                            log -> {
-                              flModule.logDrive(log);
-                              frModule.logDrive(log);
-                              blModule.logDrive(log);
-                              brModule.logDrive(log);
-                            },
-                            this));
-
-    sysIdRoutineRotation = new SysIdRoutine(
-            new SysIdRoutine.Config(
-                    null,
-                    Volts.of(4),
-                    null,
-                    null),
-            new SysIdRoutine.Mechanism(
-                    this::rotationSysID,
-                    log -> {
-                      flModule.logSteer(log);
-                      frModule.logSteer(log);
-                      blModule.logSteer(log);
-                      brModule.logSteer(log);
-                    },
-                    this));
-    sysIdRoutineSteer = new SysIdRoutine(
-            new SysIdRoutine.Config(
-                    null,
-                    Volts.of(7),
-                    null,
-                    null),
-                    new SysIdRoutine.Mechanism(
-                    this::steerSysID,
-                    log -> {
-                      flModule.logDrive(log);
-                      frModule.logDrive(log);
-                      blModule.logDrive(log);
-                      brModule.logDrive(log);
-                    },
-                    this));
-
   }
 
   /**
@@ -620,31 +554,6 @@ public class SwerveDrive extends SubsystemBase {
     frModule.setSteerVoltage(voltageMeasure.baseUnitMagnitude());
     brModule.setSteerVoltage(voltageMeasure.baseUnitMagnitude());
     blModule.setSteerVoltage(voltageMeasure.baseUnitMagnitude());
-  }
-
-  /**
-   * Sets SysID routine
-   *
-   * @param routineType Routine type (Translational, Rotational, or Steer)
-   */
-  public void setRoutine(SysIDRoutineType routineType) {
-    switch (routineType) {
-      case Translational -> routineToApply = sysIdRoutineTranslation;
-      case Rotational -> routineToApply = sysIdRoutineRotation;
-      case Steer -> routineToApply = sysIdRoutineSteer;
-    }
-  }
-
-  /*
-   * Both the sysid commands are specific to one particular sysid routine, change
-   * which one you're trying to characterize
-   */
-  public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
-    return routineToApply.quasistatic(direction).withTimeout(5);
-  }
-
-  public Command sysIdDynamic(SysIdRoutine.Direction direction) {
-    return routineToApply.dynamic(direction).withTimeout(3);
   }
 
   @Override

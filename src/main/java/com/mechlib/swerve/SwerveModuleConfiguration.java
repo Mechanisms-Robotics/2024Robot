@@ -45,7 +45,7 @@ public class SwerveModuleConfiguration {
 
     new SimpleMotorFeedforward(0.319185544, 2.2544, 0.063528),
 
-    0.2,
+    0.0,
     0.0,
     0.0,
 

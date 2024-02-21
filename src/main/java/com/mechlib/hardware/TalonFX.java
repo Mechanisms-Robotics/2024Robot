@@ -1,18 +1,18 @@
 package com.mechlib.hardware;
 
+import com.ctre.phoenix6.configs.ClosedLoopGeneralConfigs;
+import com.ctre.phoenix6.configs.CustomParamsConfigs;
+import com.ctre.phoenix6.configs.DifferentialSensorsConfigs;
+import com.ctre.phoenix6.configs.FeedbackConfigs;
+import com.ctre.phoenix6.configs.HardwareLimitSwitchConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.VoltageConfigs;
-import edu.wpi.first.units.Distance;
-import edu.wpi.first.units.MutableMeasure;
-import edu.wpi.first.units.Velocity;
-import edu.wpi.first.units.Voltage;
 import frc.robot.Robot;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
-
-import static edu.wpi.first.units.Units.*;
 
 /**
  * MechLib TalonFX class
@@ -22,7 +22,8 @@ import static edu.wpi.first.units.Units.*;
 public class TalonFX extends BrushlessMotorController {
   private final com.ctre.phoenix6.hardware.TalonFX talonFX; // WPI_TalonFX instance
 
-  private boolean inverted = false; // Motor inverted
+  private boolean inverted = false; // Inverted flag
+  private boolean sensorInverted = false; // Sensor inverted flag
 
   /**
    * TalonFX constructor
@@ -70,24 +71,48 @@ public class TalonFX extends BrushlessMotorController {
   public void setVoltage(double voltage) {
     // Set TalonFX voltage
     talonFX.setVoltage(voltage);
+
+    // Update followers
+    updateFollowersVoltage(voltage);
   }
 
   @Override
   public void setInverted(boolean inverted) {
-    // Set TalonFX inversion
-    talonFX.setInverted(inverted);
-
     // Set inverted flag
     this.inverted = inverted;
+
+    // Set TalonFX inversion
+    talonFX.setInverted(inverted);
+  }
+
+  @Override
+  public void setSensorInverted(boolean sensorInverted) {
+    // Set sensor inverted flag
+    this.sensorInverted = sensorInverted;
+
+    // Check if CANCoder is not null
+    if (canCoder != null) {
+      // Set CANCoder inversion
+      canCoder.setInverted(sensorInverted);
+    }
+  }
+
+  @Override
+  public void setInternalSensorPosition(double position) {
+    // Set TalonFX encoder position
+    talonFX.setPosition(position);
   }
 
   @Override
   public void invert() {
-    // Toggle TalonFX inversion
-    talonFX.setInverted(!talonFX.getInverted());
+    // Toggle inverted
+    setInverted(!inverted);
+  }
 
-    // Toggle inverted flag
-    this.inverted = !this.inverted;
+  @Override
+  public void invertSensor() {
+    // Toggle sensor inverted
+    setSensorInverted(!sensorInverted);
   }
 
   @Override
@@ -198,25 +223,5 @@ public class TalonFX extends BrushlessMotorController {
       // Otherwise return CANCoder velocity
       return canCoder.getVelocity();
     }
-  }
-
-  @Override
-  public double getVoltage() {
-    return talonFX.getMotorVoltage().getValueAsDouble();
-  }
-
-  @Override
-  public MutableMeasure<Voltage> getVoltageMeasure() {
-    return voltageMeasure.mut_replace(getVoltage(), Volts);
-  }
-
-  @Override
-  public MutableMeasure<Distance> getDistanceMeasure() {
-    return distanceMeasure.mut_replace(getPosition(), Meters);
-  }
-
-  @Override
-  public MutableMeasure<Velocity<Distance>> getVelocityMeasure() {
-    return velocityMeasure.mut_replace(getVelocity(), MetersPerSecond);
   }
 }

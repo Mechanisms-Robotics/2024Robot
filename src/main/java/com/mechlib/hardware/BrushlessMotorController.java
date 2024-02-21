@@ -6,13 +6,9 @@ import java.util.function.Function;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
-import edu.wpi.first.units.*;
 import frc.robot.Robot;
 import edu.wpi.first.wpilibj.RobotController;
 import java.util.ArrayList;
-
-import static edu.wpi.first.units.MutableMeasure.mutable;
-import static edu.wpi.first.units.Units.*;
 
 /**
  * MechLib BrushlessMotorController Class
@@ -54,10 +50,6 @@ public abstract class BrushlessMotorController {
     0.0,
     new Constraints(0.0, 0.0)
   );
-
-  protected final MutableMeasure<Voltage> voltageMeasure = mutable(Volts.of(0));
-  protected final MutableMeasure<Distance> distanceMeasure = mutable(Meters.of(0));
-  protected final MutableMeasure<Velocity<Distance>> velocityMeasure = mutable(MetersPerSecond.of(0));
 
   private double tolerance = 0.0; // Tolerance of PID controllers
 
@@ -102,10 +94,7 @@ public abstract class BrushlessMotorController {
    *
    * @param voltage Number of volts to run motor at. (-12.0 to 12.0)
    */
-  public void setVoltage(double voltage) {
-    // Convert voltage to percent output and pass to setPercent
-    setPercent(voltage / RobotController.getBatteryVoltage());
-  }
+  public void setVoltage(double voltage) {}
 
   /**
    * Stops running motor
@@ -125,6 +114,18 @@ public abstract class BrushlessMotorController {
    * Toggles motor inversion
    */
   public void invert() {}
+
+  /**
+   * Sets the sensor inverted flag
+   *
+   * @param sensorInverted Whether the sensor is inverted
+   */
+  public void setSensorInverted(boolean sensorInverted) {}
+
+  /**
+   * Toggles sensor inversion
+   */
+  public void invertSensor() {}
 
   /**
    * Toggles coast mode
@@ -188,13 +189,13 @@ public abstract class BrushlessMotorController {
   }
 
   /**
-   * Sets feedforward controller
+   * Sets feedforward gains
    *
    * @param kS S gain, overcomes static friction (volts)
    * @param kV V gain, models how voltage should affect velocity (volts * seconds / distance)
    * @param kA A gain, models how voltage should affect acceleration (volts * seconds^2 / distance)
    */
-  public void setFeedforwardController(double kS, double kV, double kA) {
+  public void setFeedforwardGains(double kS, double kV, double kA) {
     this.feedforwardController = new SimpleMotorFeedforward(kS, kV, kA);
   }
 
@@ -312,6 +313,13 @@ public abstract class BrushlessMotorController {
   public void zero() {}
 
   /**
+   * Sets position of internal sensor in rotations
+   *
+   * @param position Position (rotations)
+   */
+  public void setInternalSensorPosition(double position) {}
+
+  /**
    * Sets the setpoint to a given value
    *
    * @param setpoint Setpoint value
@@ -366,6 +374,23 @@ public abstract class BrushlessMotorController {
 
       // Set follower percent output
       followerMotorController.setPercent(percent * (inverted ? -1.0 : 1.0));
+    }
+  }
+
+  /**
+   * Updates all followers given the main motor voltage output
+   *
+   * @param voltage Voltage output of main motor
+   */
+  public void updateFollowersVoltage(double voltage) {
+    // Loop through followers
+    for (Pair<BrushlessMotorController, Boolean> follower : followers) {
+      // Get follower motor controller and inversion
+      BrushlessMotorController followerMotorController = follower.getFirst();
+      boolean inverted = follower.getSecond();
+
+      // Set follower voltage
+      followerMotorController.setVoltage(voltage * (inverted ? -1.0 : 1.0));
     }
   }
 
@@ -500,12 +525,4 @@ public abstract class BrushlessMotorController {
    * @return Velocity of encoder
    */
   public double getVelocity() { return 0.0; }
-
-  public double getVoltage() { return 0.0; }
-
-  public MutableMeasure<Voltage> getVoltageMeasure() { return voltageMeasure; }
-
-  public MutableMeasure<Velocity<Distance>> getVelocityMeasure() { return velocityMeasure; }
-
-  public MutableMeasure<Distance> getDistanceMeasure() { return distanceMeasure; }
 }

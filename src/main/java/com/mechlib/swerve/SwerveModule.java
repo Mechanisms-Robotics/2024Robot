@@ -6,16 +6,12 @@ import com.mechlib.hardware.CANCoder;
 import com.mechlib.hardware.SparkMax;
 import com.mechlib.hardware.TalonFX;
 import com.mechlib.util.MechMath;
+import com.mechlib.util.MechUnits;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.units.Measure;
-import edu.wpi.first.units.MutableMeasure;
-import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 /**
  * MechLib SwerveModule class
@@ -121,56 +117,6 @@ public class SwerveModule extends SubsystemBase {
   }
 
   /**
-   * Converts CANCoder units to radians
-   *
-   * @param canCoderUnits CANCoder units
-   *
-   * @return Radians
-   */
-  private double steerCANCoderToRadians(double canCoderUnits) {
-    // radians = rotations * pi * 2
-    return canCoderUnits * Math.PI * 2;
-  }
-
-  /**
-   * Converts Falcon units to meters
-   *
-   * @param falconUnits Falcon units
-   *
-   * @return Meters
-   */
-  private double driveFalconToMeters(double falconUnits) {
-    // meters = (rotations / gearRatio) * (pi * wheelDiameter)
-    return (falconUnits / moduleConfiguration.driveGearRatio) *
-      (Math.PI * moduleConfiguration.wheelDiameter);
-  }
-
-  /**
-   * Converts NEO units to meters (only use for position not velocity)
-   *
-   * @param neoUnits NEO units
-   *
-   * @return Position (meters)
-   */
-  private double driveNEOToMeters(double neoUnits) {
-    // meters = (rotations / gearRatio) * (pi * wheelDiameter)
-    return (neoUnits / moduleConfiguration.driveGearRatio) *
-      (Math.PI * moduleConfiguration.wheelDiameter);
-  }
-
-  /**
-   * Converts NEO units to m/s
-   *
-   * @param neoUnits NEO units
-   * @return Velocity (m/s)
-   */
-  private double driveNEOToMPS(double neoUnits) {
-    // mps = ((rpm / 60) / gearRatio) * (pi * wheelDiameter)
-    return ((neoUnits / 60) / moduleConfiguration.driveGearRatio) *
-      (Math.PI * moduleConfiguration.wheelDiameter);
-  }
-
-  /**
    * Configures motors
    */
   private void configureMotors() {
@@ -190,8 +136,8 @@ public class SwerveModule extends SubsystemBase {
     steerMotor.setFeedforwardController(moduleConfiguration.steerFeedforwardController);
 
     // Set the steer motor units functions
-    steerMotor.setPositionUnitsFunction(this::steerCANCoderToRadians);
-    steerMotor.setVelocityUnitsFunction(this::steerCANCoderToRadians);
+    steerMotor.setPositionUnitsFunction(MechUnits::rotationsToRadians);
+    steerMotor.setVelocityUnitsFunction(MechUnits::rotationsToRadians);
 
     // Configure the steer motor PID controller
     steerMotor.setKP(moduleConfiguration.steerKP);
@@ -218,11 +164,37 @@ public class SwerveModule extends SubsystemBase {
 
     // Set the drive motor units functions
     if (driveMotor instanceof TalonFX) {
-      driveMotor.setPositionUnitsFunction(this::driveFalconToMeters);
-      driveMotor.setVelocityUnitsFunction(this::driveFalconToMeters);
+      driveMotor.setPositionUnitsFunction(
+        (Double rotations) -> MechUnits.rotationsToMeters(
+          rotations,
+          moduleConfiguration.driveGearRatio,
+          moduleConfiguration.wheelDiameter
+        )
+      );
+
+      driveMotor.setVelocityUnitsFunction(
+        (Double rotations) -> MechUnits.rotationsToMeters(
+          rotations,
+          moduleConfiguration.driveGearRatio,
+          moduleConfiguration.wheelDiameter
+        )
+      );
     } else if (driveMotor instanceof SparkMax) {
-      driveMotor.setPositionUnitsFunction(this::driveNEOToMeters);
-      driveMotor.setVelocityUnitsFunction(this::driveNEOToMPS);
+      driveMotor.setPositionUnitsFunction(
+        (Double rotations) -> MechUnits.rotationsToMeters(
+          rotations,
+          moduleConfiguration.driveGearRatio,
+          moduleConfiguration.wheelDiameter
+        )
+      );
+
+      driveMotor.setVelocityUnitsFunction(
+        (Double rpm) -> MechUnits.rpmToMPS(
+          rpm,
+          moduleConfiguration.driveGearRatio,
+          moduleConfiguration.wheelDiameter
+        )
+      );
     }
 
     // Configure the drive motor PIDF controller
@@ -273,15 +245,15 @@ public class SwerveModule extends SubsystemBase {
    */
   public void drive(double desiredVelocity) {
     // Set desired velocity
-    this.desiredVelocity = desiredVelocity * (driveInverted ? -1 : 1);
+    this.desiredVelocity = desiredVelocity;
 
     // Check if drive closed-loop mode is enabled
     if (driveClosedLoop) {
       // Set the drive motor setpoint
-      driveMotor.setSetpoint(this.desiredVelocity);
+      driveMotor.setSetpoint(desiredVelocity * (driveInverted ? -1.0 : 1.0));
     } else {
       // Set the drive motor percentage
-      driveMotor.setPercent(this.desiredVelocity / 4.4);
+      driveMotor.setPercent(desiredVelocity / 4.4 * (driveInverted ? -1.0 : 1.0));
     };
   }
 
@@ -291,7 +263,7 @@ public class SwerveModule extends SubsystemBase {
    * @param volts Volts
    */
   public void setVoltage(double volts) {
-    driveMotor.setVoltage(volts * (driveInverted ? -1 : 1));
+    driveMotor.setVoltage(volts);
   }
 
   /**
@@ -355,13 +327,6 @@ public class SwerveModule extends SubsystemBase {
     return closestAngle;
   }
 
-  public void logDrive(SysIdRoutineLog log) {
-    log.motor(moduleName + " drive").voltage(driveMotor.getVoltageMeasure()).linearPosition(driveMotor.getDistanceMeasure());
-  }
-  public void logSteer(SysIdRoutineLog log) {
-    log.motor(moduleName + " steer").voltage(steerMotor.getVoltageMeasure()).linearPosition(steerMotor.getDistanceMeasure());
-  }
-
   @Override
   public void periodic() {
     // Update curAngle
@@ -384,6 +349,8 @@ public class SwerveModule extends SubsystemBase {
 
     // Get current velocity
     double curVelocity = driveMotor.getVelocity();
+
+    // Run drive motor PIDF in driveClosedLoop flag is true
     if (driveClosedLoop) {
       driveMotor.periodicPIDF(curVelocity);
     }
@@ -398,6 +365,12 @@ public class SwerveModule extends SubsystemBase {
     SmartDashboard.putNumber(
       "[" + moduleName + "] Desired Velocity",
       desiredVelocity
+    );
+
+    // Output velocity error to SmartDashboard
+    SmartDashboard.putNumber(
+      "[" + moduleName + "] Velocity Error",
+      Math.abs(desiredVelocity - curVelocity)
     );
   }
 }

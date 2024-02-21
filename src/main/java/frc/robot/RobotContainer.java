@@ -14,12 +14,16 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.subsystems.Arm;
+import frc.robot.subsystems.Gerald;
 import frc.robot.subsystems.Swerve;
 
 public class RobotContainer {
   private final SendableChooser<Command> routineChooser = new SendableChooser<>();
   private final SendableChooser<Boolean> quasistaticChooser = new SendableChooser<>();
   public final Swerve swerve = new Swerve();
+  public final Arm arm = new Arm();
+  public final Gerald gerald = new Gerald();
 
   private final CommandXboxController xboxController = new CommandXboxController(0);
 
@@ -30,30 +34,6 @@ public class RobotContainer {
 
     configureDefaultCommands();
 
-
-    routineChooser.addOption(
-            "Translational Quasistatic SysID",
-            new InstantCommand(() -> swerve.setRoutine(SwerveDrive.SysIDRoutineType.Translational))
-    );
-
-    routineChooser.addOption(
-            "Rotational Quasistatic SysID",
-            new InstantCommand(() -> swerve.setRoutine(SwerveDrive.SysIDRoutineType.Rotational))
-    );
-
-    routineChooser.addOption(
-            "Steer Quasistatic SysID",
-            new InstantCommand(() -> swerve.setRoutine(SwerveDrive.SysIDRoutineType.Steer))
-    );
-
-    quasistaticChooser.addOption("Quasistatic", true);
-    quasistaticChooser.addOption("Dynamic", false);
-
-    SmartDashboard.putData("SysID Routine Chooser", routineChooser);
-    SmartDashboard.putData("SysID Routine Type", quasistaticChooser);
-
-    SignalLogger.setPath("home.lvuser/logs/");
-    SignalLogger.start();
   }
 
   public void configureBindings() {
@@ -75,6 +55,21 @@ public class RobotContainer {
                     () -> false
             )
     );
+    // left trigger: intake
+    xboxController.leftTrigger().onTrue(
+            new InstantCommand(gerald::intake)
+    );
+    xboxController.leftBumper().onTrue(
+            new InstantCommand(gerald::stopIntake)
+    );
+
+    // right trigger: shoot
+    xboxController.rightTrigger().onTrue(
+            new InstantCommand(gerald::shoot)
+    );
+    xboxController.rightBumper().onTrue(
+            new InstantCommand(gerald::stopShooter)
+    );
   }
 
   private void configureDefaultCommands() {
@@ -93,18 +88,5 @@ public class RobotContainer {
   }
 
 
-  public Command getAutonomousCommand() {
-    if (quasistaticChooser.getSelected()) {
-      return new SequentialCommandGroup(
-              swerve.sysIdQuasistatic(SysIdRoutine.Direction.kForward),
-              swerve.sysIdQuasistatic(SysIdRoutine.Direction.kReverse)
-      );
-    } else {
-      return new SequentialCommandGroup(
-              swerve.sysIdDynamic(SysIdRoutine.Direction.kForward),
-              swerve.sysIdDynamic(SysIdRoutine.Direction.kReverse)
-      );
-    }
-  }
-  
+  public Command getAutonomousCommand() { return new InstantCommand(); }
 }
