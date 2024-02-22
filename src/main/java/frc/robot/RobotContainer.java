@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.commands.autos.TimedLeave;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Gerald;
 import frc.robot.subsystems.Swerve;
@@ -97,5 +98,5 @@ public class RobotContainer {
   }
 
 
-  public Command getAutonomousCommand() { return new InstantCommand(); }
+  public Command getAutonomousCommand() { return new TimedLeave(swerve).withTimeout(2); }
 }

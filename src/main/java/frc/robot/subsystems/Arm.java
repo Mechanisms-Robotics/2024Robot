@@ -9,40 +9,66 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class Arm extends SingleJointSubystem {
-    private static final double kMagnetOffset = 0;
+public class Arm extends SubsystemBase {
+    private static final double ks = 0.0;
+    private static final double kv = 0.0;
+    private static final double ka = 0.0;
+    private static final double kp = 0.0;
+    private static final double ki = 0.0;
+    private static final double kd = 0.0;
+    private static final boolean kOpenLoop = true;
+
+    private static final double kLeftMagnetOffset = 0;
+    private static final double kRightMagnetOffset = 0;
     // right arm TalonFX motor (with the Can Encoder)
-    private final TalonFX armMotor = new TalonFX(13, new CANCoder(13, kMagnetOffset));
+    private final TalonFX rightArmMotor = new TalonFX(13, new CANCoder(13, kRightMagnetOffset));
     // left arm TalonFX motor
-    private final TalonFX armFollower = new TalonFX(12);
+    private final TalonFX leftArmMotor = new TalonFX(12, new CANCoder(12, kLeftMagnetOffset));
     private static final ArmFeedforward kArmFeedForward = new ArmFeedforward(0.2, 0, 0, 0);
     private static final ProfiledPIDController kProfiledPIDController = new ProfiledPIDController(0, 0, 0, new TrapezoidProfile.Constraints(Math.PI / 4, 1));
     private static final double kTolerance = Math.toRadians(5);
     private static final Rotation2d kStowed = Rotation2d.fromDegrees(20);
     private static final Rotation2d kIntaking = Rotation2d.fromDegrees(30);
     private static final Rotation2d kShooting = Rotation2d.fromDegrees(10);
-    private static final double kMotorRatio = 1;
-    private static final double kSensorRatio = 1;
+    private static final double kSensorRatio = 68.0/16.0;
+    private static final double kMotorRatio = 60 * kSensorRatio;
     private static final Rotation2d kForwardLimit = Rotation2d.fromDegrees(10000);
     private static final Rotation2d kReverseLimit = Rotation2d.fromDegrees(-10000);
     private static final double kLeftRightRatio = 0.8;
 
+
     public Arm() {
-        addMotor(armMotor, true);
-        addMotor(armFollower, false);
-        setState(SingleJointSubsystemState.OPEN_LOOP);
         configureMotors();
     }
 
-    @Override
     protected void configureMotors() {
-        super.configureMotors();
-        setFeedforwardController(kArmFeedForward);
-        setPPIDController(kProfiledPIDController);
-        armMotor.setPositionUnitsFunction((Double rotations) -> MechUnits.rotationsToRadians(rotations, kSensorRatio));
-        armMotor.setVelocityUnitsFunction((Double rotations) -> MechUnits.rotationsToRadians(rotations, kSensorRatio));
-        setLimits(kReverseLimit, kForwardLimit, kMotorRatio);
+        rightArmMotor.brakeMode();
+        leftArmMotor.brakeMode();
+
+        rightArmMotor.setPositionUnitsFunction((Double rotations) -> MechUnits.rotationsToRadians(rotations, kSensorRatio));
+        rightArmMotor.setVelocityUnitsFunction((Double rotations) -> MechUnits.rotationsToRadians(rotations, kSensorRatio));
+        leftArmMotor.setPositionUnitsFunction((Double rotations) -> MechUnits.rotationsToRadians(rotations, kSensorRatio));
+        leftArmMotor.setVelocityUnitsFunction((Double rotations) -> MechUnits.rotationsToRadians(rotations, kSensorRatio));
+
+        rightArmMotor.setFeedforwardGains(ks, kv, ka);
+        rightArmMotor.setPIDGains(kp, ki, kd);
+
+        leftArmMotor.setFeedforwardGains(ks, kv, ka);
+        leftArmMotor.setPIDGains(kp, ki, kd);
+
+        rightArmMotor.setSensorInverted(true);
+        leftArmMotor.setSensorInverted(false);
+        rightArmMotor.setInverted(true);
+        leftArmMotor.setInverted(false);
+
+        setLimits();
+    }
+
+    private void pivotTo(Rotation2d rotation) {
+        rightArmMotor.setSetpoint(rotation.getRadians());
+        leftArmMotor.setSetpoint(rotation.getRadians());
     }
 
     public void stow() {
@@ -54,29 +80,33 @@ public class Arm extends SingleJointSubystem {
     public void shoot() {
         pivotTo(kShooting);
     }
-    public void down() {
-        double percent = -0.05;
-        armMotor.setPercent(percent);
-        armFollower.setPercent(-percent * kLeftRightRatio);
-    }
     public void stop() {
-        armMotor.setPercent(0);
-        armFollower.setPercent(0);
-    }
-    public void up() {
-        double percent = 0.05;
-        armMotor.setPercent(percent);
-        armFollower.setPercent(-percent * kLeftRightRatio);
+        setVoltage(0);
     }
     public void hold() {
         double voltage = 0.1;
-        armMotor.setVoltage(voltage);
-        armFollower.setVoltage(-voltage * 1.1);
+        setVoltage(voltage);
     }
+
+    public void setVoltage(double voltage) {
+        rightArmMotor.setVoltage(voltage);
+        leftArmMotor.setVoltage(-voltage);
+    }
+
+    public void setLimits() {
+        rightArmMotor.setInternalSensorPosition(MechUnits.radiansToRotations(rightArmMotor.getPosition(), kMotorRatio));
+        leftArmMotor.setInternalSensorPosition(MechUnits.radiansToRotations(leftArmMotor.getPosition(), kMotorRatio));
+        rightArmMotor.setSoftLimits(kReverseLimit.getRotations(), kForwardLimit.getRotations());
+        leftArmMotor.setSoftLimits(kReverseLimit.getRotations(), kForwardLimit.getRotations());
+    }
+
     @Override
     public void periodic() {
-        super.periodic();
-        SmartDashboard.putNumber("[Arm] CurrentAngle", getAngle().getDegrees());
-        SmartDashboard.putNumber("[Arm] DesiredAngle", getDesiredAngle().getDegrees());
+        if (!kOpenLoop) {
+            rightArmMotor.periodicPIDF(rightArmMotor.getPosition());
+            leftArmMotor.periodicPIDF(leftArmMotor.getPosition());
+        }
+        SmartDashboard.putNumber("[Right Arm] position", rightArmMotor.getPosition());
+        SmartDashboard.putNumber("[Left Arm] position", leftArmMotor.getPosition());
     }
 }

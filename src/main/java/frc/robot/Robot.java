@@ -76,7 +76,6 @@ public class Robot extends TimedRobot {
 
   @Override
   public void testPeriodic() {
-//    m_robotContainer.arm.setVoltage(2);
   }
 
   @Override

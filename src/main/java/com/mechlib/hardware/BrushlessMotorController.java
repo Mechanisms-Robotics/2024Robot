@@ -199,6 +199,12 @@ public abstract class BrushlessMotorController {
     this.feedforwardController = new SimpleMotorFeedforward(kS, kV, kA);
   }
 
+  public void setPIDGains(double kP, double kI, double kD) {
+    this.setKP(kP);
+    this.setKI(kI);
+    this.setKD(kD);
+  }
+
   /**
    * Sets S gain of feedforward controller
    *
