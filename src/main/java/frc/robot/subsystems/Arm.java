@@ -33,6 +33,7 @@ public class Arm extends SubsystemBase {
     private static final Rotation2d kForwardLimit = Rotation2d.fromDegrees(10000);
     private static final Rotation2d kReverseLimit = Rotation2d.fromDegrees(-10000);
     private static final double kLeftRightRatio = 0.8;
+    private boolean disabled = false;
 
 
     public Arm() {
@@ -78,8 +79,13 @@ public class Arm extends SubsystemBase {
         setVoltage(0);
     }
 
+    public void disable() {
+        disabled = true;
+        stop();
+    }
 
     public void setVoltage(double voltage) {
+        if (disabled) return;
         rightArmMotor.setVoltage(voltage);
         leftArmMotor.setVoltage(voltage);
     }
@@ -93,11 +99,12 @@ public class Arm extends SubsystemBase {
 
     @Override
     public void periodic() {
+        SmartDashboard.putNumber("[Right Arm] position", rightArmMotor.getPosition());
+        SmartDashboard.putNumber("[Left Arm] position", leftArmMotor.getPosition());
+        if (disabled) return;
         if (!kOpenLoop) {
             rightArmMotor.periodicPIDF(rightArmMotor.getPosition());
             leftArmMotor.periodicPIDF(leftArmMotor.getPosition());
         }
-        SmartDashboard.putNumber("[Right Arm] position", rightArmMotor.getPosition());
-        SmartDashboard.putNumber("[Left Arm] position", leftArmMotor.getPosition());
     }
 }

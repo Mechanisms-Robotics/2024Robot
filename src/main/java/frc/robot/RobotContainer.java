@@ -27,6 +27,7 @@ public class RobotContainer {
   public final Gerald gerald = new Gerald();
 
   private final CommandXboxController xboxController = new CommandXboxController(0);
+  private final CommandXboxController xboxController2 = new CommandXboxController(1);
 
   private final SendableChooser<Command> m_chooser = new SendableChooser<>();
 
@@ -73,13 +74,9 @@ public class RobotContainer {
             )
     ).onFalse(new InstantCommand(gerald::stopShooter));
 
-//    xboxController.povDown().whileTrue(
-//            new InstantCommand(arm::down)
-//    ).onFalse(new InstantCommand(arm::stop));
-//
-//    xboxController.povUp().whileTrue(
-//            new InstantCommand(arm::up)
-//    ).onFalse(new InstantCommand(arm::stop));
+    xboxController2.a().onTrue(
+            new InstantCommand(arm::disable)
+    );
   }
 
   private void configureDefaultCommands() {
