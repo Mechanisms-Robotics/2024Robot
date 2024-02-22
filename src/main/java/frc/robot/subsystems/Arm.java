@@ -12,12 +12,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Arm extends SubsystemBase {
-    private static final double ks = 0.0;
-    private static final double kv = 0.0;
-    private static final double ka = 0.0;
-    private static final double kp = 0.0;
-    private static final double ki = 0.0;
-    private static final double kd = 0.0;
     private static final boolean kOpenLoop = true;
 
     private static final double kLeftMagnetOffset = 0;
@@ -27,7 +21,9 @@ public class Arm extends SubsystemBase {
     // left arm TalonFX motor
     private final TalonFX leftArmMotor = new TalonFX(12, new CANCoder(12, kLeftMagnetOffset));
     private static final ArmFeedforward kArmFeedForward = new ArmFeedforward(0.2, 0, 0, 0);
-    private static final ProfiledPIDController kProfiledPIDController = new ProfiledPIDController(0, 0, 0, new TrapezoidProfile.Constraints(Math.PI / 4, 1));
+    private static final ProfiledPIDController kRightPPIDController = new ProfiledPIDController(0, 0, 0, new TrapezoidProfile.Constraints(Math.PI / 4, 1));
+    private static final ProfiledPIDController kLeftPPIDController = new ProfiledPIDController(
+            kRightPPIDController.getP(), kRightPPIDController.getI(), kRightPPIDController.getD(), kRightPPIDController.getConstraints());
     private static final double kTolerance = Math.toRadians(5);
     private static final Rotation2d kStowed = Rotation2d.fromDegrees(20);
     private static final Rotation2d kIntaking = Rotation2d.fromDegrees(30);
@@ -52,12 +48,6 @@ public class Arm extends SubsystemBase {
         leftArmMotor.setPositionUnitsFunction((Double rotations) -> MechUnits.rotationsToRadians(rotations, kSensorRatio));
         leftArmMotor.setVelocityUnitsFunction((Double rotations) -> MechUnits.rotationsToRadians(rotations, kSensorRatio));
 
-        rightArmMotor.setFeedforwardGains(ks, kv, ka);
-        rightArmMotor.setPIDGains(kp, ki, kd);
-
-        leftArmMotor.setFeedforwardGains(ks, kv, ka);
-        leftArmMotor.setPIDGains(kp, ki, kd);
-
         rightArmMotor.setSensorInverted(true);
         leftArmMotor.setSensorInverted(false);
         rightArmMotor.setInverted(true);
@@ -67,8 +57,12 @@ public class Arm extends SubsystemBase {
     }
 
     private void pivotTo(Rotation2d rotation) {
-        rightArmMotor.setSetpoint(rotation.getRadians());
-        leftArmMotor.setSetpoint(rotation.getRadians());
+        kRightPPIDController.setGoal(rotation.getRadians());
+        kLeftPPIDController.setGoal(rotation.getRadians());
+        double rightPIDFoutput = kRightPPIDController.calculate(rightArmMotor.getPosition()) + kArmFeedForward.calculate(kRightPPIDController.getSetpoint().position, kRightPPIDController.getSetpoint().velocity);
+        double leftPIDFoutput = kLeftPPIDController.calculate(leftArmMotor.getPosition()) + kArmFeedForward.calculate(kLeftPPIDController.getSetpoint().position, kLeftPPIDController.getSetpoint().velocity);
+        rightArmMotor.setVoltage(rightPIDFoutput);
+        leftArmMotor.setVoltage(leftPIDFoutput);
     }
 
     public void stow() {
@@ -83,14 +77,11 @@ public class Arm extends SubsystemBase {
     public void stop() {
         setVoltage(0);
     }
-    public void hold() {
-        double voltage = 0.1;
-        setVoltage(voltage);
-    }
+
 
     public void setVoltage(double voltage) {
         rightArmMotor.setVoltage(voltage);
-        leftArmMotor.setVoltage(-voltage);
+        leftArmMotor.setVoltage(voltage);
     }
 
     public void setLimits() {
