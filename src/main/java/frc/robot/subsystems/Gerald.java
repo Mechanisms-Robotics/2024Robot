@@ -7,16 +7,17 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Gerald extends SubsystemBase {
     // intake percent speed for the intake motor to run at
-    private static final double INTAKE_SPEED = 0.2; // percent
-    private static final double OUTTAKE_SPEED = 0.0; // percent
-    private static final double SHOOTER_RPM = 20; // rpm
+    private static final double INTAKE_SPEED = 0.4; // percent
+    private static final double OUTTAKE_SPEED = -0.35; // percent
+    private static final double SHOOTER_RPM = 6000; // rpm
+    private static final double SHOOTER_SPEED = 1;
     private static final double FEED_SPEED = 0.3; // percent
     // PID values for the shooter
     private static final double SHOOTER_KP = 0.01;
     private static final double SHOOTER_KI = 0;
     private static final double SHOOTER_KD = 0;
     private static final double SHOOTER_KF = 0.01;
-    private static final double SHOOTER_TOLERANCE = 0.1;
+    private static final double SHOOTER_TOLERANCE = 100;
 
     // naming is based off of the unique function
     private final TalonFX intakeMotor = new TalonFX(14);
@@ -27,9 +28,9 @@ public class Gerald extends SubsystemBase {
 
     private double rpsToRPM(double rps) {return (rps / kPULLEY_RATIO ) * 60;}
     public Gerald() {
-        intakeMotor.coastMode();
-        ampMotor.coastMode();
-        shooterMotor.coastMode();
+        intakeMotor.brakeMode();
+        ampMotor.brakeMode();
+        shooterMotor.brakeMode();
 
         ampMotor.setKP(SHOOTER_KP);
         ampMotor.setKI(SHOOTER_KI);
@@ -44,6 +45,9 @@ public class Gerald extends SubsystemBase {
 
         ampMotor.setVelocityUnitsFunction(this::rpsToRPM);
         shooterMotor.setVelocityUnitsFunction(this::rpsToRPM);
+
+        ampMotor.setVoltageCompensation(10);
+        shooterMotor.setVoltageCompensation(10);
     }
 
     public void intake() {
@@ -55,12 +59,15 @@ public class Gerald extends SubsystemBase {
     }
 
     public void spinup() {
-        ampMotor.setSetpoint(-SHOOTER_RPM);
-        shooterMotor.setSetpoint(SHOOTER_RPM);
-        SmartDashboard.putNumber("[Shooter Motor] Set Point", shooterMotor.getSetpoint());
-
-        ampMotor.periodicPIDF(-ampMotor.getVelocity());
-        shooterMotor.periodicPIDF(shooterMotor.getVelocity());
+        SmartDashboard.putBoolean("Spinup", true);
+//        ampMotor.setSetpoint(-SHOOTER_RPM);
+//        shooterMotor.setSetpoint(SHOOTER_RPM);
+//        SmartDashboard.putNumber("[Shooter Motor] Set Point", shooterMotor.getSetpoint());
+        ampMotor.setPercent(-SHOOTER_SPEED);
+        shooterMotor.setPercent(SHOOTER_SPEED);
+//
+//        ampMotor.periodicPIDF(ampMotor.getVelocity());
+//        shooterMotor.periodicPIDF(shooterMotor.getVelocity());
     }
 
     public void shoot() {
@@ -68,6 +75,7 @@ public class Gerald extends SubsystemBase {
             spinup();
             return;
         }
+        SmartDashboard.putBoolean("Spinup", false);
         intakeMotor.setPercent(FEED_SPEED);
     }
 

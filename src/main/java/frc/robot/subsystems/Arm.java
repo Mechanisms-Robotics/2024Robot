@@ -68,6 +68,11 @@ public class Arm extends SingleJointSubystem {
         armMotor.setPercent(percent);
         armFollower.setPercent(-percent * kLeftRightRatio);
     }
+    public void hold() {
+        double voltage = 0.1;
+        armMotor.setVoltage(voltage);
+        armFollower.setVoltage(-voltage * 1.1);
+    }
     @Override
     public void periodic() {
         super.periodic();

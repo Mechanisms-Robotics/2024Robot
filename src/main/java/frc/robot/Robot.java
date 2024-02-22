@@ -61,7 +61,9 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void teleopPeriodic() {}
+  public void teleopPeriodic() {
+    m_robotContainer.arm.hold();
+  }
 
   @Override
   public void teleopExit() {

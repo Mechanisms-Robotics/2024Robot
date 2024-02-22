@@ -54,22 +54,24 @@ public class RobotContainer {
                     () -> false
             )
     );
-    // left trigger: intake
+    // left trigger: intake, when done: out take, wait, stop
     xboxController.leftTrigger().onTrue(
             new InstantCommand(gerald::intake)
-    ).onFalse(new InstantCommand(gerald::stopIntake));
+    ).onFalse(new SequentialCommandGroup(
+            new InstantCommand(gerald::outtake),
+            new WaitCommand(0.25),
+            new InstantCommand(gerald::stopIntake)));
 
     // right trigger: shoot
     xboxController.rightTrigger().whileTrue(
-            new InstantCommand(gerald::shoot)
+            new FunctionalCommand(
+                    () -> {},
+                    gerald::shoot,
+                    (interupted) -> {},
+                    () -> false
+            )
     ).onFalse(new InstantCommand(gerald::stopShooter));
 
-    xboxController.x().onTrue(
-            new InstantCommand(arm::intake)
-    );
-    xboxController.y().onTrue(
-            new InstantCommand(arm::shoot)
-    );
 //    xboxController.povDown().whileTrue(
 //            new InstantCommand(arm::down)
 //    ).onFalse(new InstantCommand(arm::stop));
@@ -84,7 +86,7 @@ public class RobotContainer {
             swerve,
             () -> -xboxController.getLeftY(),
             () -> -xboxController.getLeftX(),
-            xboxController::getRightX,
+            () -> -xboxController.getRightX(),
             0.1,
             4.5,
             5,

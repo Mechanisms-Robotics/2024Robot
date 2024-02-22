@@ -124,7 +124,7 @@ public class SingleJointSubystem extends SubsystemBase {
 
       // Apply current limiting and voltage compensation to motor
       motor.setCurrentLimit(40.0);
-      motor.setVoltageCompensation(10.0);
+//      motor.setVoltageCompensation(10.0);
     }
 
     // Set position and velocity units function of first motor
