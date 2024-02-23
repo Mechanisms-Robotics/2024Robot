@@ -7,36 +7,42 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Gerald extends SubsystemBase {
     // intake percent speed for the intake motor to run at
-    private static final double INTAKE_SPEED = 0.4; // percent
-    private static final double OUTTAKE_SPEED = -0.35; // percent
-    private static final double SHOOTER_RPM = 6000; // rpm
-    private static final double SHOOTER_SPEED = 1;
-    private static final double FEED_SPEED = 0.3; // percent
-    // PID values for the shooter
-    private static final double SHOOTER_KP = 0.01;
+    private static final double kIntakeSpeed = 0.4; // percent
+    private static final double kOuttakeSpeed = -0.35; // percent
+    private static final double kShooterRPM = 6000; // rpm
+    private static final double kShooterSpeed = 1;
+    private static final double kFeedSpeed = 0.3; // percent
+    // PIDF values for the shooter
+    private static final double kShooterKP = 0.01;
     private static final double SHOOTER_KI = 0;
     private static final double SHOOTER_KD = 0;
     private static final double SHOOTER_KF = 0.01;
-    private static final double SHOOTER_TOLERANCE = 100;
+    private static final double SHOOTER_TOLERANCE = 100; // rpm
 
     // naming is based off of the unique function
     private final TalonFX intakeMotor = new TalonFX(14);
     // allows for amp and assists shooter
     private final TalonFX ampMotor = new TalonFX(15);
+    // only shoots
     private final TalonFX shooterMotor = new TalonFX(16);
     private static final double kPULLEY_RATIO = 1;
 
+    /**
+     * Converts rotations per second to rotations per minute
+     * @param rps rps to be converted to rpm
+     * @return rpm
+     */
     private double rpsToRPM(double rps) {return (rps / kPULLEY_RATIO ) * 60;}
     public Gerald() {
         intakeMotor.brakeMode();
         ampMotor.brakeMode();
         shooterMotor.brakeMode();
 
-        ampMotor.setKP(SHOOTER_KP);
+        ampMotor.setKP(kShooterKP);
         ampMotor.setKI(SHOOTER_KI);
         ampMotor.setKD(SHOOTER_KD);
 
-        shooterMotor.setKP(SHOOTER_KP);
+        shooterMotor.setKP(kShooterKP);
         shooterMotor.setKI(SHOOTER_KI);
         shooterMotor.setKD(SHOOTER_KD);
 
@@ -50,33 +56,46 @@ public class Gerald extends SubsystemBase {
         shooterMotor.setVoltageCompensation(10);
     }
 
+    /**
+     * Set the intake motor speed (percent) to kIntakeSpeed
+     */
     public void intake() {
-        intakeMotor.setPercent(INTAKE_SPEED);
+        intakeMotor.setPercent(kIntakeSpeed);
     }
 
+    /**
+     * Sets the outtake motor speed (percent) to kOuttakeSpeed
+     */
     public void outtake() {
-        intakeMotor.setPercent(OUTTAKE_SPEED);
+        intakeMotor.setPercent(kOuttakeSpeed);
     }
 
+    /**
+     * Spins up the shooter and amp motor for shooting
+     */
     public void spinup() {
         SmartDashboard.putBoolean("Spinup", true);
-//        ampMotor.setSetpoint(-SHOOTER_RPM);
-//        shooterMotor.setSetpoint(SHOOTER_RPM);
+//        ampMotor.setSetpoint(-kShooterRPM);
+//        shooterMotor.setSetpoint(kShooterRPM);
 //        SmartDashboard.putNumber("[Shooter Motor] Set Point", shooterMotor.getSetpoint());
-        ampMotor.setPercent(-SHOOTER_SPEED);
-        shooterMotor.setPercent(SHOOTER_SPEED);
+        ampMotor.setPercent(-kShooterSpeed);
+        shooterMotor.setPercent(kShooterSpeed);
 //
 //        ampMotor.periodicPIDF(ampMotor.getVelocity());
 //        shooterMotor.periodicPIDF(shooterMotor.getVelocity());
     }
 
+    /**
+     * If the shooter speed is not the target speed, spin. When it is up to speed, move the note
+     * with the intakeMotor by setting the speed to the kFeedSpeed percent
+     */
     public void shoot() {
-        if (!MathUtil.isNear(SHOOTER_RPM, shooterMotor.getVelocity(), SHOOTER_TOLERANCE)) {
+        if (!MathUtil.isNear(kShooterRPM, shooterMotor.getVelocity(), SHOOTER_TOLERANCE)) {
             spinup();
             return;
         }
         SmartDashboard.putBoolean("Spinup", false);
-        intakeMotor.setPercent(FEED_SPEED);
+        intakeMotor.setPercent(kFeedSpeed);
     }
 
     public void stopIntake() {

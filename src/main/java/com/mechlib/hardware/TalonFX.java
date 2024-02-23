@@ -1,11 +1,5 @@
 package com.mechlib.hardware;
 
-import com.ctre.phoenix6.configs.ClosedLoopGeneralConfigs;
-import com.ctre.phoenix6.configs.CustomParamsConfigs;
-import com.ctre.phoenix6.configs.DifferentialSensorsConfigs;
-import com.ctre.phoenix6.configs.FeedbackConfigs;
-import com.ctre.phoenix6.configs.HardwareLimitSwitchConfigs;
-import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.VoltageConfigs;
 import frc.robot.Robot;
@@ -192,14 +186,34 @@ public class TalonFX extends BrushlessMotorController {
       // If so just return the setpoint
       return pidController.getSetpoint();
 
-    // Check if internal encoder is being used
-    if (canCoder == null) {
-      // If so return internal encoder position
-      return positionUnitsFunction.apply(talonFX.getPosition().getValueAsDouble());
+    // Check if CANCoder exists
+    if (canCoder != null) {
+      // Return CANCoder absolute position
+      return canCoder.getAbsolutePosition();
     } else {
-      // Otherwise return CANCoder position
-      return canCoder.getPosition();
+      // Otherwise return the internal encoder position
+      return positionUnitsFunction.apply(talonFX.getPosition().getValueAsDouble());
     }
+  }
+
+  @Override
+  public double getAbsolutePosition() {
+    // Check if this is a simulation
+    if (Robot.isSimulation())
+      // If so just return the setpoint
+      return pidController.getSetpoint();
+
+    // Check if CANCoder exists
+    if (canCoder != null) {
+      // Return CANCoder absolute position
+      return canCoder.getAbsolutePosition();
+    }
+
+    // Print error
+    System.out.println("[ERROR] No CANCoder provided on TalonFX!");
+
+    // Return 0
+    return 0.0;
   }
 
   @Override

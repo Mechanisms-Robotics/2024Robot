@@ -23,7 +23,7 @@ public class RobotContainer {
   private final SendableChooser<Command> routineChooser = new SendableChooser<>();
   private final SendableChooser<Boolean> quasistaticChooser = new SendableChooser<>();
   public final Swerve swerve = new Swerve();
-  public final Arm arm = new Arm();
+//  public final Arm arm = new Arm();
   public final Gerald gerald = new Gerald();
 
   private final CommandXboxController xboxController = new CommandXboxController(0);
@@ -32,6 +32,7 @@ public class RobotContainer {
   private final SendableChooser<Command> m_chooser = new SendableChooser<>();
 
   public RobotContainer() {
+    System.out.println("Starting in ROBOT CONTAINER");
     configureBindings();
 
     configureDefaultCommands();
@@ -41,7 +42,7 @@ public class RobotContainer {
     xboxController.a().onTrue( // a is uh x cuh
             new InstantCommand(swerve::zeroGyro)
     );
-
+    // b pressed: lock the swerve in x configuration
     xboxController.b().onTrue(
             new InstantCommand(swerve::lock)
     );
@@ -56,7 +57,7 @@ public class RobotContainer {
                     () -> false
             )
     );
-    // left trigger: intake, when done: out take, wait, stop
+    // hold left trigger: intake, when done: out take, wait, stop
     xboxController.leftTrigger().onTrue(
             new InstantCommand(gerald::intake)
     ).onFalse(new SequentialCommandGroup(
@@ -64,7 +65,7 @@ public class RobotContainer {
             new WaitCommand(0.25),
             new InstantCommand(gerald::stopIntake)));
 
-    // right trigger: shoot
+    // hold right trigger: shoot
     xboxController.rightTrigger().whileTrue(
             new FunctionalCommand(
                     () -> {},
@@ -74,26 +75,27 @@ public class RobotContainer {
             )
     ).onFalse(new InstantCommand(gerald::stopShooter));
 
-    xboxController2.a().onTrue(
-            new InstantCommand(arm::disable)
-    );
+    // secondary driver x: disable the arm SAFETY
+//    xboxController2.a().onTrue( // x on xbox controller
+//            new InstantCommand(arm::disable)
+//    );
   }
 
   private void configureDefaultCommands() {
-    swerve.setDefaultCommand(new SwerveTeleopDriveCommand(
-            swerve,
-            () -> -xboxController.getLeftY(),
-            () -> -xboxController.getLeftX(),
-            () -> -xboxController.getRightX(),
-            0.1,
-            4.5,
-            5,
-            Math.PI,
-            2*Math.PI,
-            true
-    ));
+    // Set the swerves default command to teleop drive
+//    swerve.setDefaultCommand(new SwerveTeleopDriveCommand(
+//            swerve,
+//            () -> -xboxController.getLeftY(),
+//            () -> -xboxController.getLeftX(),
+//            () -> -xboxController.getRightX(),
+//            0.1,
+//            4.5,
+//            5,
+//            Math.PI,
+//            2*Math.PI,
+//            true
+//    ));
   }
-
 
   public Command getAutonomousCommand() { return new TimedLeave(swerve).withTimeout(2); }
 }

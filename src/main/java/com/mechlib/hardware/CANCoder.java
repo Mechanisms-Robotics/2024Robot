@@ -43,6 +43,7 @@ public class CANCoder {
    */
   public CANCoder(int id, double magnetOffset) {
     this(id, SensorDirectionValue.CounterClockwise_Positive, magnetOffset);
+    System.out.println("Calling the CANCoder constructor");
   }
 
   /**
@@ -73,6 +74,9 @@ public class CANCoder {
 
     // Apply configuration
     canCoder.getConfigurator().apply(config);
+
+    // Reset relative position to absolute position
+    canCoder.getAbsolutePosition().getValueAsDouble();
   }
 
   /**
@@ -127,11 +131,13 @@ public class CANCoder {
   }
 
   /**
-   * Gets the position of the CANcoder
+   * Gets the absolute position of the CANcoder
    *
-   * @return Position (position units)
+   * @return Absolute position (position units)
    */
-  public double getPosition() {
+  public double getAbsolutePosition() {
+    System.out.println("Absolute position of CanCoder: " + canCoder.getAbsolutePosition().getValueAsDouble()
+                        + " magnet offset: " + magnetOffset);
     return positionUnitsFunction.apply(
       canCoder.getAbsolutePosition().getValueAsDouble() + magnetOffset
     );
@@ -152,7 +158,8 @@ public class CANCoder {
    * @param position Position (rotations)
    */
   private void setPosition(double position) {
-      canCoder.setPosition(position);
+    System.out.println("Position: " + position);
+    canCoder.setPosition(position);
   }
 
   /**

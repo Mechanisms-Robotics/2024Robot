@@ -2,7 +2,6 @@ package frc.robot.subsystems;
 
 import com.mechlib.hardware.CANCoder;
 import com.mechlib.hardware.TalonFX;
-import com.mechlib.subsystems.SingleJointSubystem;
 import com.mechlib.util.MechUnits;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;

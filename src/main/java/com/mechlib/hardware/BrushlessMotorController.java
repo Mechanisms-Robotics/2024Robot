@@ -199,12 +199,6 @@ public abstract class BrushlessMotorController {
     this.feedforwardController = new SimpleMotorFeedforward(kS, kV, kA);
   }
 
-  public void setPIDGains(double kP, double kI, double kD) {
-    this.setKP(kP);
-    this.setKI(kI);
-    this.setKD(kD);
-  }
-
   /**
    * Sets S gain of feedforward controller
    *
@@ -503,11 +497,19 @@ public abstract class BrushlessMotorController {
   public void setSoftLimits(double lowerLimit, double higherLimit) {}
 
   /**
-   * Returns the position of the internal encoder if one exists
+   * Returns the relative position of the CANCoder if one exists or the position of the motor's
+   * internal encoder.
    *
    * @return Position of encoder
    */
   public double getPosition() { return 0.0; }
+
+  /**
+   * Returns the absolute position of the CANCoder if one exists
+   *
+   * @return Absolute position of encoder
+   */
+  public double getAbsolutePosition() { return 0.0; }
 
   /**
    * Returns the distance the encoder has moved in ticks

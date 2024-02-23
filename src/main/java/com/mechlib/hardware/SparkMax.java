@@ -161,14 +161,34 @@ public class SparkMax extends BrushlessMotorController {
       // If so just return the setpoint
       return pidController.getSetpoint();
 
-    // Check if internal encoder is being used
-    if (canCoder == null) {
-      // If so return internal encoder position
-      return positionUnitsFunction.apply(sparkMax.getEncoder().getPosition());
+    // Check if CANCoder exists
+    if (canCoder != null) {
+      // Return CANCoder absolute position
+      return canCoder.getAbsolutePosition();
     } else {
-      // Otherwise return CANCoder position
-      return canCoder.getPosition();
+      // Otherwise return the internal encoder position
+      return positionUnitsFunction.apply(sparkMax.getEncoder().getPosition());
     }
+  }
+
+  @Override
+  public double getAbsolutePosition() {
+    // Check if this is a simulation
+    if (Robot.isSimulation())
+      // If so just return the setpoint
+      return pidController.getSetpoint();
+
+    // Check if CANCoder exists
+    if (canCoder != null) {
+      // Return CANCoder absolute position
+      return canCoder.getAbsolutePosition();
+    }
+
+    // Print error
+    System.out.println("[ERROR] No CANCoder provided on SparkMax!");
+
+    // Return 0
+    return 0.0;
   }
 
   @Override

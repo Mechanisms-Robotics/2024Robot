@@ -78,16 +78,17 @@ public class SwerveModule extends SubsystemBase {
 
     // Check which brushless motor controller type to use for steer
     switch (steerBrushlessMotorControllerType) {
-      // Default
-      default -> {
-        // Instantiate TalonFX
-        steerMotor = new TalonFX(steerMotorID, new CANCoder(steerEncoderID, magnetOffset));
-      }
-
       // SparkMax
       case SparkMax -> {
         // Instantiate SparkMax
         steerMotor = new SparkMax(steerMotorID, new CANCoder(steerEncoderID, magnetOffset));
+        break;
+      }
+      // Default
+      default -> {
+        System.out.println("Instantiating default as a TalonFX");
+        // Instantiate TalonFX
+        steerMotor = new TalonFX(steerMotorID, new CANCoder(steerEncoderID, magnetOffset));
       }
     }
 
@@ -330,7 +331,7 @@ public class SwerveModule extends SubsystemBase {
   @Override
   public void periodic() {
     // Update curAngle
-    curAngle = new Rotation2d(steerMotor.getPosition());
+    curAngle = new Rotation2d(steerMotor.getAbsolutePosition());
 
     // Output current angle to SmartDashboard
     SmartDashboard.putNumber("[" + moduleName + "] Current Angle", curAngle.getDegrees());
