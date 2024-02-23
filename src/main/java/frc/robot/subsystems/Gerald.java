@@ -98,9 +98,16 @@ public class Gerald extends SubsystemBase {
         intakeMotor.setPercent(kFeedSpeed);
     }
 
+    /**
+     * Sets the intakeMotor to 0 percent
+     */
     public void stopIntake() {
         intakeMotor.setPercent(0);
     }
+
+    /**
+     * Sets the motors for shooting (shooterMotor and ampMotor) to 0 percent
+     */
     public void stopShooter() {
         shooterMotor.setPercent(0);
         ampMotor.setPercent(0);

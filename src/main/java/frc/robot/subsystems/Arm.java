@@ -13,10 +13,11 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Arm extends SubsystemBase {
+    // true if the arm runs in open loop, false if it runs in closed loop
     private static final boolean kOpenLoop = true;
-    // left arm motor magnet offset
+    // left arm motor magnet offset (acquired in Phoenix Tuner X)
     private static final double kLeftMagnetOffset = 0.206299;
-    // right arm motor magnet offest
+    // right arm motor magnet offset
     private static final double kRightMagnetOffset = -0.336914;
     // right arm TalonFX motor and it's can coder
     private final TalonFX rightArmMotor = new TalonFX(13, new CANCoder(13, kRightMagnetOffset));
@@ -40,6 +41,7 @@ public class Arm extends SubsystemBase {
     private static final Rotation2d kForwardLimit = Rotation2d.fromDegrees(10000);
     private static final Rotation2d kReverseLimit = Rotation2d.fromDegrees(-10000);
     private static final double kLeftRightRatio = 0.8;
+    // safety disable feature, triggered by the secondary driver when x is pressed
     private boolean disabled = false;
 
 
@@ -48,18 +50,26 @@ public class Arm extends SubsystemBase {
     }
 
     /**
-     * Configure the motors. Set the right and left arm: to brake mode, set the units functions, and set wether they
-     * are inverted or not. Set the limits of the motors.
+     * Configure the motors. Set the right and left arm: to brake mode, sets the units functions, and set whether they
+     * are inverted or not. Sets the limits of the motors.
      */
     protected void configureMotors() {
-        rightArmMotor.coastMode();
-        leftArmMotor.coastMode();
+        // setting the arm to brake mode makes the arm still due to cwazy gear ratio
+        rightArmMotor.brakeMode();
+        leftArmMotor.brakeMode();
 
-        rightArmMotor.setPositionUnitsFunction((Double rotations) -> MechUnits.rotationsToRadians(rotations, kSensorRatio));
-        rightArmMotor.setVelocityUnitsFunction((Double rotations) -> MechUnits.rotationsToRadians(rotations, kSensorRatio));
-        leftArmMotor.setPositionUnitsFunction((Double rotations) -> MechUnits.rotationsToRadians(rotations, kSensorRatio));
-        leftArmMotor.setVelocityUnitsFunction((Double rotations) -> MechUnits.rotationsToRadians(rotations, kSensorRatio));
+        /* set the right and left arm motors position and velocity units function to radians from rotations, accounting
+           for the ratio of the sensor to the arm */
+        rightArmMotor.setPositionUnitsFunction(
+                (Double rotations) -> MechUnits.rotationsToRadians(rotations, kSensorRatio));
+        rightArmMotor.setVelocityUnitsFunction(
+                (Double rotations) -> MechUnits.rotationsToRadians(rotations, kSensorRatio));
+        leftArmMotor.setPositionUnitsFunction(
+                (Double rotations) -> MechUnits.rotationsToRadians(rotations, kSensorRatio));
+        leftArmMotor.setVelocityUnitsFunction(
+                (Double rotations) -> MechUnits.rotationsToRadians(rotations, kSensorRatio));
 
+        // sets the left and right arms inversion (they should alternate, never both true nor both false)
         rightArmMotor.setSensorInverted(true);
         leftArmMotor.setSensorInverted(false);
         rightArmMotor.setInverted(true);
@@ -69,15 +79,20 @@ public class Arm extends SubsystemBase {
     }
 
     /**
-     * Set the pivot position to a rotation and apply the voltage
+     * Set the pivot position to a rotation and applies the given voltage
      *
      * @param rotation position for the arm to be pivoted to
      */
     private void pivotTo(Rotation2d rotation) {
         kRightPPIDController.setGoal(rotation.getRadians());
         kLeftPPIDController.setGoal(rotation.getRadians());
-        double rightPIDFoutput = kRightPPIDController.calculate(rightArmMotor.getRelativePosition()) + kArmFeedForward.calculate(kRightPPIDController.getSetpoint().position, kRightPPIDController.getSetpoint().velocity);
-        double leftPIDFoutput = kLeftPPIDController.calculate(leftArmMotor.getRelativePosition()) + kArmFeedForward.calculate(kLeftPPIDController.getSetpoint().position, kLeftPPIDController.getSetpoint().velocity);
+        // Set and apply the right and left voltage using their PPID and feed forward controllers
+        double rightPIDFoutput = kRightPPIDController.calculate(rightArmMotor.getRelativePosition())
+                + kArmFeedForward.calculate(kRightPPIDController.getSetpoint().position,
+                                            kRightPPIDController.getSetpoint().velocity);
+        double leftPIDFoutput = kLeftPPIDController.calculate(leftArmMotor.getRelativePosition())
+                + kArmFeedForward.calculate(kLeftPPIDController.getSetpoint().position,
+                kLeftPPIDController.getSetpoint().velocity);
         rightArmMotor.setVoltage(rightPIDFoutput);
         leftArmMotor.setVoltage(leftPIDFoutput);
     }
@@ -130,7 +145,7 @@ public class Arm extends SubsystemBase {
     }
 
     /**
-     * Sets the right and left arm motors sensor positions and sets the right and left are soft limits
+     * Sets the right and left arm motors sensor positions and sets the right and left arm soft limits
      */
     public void setLimits() {
         rightArmMotor.setInternalSensorPosition(MechUnits.radiansToRotations(rightArmMotor.getRelativePosition(), kMotorRatio));
