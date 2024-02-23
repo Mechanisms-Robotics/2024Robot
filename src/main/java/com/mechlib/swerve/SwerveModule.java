@@ -78,17 +78,16 @@ public class SwerveModule extends SubsystemBase {
 
     // Check which brushless motor controller type to use for steer
     switch (steerBrushlessMotorControllerType) {
+      // Default
+      default -> {
+        // Instantiate TalonFX
+        steerMotor = new TalonFX(steerMotorID, new CANCoder(steerEncoderID, magnetOffset));
+      }
+
       // SparkMax
       case SparkMax -> {
         // Instantiate SparkMax
         steerMotor = new SparkMax(steerMotorID, new CANCoder(steerEncoderID, magnetOffset));
-        break;
-      }
-      // Default
-      default -> {
-        System.out.println("Instantiating default as a TalonFX");
-        // Instantiate TalonFX
-        steerMotor = new TalonFX(steerMotorID, new CANCoder(steerEncoderID, magnetOffset));
       }
     }
 

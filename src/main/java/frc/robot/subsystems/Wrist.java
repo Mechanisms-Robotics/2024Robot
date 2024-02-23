@@ -47,7 +47,7 @@ public class Wrist extends SubsystemBase {
 
     private void pivotTo(Rotation2d rotation) {
         kPPIDController.setGoal(rotation.getRadians());
-        double PPIDFOutput = kPPIDController.calculate(wristMotor.getPosition()) + kArmFeedForward.calculate(kPPIDController.getSetpoint().position, kPPIDController.getSetpoint().velocity);
+        double PPIDFOutput = kPPIDController.calculate(wristMotor.getRelativePosition()) + kArmFeedForward.calculate(kPPIDController.getSetpoint().position, kPPIDController.getSetpoint().velocity);
         wristMotor.setVoltage(PPIDFOutput);
     }
 
@@ -69,15 +69,15 @@ public class Wrist extends SubsystemBase {
     }
 
     public void setLimits() {
-        wristMotor.setInternalSensorPosition(MechUnits.radiansToRotations(wristMotor.getPosition(), kMotorRatio));
+        wristMotor.setInternalSensorPosition(MechUnits.radiansToRotations(wristMotor.getRelativePosition(), kMotorRatio));
         wristMotor.setSoftLimits(kReverseLimit.getRotations(), kForwardLimit.getRotations());
     }
 
     @Override
     public void periodic() {
         if (!kOpenLoop) {
-            wristMotor.periodicPIDF(wristMotor.getPosition());
+            wristMotor.periodicPIDF(wristMotor.getRelativePosition());
         }
-        SmartDashboard.putNumber("[Wrist] position", wristMotor.getPosition());
+        SmartDashboard.putNumber("[Wrist] position", wristMotor.getRelativePosition());
     }
 }

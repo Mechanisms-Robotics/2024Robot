@@ -11,7 +11,6 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.mechlib.hardware.CANCoder;
-import com.mechlib.hardware.TalonFX;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -20,7 +19,6 @@ public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
   private RobotContainer m_robotContainer;
-  private CANcoder canCoder = new CANcoder(13);
 
   @Override
   public void robotInit() {
@@ -45,7 +43,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
-    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+//    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
@@ -63,7 +61,7 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
-    m_robotContainer.swerve.driveClosedLoop();
+//    m_robotContainer.swerve.driveClosedLoop();
 
   }
 
@@ -76,16 +74,6 @@ public class Robot extends TimedRobot {
 
   @Override
   public void testInit() {
-    CANcoderConfiguration config = new CANcoderConfiguration().withMagnetSensor(
-            new MagnetSensorConfigs().withAbsoluteSensorRange(
-                    AbsoluteSensorRangeValue.Unsigned_0To1
-            ).withSensorDirection(
-                   SensorDirectionValue.CounterClockwise_Positive
-            )
-    );
-
-    // Apply configuration
-    canCoder.getConfigurator().apply(config);
     CommandScheduler.getInstance().cancelAll();
   }
 

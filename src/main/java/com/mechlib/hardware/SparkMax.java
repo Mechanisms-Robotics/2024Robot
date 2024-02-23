@@ -84,8 +84,8 @@ public class SparkMax extends BrushlessMotorController {
       // Set CANSparkMax RelativeEncoder inversion
       sparkMax.getEncoder().setInverted(sensorInverted);
     } else {
-      // Set CANCoder inversion
-      canCoder.setInverted(sensorInverted);
+      // Print error
+      System.out.println("[ERROR] CANCoder inversion should be passed to constructor!");
     }
   }
 
@@ -155,7 +155,12 @@ public class SparkMax extends BrushlessMotorController {
   }
 
   @Override
-  public double getPosition() {
+  public double getRawPosition() {
+    return sparkMax.getEncoder().getPosition();
+  }
+
+  @Override
+  public double getRelativePosition() {
     // Check if this is a simulation
     if (Robot.isSimulation())
       // If so just return the setpoint
@@ -185,7 +190,7 @@ public class SparkMax extends BrushlessMotorController {
     }
 
     // Print error
-    System.out.println("[ERROR] No CANCoder provided on SparkMax!");
+    System.out.println("[ERROR] No CANCoder provided!");
 
     // Return 0
     return 0.0;

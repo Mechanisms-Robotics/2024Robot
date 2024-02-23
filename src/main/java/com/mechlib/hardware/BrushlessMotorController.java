@@ -239,6 +239,19 @@ public abstract class BrushlessMotorController {
   }
 
   /**
+   * Sets PID gains
+   *
+   * @param kP P gain
+   * @param kI I gain
+   * @param kD D gain
+   */
+  public void setPIDGains(double kP, double kI, double kD) {
+    setKP(kP);
+    setKI(kI);
+    setKD(kD);
+  }
+
+  /**
    * Updates the PIDF and PPIDF, kP values
    *
    * @param kP The P gain
@@ -269,6 +282,22 @@ public abstract class BrushlessMotorController {
     // Set the D gains
     this.pidController.setD(kD);
     this.ppidController.setD(kD);
+  }
+
+  /**
+   * Sets PPID trapezoidal motrion profile constraints
+   *
+   * @param maxVelocity Max velocity (velocity units)
+   * @param maxAcceleration Max acceleration (velocity units/s)
+   */
+  public void setConstraints(double maxVelocity, double maxAcceleration) {
+    // Set PPID constraints
+    this.ppidController.setConstraints(
+      new Constraints(
+        maxVelocity,
+        maxAcceleration
+      )
+    );
   }
 
   /**
@@ -397,11 +426,20 @@ public abstract class BrushlessMotorController {
   /**
    * Gets the current setpoint
    *
-   * @return Current setpoint of PIDF controller
+   * @return Current setpoint of PID controller
    */
   public double getSetpoint() {
     // Get the current setpoint
     return this.pidController.getSetpoint();
+  }
+
+  /**
+   * Gets the current velocity setpoint of the PPID controller
+   *
+   * @return Current velocity setpoint of PPID controller
+   */
+  public double getVelocitySetpoint() {
+    return this.ppidController.getSetpoint().velocity;
   }
 
   /**
@@ -454,6 +492,22 @@ public abstract class BrushlessMotorController {
   }
 
   /**
+   * Runs the periodic code for the PID controller given a current position, current velocity, and
+   * feedforward output value.
+   *
+   * @param currentPosition Current position
+   * @param currentVelocity Current velocity
+   * @param ffOutput Output of feedforward controller
+   */
+  public void periodicPIDF(double currentPosition, double currentVelocity, double ffOutput) {
+    // Calculate PIDF output
+    double pidfOutput = pidController.calculate(currentPosition) + ffOutput;
+
+    // Set the percentage of the motor to the PIDF output
+    setPercent(pidfOutput);
+  }
+
+  /**
    * Runs the periodic code for the feedforward and PPID controller given a current measurement
    *
    * @param currentMeasurement Current measurement
@@ -497,12 +551,19 @@ public abstract class BrushlessMotorController {
   public void setSoftLimits(double lowerLimit, double higherLimit) {}
 
   /**
+   * Returns the internal sensor position of the motor without any functions applied to it
+   *
+   * @return Position of internal encoder
+   */
+  public double getRawPosition() { return 0.0; }
+
+  /**
    * Returns the relative position of the CANCoder if one exists or the position of the motor's
    * internal encoder.
    *
    * @return Position of encoder
    */
-  public double getPosition() { return 0.0; }
+  public double getRelativePosition() { return 0.0; }
 
   /**
    * Returns the absolute position of the CANCoder if one exists
@@ -510,6 +571,21 @@ public abstract class BrushlessMotorController {
    * @return Absolute position of encoder
    */
   public double getAbsolutePosition() { return 0.0; }
+
+  /**
+   * Sync relative position of CANCoder if one exists
+   */
+  public void syncRelativePosition() {
+    // Check if CANCoder exists
+    if (canCoder == null) {
+      // Print error and return
+      System.out.println("[ERROR] No CANCoder provided!");
+      return;
+    }
+
+    // Sync CANCoder relative position
+    canCoder.syncRelativePosition();
+  }
 
   /**
    * Returns the distance the encoder has moved in ticks
@@ -524,7 +600,7 @@ public abstract class BrushlessMotorController {
       return simDistance;
 
     // Otherwise just return the getPosition output
-    return getPosition();
+    return getRelativePosition();
   }
 
   /**

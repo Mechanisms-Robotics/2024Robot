@@ -85,9 +85,11 @@ public class TalonFX extends BrushlessMotorController {
     this.sensorInverted = sensorInverted;
 
     // Check if CANCoder is not null
-    if (canCoder != null) {
-      // Set CANCoder inversion
-      canCoder.setInverted(sensorInverted);
+    if (canCoder == null) {
+      System.out.println("[ERROR] TalonFX sensor in sync, invert motor instead!");
+    } else {
+      // Print error
+      System.out.println("[ERROR] CANCoder inversion should be passed in to constructor!");
     }
   }
 
@@ -180,7 +182,12 @@ public class TalonFX extends BrushlessMotorController {
   }
 
   @Override
-  public double getPosition() {
+  public double getRawPosition() {
+    return talonFX.getPosition().getValueAsDouble();
+  }
+
+  @Override
+  public double getRelativePosition() {
     // Check if this is a simulation
     if (Robot.isSimulation())
       // If so just return the setpoint
@@ -188,8 +195,8 @@ public class TalonFX extends BrushlessMotorController {
 
     // Check if CANCoder exists
     if (canCoder != null) {
-      // Return CANCoder absolute position
-      return canCoder.getAbsolutePosition();
+      // Return CANCoder relative position
+      return canCoder.getRelativePosition();
     } else {
       // Otherwise return the internal encoder position
       return positionUnitsFunction.apply(talonFX.getPosition().getValueAsDouble());
@@ -210,7 +217,7 @@ public class TalonFX extends BrushlessMotorController {
     }
 
     // Print error
-    System.out.println("[ERROR] No CANCoder provided on TalonFX!");
+    System.out.println("[ERROR] No CANCoder provided!");
 
     // Return 0
     return 0.0;

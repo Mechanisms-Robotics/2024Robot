@@ -76,8 +76,8 @@ public class Arm extends SubsystemBase {
     private void pivotTo(Rotation2d rotation) {
         kRightPPIDController.setGoal(rotation.getRadians());
         kLeftPPIDController.setGoal(rotation.getRadians());
-        double rightPIDFoutput = kRightPPIDController.calculate(rightArmMotor.getPosition()) + kArmFeedForward.calculate(kRightPPIDController.getSetpoint().position, kRightPPIDController.getSetpoint().velocity);
-        double leftPIDFoutput = kLeftPPIDController.calculate(leftArmMotor.getPosition()) + kArmFeedForward.calculate(kLeftPPIDController.getSetpoint().position, kLeftPPIDController.getSetpoint().velocity);
+        double rightPIDFoutput = kRightPPIDController.calculate(rightArmMotor.getRelativePosition()) + kArmFeedForward.calculate(kRightPPIDController.getSetpoint().position, kRightPPIDController.getSetpoint().velocity);
+        double leftPIDFoutput = kLeftPPIDController.calculate(leftArmMotor.getRelativePosition()) + kArmFeedForward.calculate(kLeftPPIDController.getSetpoint().position, kLeftPPIDController.getSetpoint().velocity);
         rightArmMotor.setVoltage(rightPIDFoutput);
         leftArmMotor.setVoltage(leftPIDFoutput);
     }
@@ -133,8 +133,8 @@ public class Arm extends SubsystemBase {
      * Sets the right and left arm motors sensor positions and sets the right and left are soft limits
      */
     public void setLimits() {
-        rightArmMotor.setInternalSensorPosition(MechUnits.radiansToRotations(rightArmMotor.getPosition(), kMotorRatio));
-        leftArmMotor.setInternalSensorPosition(MechUnits.radiansToRotations(leftArmMotor.getPosition(), kMotorRatio));
+        rightArmMotor.setInternalSensorPosition(MechUnits.radiansToRotations(rightArmMotor.getRelativePosition(), kMotorRatio));
+        leftArmMotor.setInternalSensorPosition(MechUnits.radiansToRotations(leftArmMotor.getRelativePosition(), kMotorRatio));
         rightArmMotor.setSoftLimits(kReverseLimit.getRotations(), kForwardLimit.getRotations());
         leftArmMotor.setSoftLimits(kReverseLimit.getRotations(), kForwardLimit.getRotations());
     }
@@ -145,14 +145,14 @@ public class Arm extends SubsystemBase {
      */
     @Override
     public void periodic() {
-        SmartDashboard.putNumber("[Right Arm] position", new Rotation2d(rightArmMotor.getPosition()).getDegrees());
-        SmartDashboard.putNumber("[Left Arm] position", new Rotation2d(leftArmMotor.getPosition()).getDegrees());
+        SmartDashboard.putNumber("[Right Arm] position", new Rotation2d(rightArmMotor.getRelativePosition()).getDegrees());
+        SmartDashboard.putNumber("[Left Arm] position", new Rotation2d(leftArmMotor.getRelativePosition()).getDegrees());
         // if disabled, do not run any processes on the arm
         if (disabled) return;
         // if in closed loop, move the right and left arm via PIDF
         if (!kOpenLoop) {
-            rightArmMotor.periodicPIDF(rightArmMotor.getPosition());
-            leftArmMotor.periodicPIDF(leftArmMotor.getPosition());
+            rightArmMotor.periodicPIDF(rightArmMotor.getRelativePosition());
+            leftArmMotor.periodicPIDF(leftArmMotor.getRelativePosition());
         }
     }
 }

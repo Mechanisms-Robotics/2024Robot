@@ -1,5 +1,6 @@
 package com.mechlib.hardware;
 
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.function.Function;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
@@ -12,15 +13,15 @@ import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
  *
  * Contains some wrapper code for a CTRE CANCoder
  */
-public class CANCoder {
+public class CANCoder extends SubsystemBase {
   // CANcoder
   private final CANcoder canCoder;
 
   // Magnet offset
-  private final double magnetOffset;
+  private double magnetOffset;
 
-  // Sensor direction
-  private SensorDirectionValue sensorDirection = SensorDirectionValue.CounterClockwise_Positive;
+  // CANCoder config
+  private CANcoderConfiguration config = new CANcoderConfiguration();
 
   // Unit functions
   private Function<Double, Double> positionUnitsFunction = (Double x) -> x;
@@ -32,84 +33,90 @@ public class CANCoder {
    * @param id CAN ID of CANCoder
    */
   public CANCoder(int id) {
-    this(id, SensorDirectionValue.CounterClockwise_Positive, 0.0);
+    this(
+      id,
+      0,
+      AbsoluteSensorRangeValue.Signed_PlusMinusHalf,
+      SensorDirectionValue.CounterClockwise_Positive
+    );
   }
 
   /**
    * CANCoder constructor
    *
    * @param id CAN ID of CANCoder
-   * @param magnetOffset Absolute position magnet offset (rotations)
+   * @param magnetOffset Magnet offset (rotations)
    */
   public CANCoder(int id, double magnetOffset) {
-    this(id, SensorDirectionValue.CounterClockwise_Positive, magnetOffset);
-    System.out.println("Calling the CANCoder constructor");
+    this(
+      id,
+      magnetOffset,
+      AbsoluteSensorRangeValue.Signed_PlusMinusHalf,
+      SensorDirectionValue.CounterClockwise_Positive
+    );
   }
 
   /**
    * CANCoder constructor
    *
    * @param id CAN ID of CANCoder
-   * @param sensorDirection Direction of CANcoder
-   * @param magnetOffset Absolute position magnet offset (rotations)
+   * @param magnetOffset Magnet offset (rotations)
+   * @param sensorRange Range of absolute sensor (AbsoluteSensorRangeValue)
    */
-  public CANCoder(int id, SensorDirectionValue sensorDirection, double magnetOffset) {
+  public CANCoder(int id, double magnetOffset, AbsoluteSensorRangeValue sensorRange) {
+    this(
+      id,
+      magnetOffset,
+      sensorRange,
+      SensorDirectionValue.CounterClockwise_Positive
+    );
+  }
+
+  /**
+   * CANCoder constructor
+   *
+   * @param id CAN ID of CANCoder
+   * @param magnetOffset Magnet offset (rotations)
+   * @param sensorRange Range of absolute sensor (AbsoluteSensorRangeValue)
+   * @param sensorDirection Direction of sensor (SensorDirectionValue)
+   */
+  public CANCoder(
+    int id,
+    double magnetOffset,
+    AbsoluteSensorRangeValue sensorRange,
+    SensorDirectionValue sensorDirection
+  ) {
     // Instantiate CANCoder
     canCoder = new CANcoder(id);
 
-    // Set sensor direction
-    this.sensorDirection = sensorDirection;
+    // Configure CANCoder
+    configure(magnetOffset, sensorRange, sensorDirection);
+  }
 
-    // Create configuration
-    CANcoderConfiguration config = new CANcoderConfiguration().withMagnetSensor(
-      new MagnetSensorConfigs().withAbsoluteSensorRange(
-        AbsoluteSensorRangeValue.Signed_PlusMinusHalf
-      ).withSensorDirection(
-        sensorDirection
-      )
-    );
-
+  /**
+   * Configures CANCoder
+   *
+   * @param magnetOffset Magnet offset (rotations)
+   * @param sensorRange Range of absolute sensor (AbsoluteSensorRangeValue)
+   * @param sensorDirection Direction of sensor (SensorDirectionValue)
+   */
+  public void configure(
+    double magnetOffset,
+    AbsoluteSensorRangeValue sensorRange,
+    SensorDirectionValue sensorDirection
+  ) {
     // Set magnet offset
     this.magnetOffset = magnetOffset;
 
+    // Set configuration
+    config = config.withMagnetSensor(
+      new MagnetSensorConfigs()
+        .withAbsoluteSensorRange(sensorRange)
+        .withSensorDirection(sensorDirection)
+    );
+
     // Apply configuration
     canCoder.getConfigurator().apply(config);
-
-    // Reset relative position to absolute position
-    canCoder.getAbsolutePosition().getValueAsDouble();
-  }
-
-  /**
-   * Sets sensor direction inverted
-   *
-   * @param inverted Sensor direction inverted
-   */
-  public void setInverted(boolean inverted) {
-    // Check if inverted is true
-    if (inverted) {
-      // Set sensor direction to clockwise
-      sensorDirection = SensorDirectionValue.Clockwise_Positive;
-    } else {
-      // Set sensor direction to counter-clockwise
-      sensorDirection = SensorDirectionValue.CounterClockwise_Positive;
-    }
-
-    // Apply new magnet sensor configuration
-    canCoder.getConfigurator().apply(
-      new MagnetSensorConfigs().withAbsoluteSensorRange(
-        AbsoluteSensorRangeValue.Signed_PlusMinusHalf
-      ).withSensorDirection(
-        sensorDirection
-      )
-    );
-  }
-
-  /**
-   * Inverts sensor direction
-   */
-  public void invert() {
-    // Toggle inverted
-    setInverted(sensorDirection != SensorDirectionValue.Clockwise_Positive);
   }
 
   /**
@@ -131,13 +138,22 @@ public class CANCoder {
   }
 
   /**
+   * Gets the relative position of the CANCoder
+   *
+   * @return Relative position (position units)
+   */
+  public double getRelativePosition() {
+    return positionUnitsFunction.apply(
+      canCoder.getPosition().getValueAsDouble() + magnetOffset
+    );
+  }
+
+  /**
    * Gets the absolute position of the CANcoder
    *
    * @return Absolute position (position units)
    */
   public double getAbsolutePosition() {
-    System.out.println("Absolute position of CanCoder: " + canCoder.getAbsolutePosition().getValueAsDouble()
-                        + " magnet offset: " + magnetOffset);
     return positionUnitsFunction.apply(
       canCoder.getAbsolutePosition().getValueAsDouble() + magnetOffset
     );
@@ -153,17 +169,24 @@ public class CANCoder {
   }
 
   /**
-   * Sets position of CANCoder in native units
+   * Zeroes the CANCoder
+   */
+  public void zero() { setRelativePosition(-magnetOffset); }
+
+  /**
+   * Sets relative position of CANCoder in native units
    * 
    * @param position Position (rotations)
    */
-  private void setPosition(double position) {
-    System.out.println("Position: " + position);
-    canCoder.setPosition(position);
+  public void setRelativePosition(double position) {
+      canCoder.setPosition(position);
   }
 
   /**
-   * Zeroes the CANCoder
+   * Sets relative position to absolute position
    */
-  public void zero() { setPosition(-magnetOffset); }
+  public void syncRelativePosition() {
+    // Set relative position to absolute position
+    canCoder.setPosition(canCoder.getAbsolutePosition().getValueAsDouble());
+  }
 }
