@@ -501,7 +501,9 @@ public abstract class BrushlessMotorController {
    */
   public void periodicPIDF(double currentPosition, double currentVelocity, double ffOutput) {
     // Calculate PIDF output
-    double pidfOutput = pidController.calculate(currentPosition) + ffOutput;
+    double pidfOutput = pidController.calculate(currentPosition) + (
+      ffOutput / RobotController.getBatteryVoltage()
+    );
 
     // Set the percentage of the motor to the PIDF output
     setPercent(pidfOutput);
@@ -536,6 +538,24 @@ public abstract class BrushlessMotorController {
       feedforwardController.calculate(
         currentVelocity
       ) / RobotController.getBatteryVoltage()
+    );
+
+    // Set the percentage of the motor to the PPIDF output
+    setPercent(ppidfOutput);
+  }
+
+  /**
+   * Runs the periodic code for the PPID controller given a current position, current velocity, and
+   * feedforward output value.
+   *
+   * @param currentPosition Current position
+   * @param currentVelocity Current velocity
+   * @param ffOutput Output of feedforward controller
+   */
+  public void periodicPPIDF(double currentPosition, double currentVelocity, double ffOutput) {
+    // Calculate PPIDF output
+    double ppidfOutput = ppidController.calculate(currentPosition) + (
+      ffOutput / RobotController.getBatteryVoltage()
     );
 
     // Set the percentage of the motor to the PPIDF output

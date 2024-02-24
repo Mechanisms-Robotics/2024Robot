@@ -21,6 +21,22 @@ public class SingleJointSubystem extends SubsystemBase {
   // Motors
   protected ArrayList<BrushlessMotorController> motors = new ArrayList<>();
 
+  // Subsystem state enumerator
+  public enum SingleJointSubsystemState {
+    OPEN_LOOP,
+    CLOSED_LOOP
+  };
+
+  // Current subsystem state
+  protected SingleJointSubsystemState state = SingleJointSubsystemState.CLOSED_LOOP;
+
+  // Pivot feedforward controller
+  protected ArmFeedforward feedforwardController = new ArmFeedforward(
+    0,
+    0,
+    0,
+    0);
+
   // PID Constants
   private double kP = 0.0;
   private double kI = 0.0;
@@ -30,23 +46,8 @@ public class SingleJointSubystem extends SubsystemBase {
   private double maxVelocity = 0.0;
   private double maxAcceleration = 0.0;
 
-  // Pivot feedforward controller
-  protected ArmFeedforward feedforwardController = new ArmFeedforward(
-    0,
-    0,
-    0,
-    0);
-
-  protected Rotation2d desiredAngle = new Rotation2d(); // Desired angle
-
-  // Subsystem state enumerator
-  public enum SingleJointSubsystemState {
-    OPEN_LOOP,
-    CLOSED_LOOP
-  };
-
-  // Current subsystem state
-  protected SingleJointSubsystemState state = SingleJointSubsystemState.CLOSED_LOOP;
+  // Desired angle
+  protected Rotation2d desiredAngle = new Rotation2d();
 
   /**
    * Adds a motor to the SingleJointSubsystem
@@ -179,6 +180,9 @@ public class SingleJointSubystem extends SubsystemBase {
       // Set position units function of first motor
       motor.setPositionUnitsFunction(positionUnitsFunction);
     }
+
+    // Set desired angle to current angle
+    pivotTo(getAngle());
   }
 
   /**
@@ -337,7 +341,7 @@ public class SingleJointSubystem extends SubsystemBase {
       // Loop over every motor
       for (BrushlessMotorController motor : motors) {
         // Run periodic PIDF code
-        motor.periodicPIDF(
+        motor.periodicPPIDF(
           motor.getRelativePosition(),
           motor.getVelocity(),
           feedforwardController.calculate(

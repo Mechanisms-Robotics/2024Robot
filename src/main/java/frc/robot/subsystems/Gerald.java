@@ -7,17 +7,11 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Gerald extends SubsystemBase {
     // intake percent speed for the intake motor to run at
-    private static final double kIntakeSpeed = 0.4; // percent
-    private static final double kOuttakeSpeed = -0.35; // percent
-    private static final double kShooterRPM = 6000; // rpm
-    private static final double kShooterSpeed = 1;
-    private static final double kFeedSpeed = 0.3; // percent
-    // PIDF values for the shooter
-    private static final double kShooterKP = 0.01;
-    private static final double SHOOTER_KI = 0;
-    private static final double SHOOTER_KD = 0;
-    private static final double SHOOTER_KF = 0.01;
-    private static final double SHOOTER_TOLERANCE = 100; // rpm
+    private static final double kIntakeVoltage = 5.0; // volts
+    private static final double kOuttakeVoltage = -5; // volts
+    private static final double kShooterVoltage = 6;
+    private static final double kFeedVoltage = 3; // volts
+    private static final double kAmpVoltage = 5; // volts
 
     // naming is based off of the unique function
     private final TalonFX intakeMotor = new TalonFX(14);
@@ -25,79 +19,58 @@ public class Gerald extends SubsystemBase {
     private final TalonFX ampMotor = new TalonFX(15);
     // only shoots
     private final TalonFX shooterMotor = new TalonFX(16);
-    private static final double kPULLEY_RATIO = 1;
 
-    /**
-     * Converts rotations per second to rotations per minute
-     * @param rps rps to be converted to rpm
-     * @return rpm
-     */
-    private double rpsToRPM(double rps) {return (rps / kPULLEY_RATIO ) * 60;}
+
     public Gerald() {
         intakeMotor.brakeMode();
         ampMotor.brakeMode();
         shooterMotor.brakeMode();
+        intakeMotor.setInverted(false);
+        ampMotor.setInverted(true);
+        shooterMotor.setInverted(false);
 
-        ampMotor.setKP(kShooterKP);
-        ampMotor.setKI(SHOOTER_KI);
-        ampMotor.setKD(SHOOTER_KD);
 
-        shooterMotor.setKP(kShooterKP);
-        shooterMotor.setKI(SHOOTER_KI);
-        shooterMotor.setKD(SHOOTER_KD);
-
-        ampMotor.setTolerance(SHOOTER_TOLERANCE);
-        shooterMotor.setTolerance(SHOOTER_TOLERANCE);
-
-        ampMotor.setVelocityUnitsFunction(this::rpsToRPM);
-        shooterMotor.setVelocityUnitsFunction(this::rpsToRPM);
-
+        intakeMotor.setVoltageCompensation(10);
         ampMotor.setVoltageCompensation(10);
         shooterMotor.setVoltageCompensation(10);
+        intakeMotor.setCurrentLimit(40);
+        ampMotor.setCurrentLimit(40);
+        shooterMotor.setCurrentLimit(40);
+
     }
 
     /**
      * Set the intake motor speed (percent) to kIntakeSpeed
      */
     public void intake() {
-        intakeMotor.setPercent(kIntakeSpeed);
+        intakeMotor.setVoltage(kIntakeVoltage);
     }
 
     /**
      * Sets the outtake motor speed (percent) to kOuttakeSpeed
      */
     public void outtake() {
-        intakeMotor.setPercent(kOuttakeSpeed);
+        intakeMotor.setVoltage(kOuttakeVoltage);
     }
 
-    /**
-     * Spins up the shooter and amp motor for shooting
-     */
-    public void spinup() {
-        SmartDashboard.putBoolean("Spinup", true);
-//        ampMotor.setSetpoint(-kShooterRPM);
-//        shooterMotor.setSetpoint(kShooterRPM);
-//        SmartDashboard.putNumber("[Shooter Motor] Set Point", shooterMotor.getSetpoint());
-        ampMotor.setPercent(-kShooterSpeed);
-        shooterMotor.setPercent(kShooterSpeed);
-//
-//        ampMotor.periodicPIDF(ampMotor.getVelocity());
-//        shooterMotor.periodicPIDF(shooterMotor.getVelocity());
-    }
 
     /**
      * If the shooter speed is not the target speed, spin. When it is up to speed, move the note
      * with the intakeMotor by setting the speed to the kFeedSpeed percent
      */
     public void shoot() {
-        if (!MathUtil.isNear(kShooterRPM, shooterMotor.getVelocity(), SHOOTER_TOLERANCE)) {
-            spinup();
-            return;
-        }
-        SmartDashboard.putBoolean("Spinup", false);
-        intakeMotor.setPercent(kFeedSpeed);
+        shooterMotor.setVoltage(kShooterVoltage);
+        ampMotor.setVoltage(kShooterVoltage);
+        
     }
+    public void amp () {
+        shooterMotor.setVoltage(kAmpVoltage);
+        ampMotor.setVoltage(-kAmpVoltage);
+    }
+    public void feed (){
+        intakeMotor.setVoltage(kFeedVoltage);
 
+    }
     /**
      * Sets the intakeMotor to 0 percent
      */
@@ -113,10 +86,4 @@ public class Gerald extends SubsystemBase {
         ampMotor.setPercent(0);
     }
 
-    @Override
-    public void periodic() {
-        SmartDashboard.putNumber("[Intake Motor] Velocity", intakeMotor.getVelocity());
-        SmartDashboard.putNumber("[Amp Motor] Velocity", ampMotor.getVelocity());
-        SmartDashboard.putNumber("[Shooter Motor] Velocity", shooterMotor.getVelocity());
-    }
 }

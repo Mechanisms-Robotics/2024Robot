@@ -50,34 +50,41 @@ public class RobotContainer {
     xboxController.b().onTrue(
             new InstantCommand(swerve::lock)
     );
-    // Test implementation for aim at
-    xboxController.rightTrigger().whileTrue(
-            new FunctionalCommand(
-                    () -> {},
-                    () -> {
-//                      swerve.aimAt(new Translation2d(17, 5.7), new Rotation2d());
-                    },
-                    (interupted) -> {},
-                    () -> false
-            )
-    );
     // hold left trigger: intake, when done: out take, wait, stop
     xboxController.leftTrigger().onTrue(
             new InstantCommand(gerald::intake)
     ).onFalse(new SequentialCommandGroup(
             new InstantCommand(gerald::outtake),
-            new WaitCommand(0.25),
+            new WaitCommand(0.125),
             new InstantCommand(gerald::stopIntake)));
 
     // hold right trigger: shoot
-    xboxController.rightTrigger().whileTrue(
-            new FunctionalCommand(
-                    () -> {},
-                    gerald::shoot,
-                    (interupted) -> {},
-                    () -> false
-            )
-    ).onFalse(new InstantCommand(gerald::stopShooter));
+    xboxController.rightTrigger().onTrue(
+        new InstantCommand(gerald::shoot)
+    ).onFalse(new SequentialCommandGroup(
+        new InstantCommand(gerald::feed),
+        new WaitCommand(1.0),
+        new InstantCommand(gerald::stopIntake),
+        new InstantCommand(gerald::stopShooter)
+    ));
+xboxController.rightBumper().onTrue(
+        new InstantCommand(gerald::amp)
+    ).onFalse(new SequentialCommandGroup(
+        new InstantCommand(gerald::feed),
+        new WaitCommand(1.0),
+        new InstantCommand(gerald::stopIntake),
+        new InstantCommand(gerald::stopShooter)
+    ));
+    xboxController.povUp().onTrue(
+        new InstantCommand(arm::shoot)
+    );
+      xboxController.povRight().onTrue(
+        new InstantCommand(arm::stow)
+    );
+      xboxController.povDown().onTrue(
+        new InstantCommand(arm::intake)
+    );
+    
 
     // secondary driver x: disable the arm SAFETY
     xboxController2.a().onTrue( // x on xbox controller
