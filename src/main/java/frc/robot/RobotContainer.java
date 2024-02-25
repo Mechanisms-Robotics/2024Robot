@@ -122,7 +122,6 @@ xboxController.rightBumper().onTrue(
           new InstantCommand(wrist::intake)
         )
     );
-    
 
     // secondary driver x: disable the arm SAFETY
     xboxController2.a().onTrue( // x on xbox controller

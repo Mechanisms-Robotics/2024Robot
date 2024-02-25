@@ -30,7 +30,6 @@ public class IntakeCommand extends Command{
         arm.intake();
         wrist.intake();
         gerald.intake();
-
     }
     @Override
     public void execute(){
@@ -45,7 +44,6 @@ public class IntakeCommand extends Command{
     public boolean isFinished() {
         return delayTimer.hasElapsed(kDelayTime);
     }
-
 
     @Override
     public void end(boolean interrupted) {

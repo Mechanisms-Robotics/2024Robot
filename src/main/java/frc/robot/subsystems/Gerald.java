@@ -22,21 +22,21 @@ public class Gerald extends SubsystemBase {
 
 
     public Gerald() {
+        // set gerald motors to brake mode
         intakeMotor.brakeMode();
         ampMotor.brakeMode();
         shooterMotor.brakeMode();
+        // set inversions (amp and shooter alternate)
         intakeMotor.setInverted(false);
         ampMotor.setInverted(true);
         shooterMotor.setInverted(false);
-
-
+        // set motor voltage compensations
         intakeMotor.setVoltageCompensation(10);
         ampMotor.setVoltageCompensation(10);
         shooterMotor.setVoltageCompensation(10);
         intakeMotor.setCurrentLimit(40);
         ampMotor.setCurrentLimit(40);
         shooterMotor.setCurrentLimit(40);
-
     }
 
     /**
@@ -55,21 +55,27 @@ public class Gerald extends SubsystemBase {
 
 
     /**
-     * If the shooter speed is not the target speed, spin. When it is up to speed, move the note
-     * with the intakeMotor by setting the speed to the kFeedSpeed percent
+     * Set the amp and shooter motors to the shooter voltage
      */
     public void shoot() {
         shooterMotor.setVoltage(kShooterVoltage);
         ampMotor.setVoltage(kShooterVoltage);
-        
     }
+
+    /**
+     * Set the shooter and amp motors to the amp voltage. The motors spin in the same direction
+     */
     public void amp () {
+        // spins in the same direction as they are inverted and the amp motor is negative
         shooterMotor.setVoltage(kAmpVoltage);
         ampMotor.setVoltage(-kAmpVoltage);
     }
+
+    /**
+     * Feed the note into the shooter by setting the intake motor to the feed voltage.
+     */
     public void feed (){
         intakeMotor.setVoltage(kFeedVoltage);
-
     }
     /**
      * Sets the intakeMotor to 0 percent
@@ -85,5 +91,4 @@ public class Gerald extends SubsystemBase {
         shooterMotor.setPercent(0);
         ampMotor.setPercent(0);
     }
-
 }

@@ -39,7 +39,6 @@ public class Arm extends SingleJointSubystem {
     // safety disable feature, triggered by the secondary driver when x is pressed
     private boolean disabled = false;
 
-
     public Arm() {
         addMotor(leftArmMotor, true);
         addMotor(rightArmMotor, false);
@@ -53,12 +52,8 @@ public class Arm extends SingleJointSubystem {
         setPPIDGains(1.0, 0.0, 0.0);
         setPPIDConstraints(2*Math.PI, 8*Math.PI);
         setTolerance(kTolerance);
-        SmartDashboard.putBoolean("[arm] disabled", disabled);
-
+        SmartDashboard.putBoolean("[Arm] disabled", disabled);
     }
-
-   
-
    
     /**
      * Set arm to the stow position
@@ -81,22 +76,14 @@ public class Arm extends SingleJointSubystem {
         pivotTo(kShooting);
     }
 
-    
-
     /**
      * Stops voltage and disables all processes on the arm (PID etc)
      */
     public void disable() {
         stop();
         disabled = true;
-        SmartDashboard.putBoolean("[arm] disabled", disabled);
-
+        SmartDashboard.putBoolean("[Arm] disabled", disabled);
     }
-
-    
-    
-
-    
 
     /**
      * Periodically output the data (right and left arm position) to SmartDashBoard. Do not run the arms if the robot
@@ -110,11 +97,9 @@ public class Arm extends SingleJointSubystem {
          }
         if (disabled) return;
         super.periodic();
-        SmartDashboard.putNumber("[arm] Left position", leftArmMotor.getRawPosition());
-        SmartDashboard.putNumber("[arm] Right position", rightArmMotor.getRawPosition());
-        SmartDashboard.putNumber("[arm] current angle", getAngle().getDegrees());
-        SmartDashboard.putNumber("[arm] desired angle", getDesiredAngle().getDegrees());
-
-
+        SmartDashboard.putNumber("[Arm] Left position", leftArmMotor.getRawPosition());
+        SmartDashboard.putNumber("[Arm] Right position", rightArmMotor.getRawPosition());
+        SmartDashboard.putNumber("[Arm] current angle", getAngle().getDegrees());
+        SmartDashboard.putNumber("[Arm] desired angle", getDesiredAngle().getDegrees());
     }
 }
