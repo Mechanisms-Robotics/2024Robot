@@ -4,14 +4,7 @@
 
 package frc.robot;
 
-import javax.swing.plaf.InsetsUIResource;
 
-import com.ctre.phoenix6.SignalLogger;
-import com.ctre.phoenix6.configs.CANcoderConfiguration;
-import com.ctre.phoenix6.configs.MagnetSensorConfigs;
-import com.ctre.phoenix6.hardware.CANcoder;
-import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
-import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.mechlib.commands.SwerveTeleopDriveCommand;
 import com.mechlib.swerve.SwerveDrive;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -56,22 +49,8 @@ public class RobotContainer {
     xboxController.b().onTrue(
             new InstantCommand(swerve::lock)
     );
-    // hold left trigger: intake, when done: out take, wait, stop
-    // xboxController.leftTrigger().onTrue(
-    //   new ParallelCommandGroup(
-    //                 new InstantCommand(gerald::intake),
-    //                 new InstantCommand(arm::intake),
-    //                 new InstantCommand(wrist::intake)
 
-
-    //   )
-    // ).onFalse(new SequentialCommandGroup(
-    //         new InstantCommand(arm::stow),
-    //         new InstantCommand(wrist::stow),
-    //         new InstantCommand(gerald::outtake),
-    //         new WaitCommand(0.125),
-    //         new InstantCommand(gerald::stopIntake)));
-
+    // hold left trigger: intake
     xboxController.leftTrigger().whileTrue(new IntakeCommand(arm, wrist, gerald));
 
     // hold right trigger: shoot
@@ -80,7 +59,6 @@ public class RobotContainer {
                   new InstantCommand(gerald::shoot),
                   new InstantCommand(arm::shoot),
                   new InstantCommand(wrist::shoot)
-
         )
     ).onFalse(new SequentialCommandGroup(
         new InstantCommand(gerald::feed),
@@ -90,7 +68,8 @@ public class RobotContainer {
         new InstantCommand(arm::stow),
         new InstantCommand(wrist::stow)
     ));
-xboxController.rightBumper().onTrue(
+    // right bumper: amp
+    xboxController.rightBumper().onTrue(
         new ParallelCommandGroup(
                   new InstantCommand(gerald::amp),
                   new InstantCommand(arm::shoot),
@@ -104,32 +83,32 @@ xboxController.rightBumper().onTrue(
         new InstantCommand(arm::stow),
         new InstantCommand(wrist::stow)
     ));
+    // up on d-pad: move arm and wrist to shoot/amp position
     xboxController.povUp().onTrue(
         new ParallelCommandGroup(
           new InstantCommand(arm::shoot),
           new InstantCommand(wrist::shoot)
         )
     );
-      xboxController.povRight().onTrue(
+    // right on d-pad: set arm and wrist to shoot/amp position
+    xboxController.povRight().onTrue(
         new ParallelCommandGroup(
           new InstantCommand(arm::stow),
           new InstantCommand(wrist::stow)
         )
     );
-      xboxController.povDown().onTrue(
+    // down on d-pad: set arm and wrist to intake position
+    xboxController.povDown().onTrue(
         new ParallelCommandGroup(
           new InstantCommand(arm::intake),
           new InstantCommand(wrist::intake)
         )
     );
 
-    // secondary driver x: disable the arm SAFETY
+    // secondary driver x: disable the arm (SAFETY)
     xboxController2.a().onTrue( // x on xbox controller
             new InstantCommand(arm::disable)
     );
-
-    // xboxController2.povDown().onTrue(new InstantCommand(() -> wrist.setVoltage(-0.5))).onFalse(new InstantCommand(wrist::stop));
-    // xboxController2.povUp().onTrue(new InstantCommand(() -> wrist.setVoltage(0.5))).onFalse(new InstantCommand(wrist::stop));
   }
 
   private void configureDefaultCommands() {

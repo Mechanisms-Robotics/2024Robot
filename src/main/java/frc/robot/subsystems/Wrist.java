@@ -58,7 +58,7 @@ public class Wrist extends SingleJointSubystem {
     }
 
     /**
-     * Set wrist to the shoot position
+     * Set wrist to the shoot/amp position
      */
     public void shoot() {
         pivotTo(kShooting);

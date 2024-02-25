@@ -70,7 +70,7 @@ public class Arm extends SingleJointSubystem {
     }
 
     /**
-     * Set arm to the shoot position
+     * Set arm to the shoot/amp position
      */
     public void shoot() {
         pivotTo(kShooting);

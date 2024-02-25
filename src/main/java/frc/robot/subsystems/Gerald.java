@@ -30,7 +30,7 @@ public class Gerald extends SubsystemBase {
         intakeMotor.setInverted(false);
         ampMotor.setInverted(true);
         shooterMotor.setInverted(false);
-        // set motor voltage compensations
+        // set motor voltage compensations and current limits
         intakeMotor.setVoltageCompensation(10);
         ampMotor.setVoltageCompensation(10);
         shooterMotor.setVoltageCompensation(10);
@@ -52,7 +52,6 @@ public class Gerald extends SubsystemBase {
     public void outtake() {
         intakeMotor.setVoltage(kOuttakeVoltage);
     }
-
 
     /**
      * Set the amp and shooter motors to the shooter voltage
