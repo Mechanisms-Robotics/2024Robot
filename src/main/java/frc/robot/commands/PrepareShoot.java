@@ -16,6 +16,7 @@ public class PrepareShoot extends Command {
         this.gerald = gerald;
         this.arm = arm;
         this.wrist = wrist;
+        addRequirements(gerald, arm, wrist);
     }
 
     @Override
