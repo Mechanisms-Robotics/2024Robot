@@ -6,17 +6,10 @@ package frc.robot;
 
 
 import com.mechlib.commands.SwerveTeleopDriveCommand;
-import com.mechlib.swerve.SwerveDrive;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.IntakeCommand;
-import frc.robot.commands.PrepareShoot;
-import frc.robot.commands.autos.TimedLeave;
 import frc.robot.commands.autos.TimedShootLeave;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Gerald;
@@ -56,7 +49,11 @@ public class RobotContainer {
 
     // hold right trigger: shoot
     xboxController.rightTrigger().onTrue(
-            new PrepareShoot(gerald, arm, wrist)
+            new ParallelRaceGroup(
+                    new InstantCommand(gerald::shoot),
+                    new InstantCommand(arm::shoot),
+                    new InstantCommand(wrist::shoot)
+            )
     ).onFalse(new SequentialCommandGroup(
         new InstantCommand(gerald::feed),
         new WaitCommand(1.0),
