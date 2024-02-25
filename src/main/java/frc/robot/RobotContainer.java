@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.IntakeCommand;
+import frc.robot.commands.PrepareShoot;
 import frc.robot.commands.autos.TimedLeave;
 import frc.robot.commands.autos.TimedShootLeave;
 import frc.robot.subsystems.Arm;
@@ -55,11 +56,7 @@ public class RobotContainer {
 
     // hold right trigger: shoot
     xboxController.rightTrigger().onTrue(
-        new ParallelCommandGroup(
-                  new InstantCommand(gerald::shoot),
-                  new InstantCommand(arm::shoot),
-                  new InstantCommand(wrist::shoot)
-        )
+            new PrepareShoot(gerald, arm, wrist)
     ).onFalse(new SequentialCommandGroup(
         new InstantCommand(gerald::feed),
         new WaitCommand(1.0),
