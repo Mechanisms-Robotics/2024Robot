@@ -147,6 +147,8 @@ public class SwerveModule extends SubsystemBase {
     // Set the steer motor PID tolerance
     steerMotor.setTolerance(moduleConfiguration.steerTolerance);
 
+    steerMotor.setContinuousInput(-Math.PI, Math.PI);
+
     // Set the drive motor inversion and switch it to brake mode
     driveMotor.setInverted(driveInverted);
     driveMotor.brakeMode();
@@ -281,11 +283,13 @@ public class SwerveModule extends SubsystemBase {
    * @param state SwerveModuleState
    */
   public void setState(SwerveModuleState state) {
+    SwerveModuleState desiredState = SwerveModuleState.optimize(state, curAngle);
+
     // Steer to state angle
-    steerTo(state.angle);
+    steerTo(desiredState.angle);
 
     // Drive at state speed
-    drive(state.speedMetersPerSecond);
+    drive(desiredState.speedMetersPerSecond);
   }
 
   /**
@@ -335,8 +339,8 @@ public class SwerveModule extends SubsystemBase {
     // Output current angle to SmartDashboard
     SmartDashboard.putNumber("[" + moduleName + "] Current Angle", curAngle.getDegrees());
 
-    // Optimize desired angle
-    desiredAngle = optimizeAngle(desiredAngle);
+    // // Optimize desired angle
+    // desiredAngle = optimizeAngle(desiredAngle);
 
     // Output desiredAngle to SmartDashboard
     SmartDashboard.putNumber("[" + moduleName + "] Desired Angle", desiredAngle.getDegrees());

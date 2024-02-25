@@ -17,24 +17,25 @@ public class Arm extends SingleJointSubystem {
     // true if the arm runs in open loop, false if it runs in closed loop
     private static final boolean kOpenLoop = true;
     // left arm motor magnet offset (acquired in Phoenix Tuner X)
-    private static final double kLeftMagnetOffset = 0.24893;
+    private static final double kLeftMagnetOffset = 0.2326;
     // right arm motor magnet offset
-    private static final double kRightMagnetOffset = 0.36163;
+    private static final double kRightMagnetOffset = 0.675;
     // right arm TalonFX motor and it's can coder
-    private final TalonFX rightArmMotor = new TalonFX(13, new CANCoder(13, kRightMagnetOffset));
+    private final TalonFX rightArmMotor = new TalonFX(13, new CANCoder(13, kRightMagnetOffset, AbsoluteSensorRangeValue.Unsigned_0To1, SensorDirectionValue.Clockwise_Positive));
     // left arm TalonFX motor with it's can coder
-    private final TalonFX leftArmMotor = new TalonFX(12, new CANCoder(12, kLeftMagnetOffset));
+    private final TalonFX leftArmMotor = new TalonFX(12, new CANCoder(12, kLeftMagnetOffset, AbsoluteSensorRangeValue.Unsigned_0To1, SensorDirectionValue.CounterClockwise_Positive));
     // feed forward controller for the arm
     /* PID controller for the right and left arm, which will always have the same values they are different to account
        for different mechanical structures, such as belt tensioning */
     private static final double kTolerance = Math.toRadians(0.5);
     private static final Rotation2d kStowed = Rotation2d.fromDegrees(60);
-    private static final Rotation2d kIntaking = Rotation2d.fromDegrees(5);
+    private static final Rotation2d kIntaking = Rotation2d.fromDegrees(3);
     private static final Rotation2d kShooting = Rotation2d.fromDegrees(95);
     private static final double kSensorRatio = 64.0/16.0;
     private static final double kMotorRatio = 60 * kSensorRatio;
     private static final Rotation2d kForwardLimit = Rotation2d.fromDegrees(95);
-    private static final Rotation2d kReverseLimit = Rotation2d.fromDegrees(5);
+    private static final Rotation2d kReverseLimit = Rotation2d.fromDegrees(3);
+    private static final double kAllowableDifference = 5.0;
     // safety disable feature, triggered by the secondary driver when x is pressed
     private boolean disabled = false;
 
@@ -48,10 +49,11 @@ public class Arm extends SingleJointSubystem {
         setPositionUnitsFunction((rotations) -> MechUnits.rotationsToRadians(rotations, kSensorRatio));
         setVelocityUnitsFunction((rotations) -> MechUnits.rotationsToRadians(rotations, kSensorRatio));
         setLimits(kReverseLimit, kForwardLimit, kMotorRatio);
-        setFeedforwardGains(0.15, 0.1, 0.0, 0.0);
+        setFeedforwardGains(0.15, 0, 0.0, 0.0);
         setPPIDGains(1.0, 0.0, 0.0);
         setPPIDConstraints(2*Math.PI, 8*Math.PI);
         setTolerance(kTolerance);
+        SmartDashboard.putBoolean("[arm] disabled", disabled);
 
     }
 
@@ -87,6 +89,8 @@ public class Arm extends SingleJointSubystem {
     public void disable() {
         stop();
         disabled = true;
+        SmartDashboard.putBoolean("[arm] disabled", disabled);
+
     }
 
     
@@ -101,6 +105,9 @@ public class Arm extends SingleJointSubystem {
     @Override
     public void periodic() {
         // if disabled, do not run any processes on the arm
+        if (Math.abs(leftArmMotor.getRawPosition() -rightArmMotor.getRawPosition()) > kAllowableDifference){
+          disable();
+         }
         if (disabled) return;
         super.periodic();
         SmartDashboard.putNumber("[arm] Left position", leftArmMotor.getRawPosition());

@@ -12,7 +12,7 @@ public class TimedLeave extends Command {
     }
 
     @Override
-    public void initialize() {
+    public void execute() {
         swerve.drive(1.0, 0.0, 0.0);
     }
 

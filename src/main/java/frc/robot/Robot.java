@@ -11,6 +11,8 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.mechlib.hardware.CANCoder;
+
+import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -23,6 +25,7 @@ public class Robot extends TimedRobot {
   @Override
   public void robotInit() {
     m_robotContainer = new RobotContainer();
+    CameraServer.startAutomaticCapture();
   }
 
   @Override
@@ -33,6 +36,10 @@ public class Robot extends TimedRobot {
   @Override
   public void disabledInit() {
     SignalLogger.stop();
+    m_robotContainer.arm.stop();
+    m_robotContainer.gerald.stopIntake();
+    m_robotContainer.gerald.stopShooter();
+    m_robotContainer.wrist.stop();
   }
 
   @Override
@@ -43,7 +50,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
-//    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+   m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
@@ -62,7 +69,6 @@ public class Robot extends TimedRobot {
       m_autonomousCommand.cancel();
     }
 //    m_robotContainer.swerve.driveClosedLoop();
-
   }
 
   @Override
