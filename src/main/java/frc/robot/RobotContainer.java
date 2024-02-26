@@ -49,7 +49,7 @@ public class RobotContainer {
 
     // hold right trigger: shoot
     xboxController.rightTrigger().onTrue(
-            new ParallelRaceGroup(
+            new ParallelCommandGroup(
                     new InstantCommand(gerald::shoot),
                     new InstantCommand(arm::shoot),
                     new InstantCommand(wrist::shoot)
