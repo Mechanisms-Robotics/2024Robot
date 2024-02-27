@@ -1,15 +1,12 @@
 package frc.robot.subsystems;
 
 import com.mechlib.hardware.TalonFX;
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Gerald extends SubsystemBase {
-    // intake percent speed for the intake motor to run at
     private static final double kIntakeVoltage = 5; // volts
     private static final double kOuttakeVoltage = -5; // volts
-    private static final double kShooterVoltage = 5;
+    private static final double kShooterVoltage = 5; // volts
     private static final double kFeedVoltage = 3; // volts
     private static final double kAmpVoltage = 5; // volts
 
@@ -47,7 +44,7 @@ public class Gerald extends SubsystemBase {
     }
 
     /**
-     * Sets the outtake motor speed (percent) to kOuttakeVoltage
+     * Sets the outtake motor speed (voltage) to kOuttakeVoltage
      */
     public void outtake() {
         intakeMotor.setVoltage(kOuttakeVoltage);
