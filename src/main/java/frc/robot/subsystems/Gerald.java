@@ -5,7 +5,6 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.commands.PrepareShoot;
 import frc.util6328.Alert;
 import frc.util6328.Alert.AlertType;
 
@@ -13,16 +12,13 @@ import frc.util6328.Alert.AlertType;
  * The box of wheels that intakes, shoots, and amps the notes.
  */
 public class Gerald extends SubsystemBase {
-    // intake percent speed for the intake motor to run at
     private static final double kIntakeVoltage = 5; // volts
     private static final double kOuttakeVoltage = -5; // volts
     private static final double kShooterVoltage = 5;
     private static final double kAmpVoltage = 5; // volts
     private static final double kIdleVoltage = 2;
-    private static final double kShooterFeedVoltage = 3;
     private static final double kAmpFeedVoltage = 3;
     private static final double kIntakeDetectDelay = 0.0625;
-    private static final double kShootDetectDelay = 0;
     private static final double kAmpDetectDelay = 0;
     private static final Timer detectDelayTimer = new Timer();
     private final Alert unexpectedNote =
