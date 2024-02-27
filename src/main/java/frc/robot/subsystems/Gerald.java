@@ -3,7 +3,11 @@ package frc.robot.subsystems;
 import com.mechlib.hardware.TalonFX;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.commands.PrepareShoot;
+import frc.util6328.Alert;
+import frc.util6328.Alert.AlertType;
 
 /**
  * The box of wheels that intakes, shoots, and amps the notes.
@@ -21,7 +25,9 @@ public class Gerald extends SubsystemBase {
     private static final double kShootDetectDelay = 0;
     private static final double kAmpDetectDelay = 0;
     private static final Timer detectDelayTimer = new Timer();
-
+    private final Alert unexpectedNote =
+            new Alert("an unexpected note was detected in gerald after feeding it to the shooter",
+                    AlertType.ERROR);
     private boolean lastDetected = false;
 
     // naming is based off of the unique function
@@ -33,15 +39,15 @@ public class Gerald extends SubsystemBase {
 
     private final DigitalInput noteSensor = new DigitalInput(0);
 
-    public enum GeraldState {
+    public enum State {
         Idling,
+        Feeding,
         Intaking,
-        PreparingShoot,
-        Shooting,
         PreparingAmp,
-        Amping
+        PreparingShoot
     }
-    private GeraldState geraldState = GeraldState.Idling;
+
+    private State state = State.Idling;
 
 
     public Gerald() {
@@ -66,13 +72,13 @@ public class Gerald extends SubsystemBase {
      * Set the intake motor speed (voltage) to kIntakeVoltage
      */
     public void intake() {
-        if (!geraldState.equals(GeraldState.Intaking)) {
+        if (!state.equals(State.Intaking)) {
             intakeMotor.setVoltage(kIntakeVoltage);
-            geraldState = GeraldState.Intaking;
+            state = State.Intaking;
         }
         // if the note was just detected on this cycle
         if (noteDetected() && !lastDetected) {
-            detectDelayTimer.start();
+            detectDelayTimer.restart();
             lastDetected = true;
         // if the note was not detected but was detected on the last cycle, set lastDetected to false;
         } else if (!noteDetected() && lastDetected) {
@@ -86,6 +92,11 @@ public class Gerald extends SubsystemBase {
         }
     }
 
+    public void toggleIntake() {
+        if (!state.equals(State.Intaking)) intake();
+        else idle();
+    }
+
     /**
      * Sets the outtake motor speed (voltage) to kOuttakeVoltage
      */
@@ -97,10 +108,10 @@ public class Gerald extends SubsystemBase {
      * Set the amp and shooter motors to the shooter voltage
      */
     public void prepareShoot() {
-        if (!geraldState.equals(GeraldState.PreparingShoot)) {
+        if (!state.equals(State.PreparingShoot)) {
             shooterMotor.setVoltage(kShooterVoltage);
             ampMotor.setVoltage(kShooterVoltage);
-            geraldState = GeraldState.PreparingShoot;
+            state = State.PreparingShoot;
         }
     }
 
@@ -108,57 +119,44 @@ public class Gerald extends SubsystemBase {
      * Set the shooter and amp motors to the amp voltage. The motors spin in the same direction
      */
     public void prepareAmp () {
-        if (!geraldState.equals(GeraldState.PreparingAmp)) {
+        if (!state.equals(State.PreparingAmp)) {
             // spins in the same direction as they are inverted and the amp motor is negative
             shooterMotor.setVoltage(kAmpVoltage);
             ampMotor.setVoltage(-kAmpVoltage);
-            geraldState = GeraldState.PreparingAmp;
+            state = State.PreparingAmp;
         }
+    }
+
+    public void toggleSpinupAmp() {
+        if (state.equals(State.PreparingAmp)) idle();
+        else prepareAmp();
+    }
+
+    public void toggleSpinupShoot() {
+        if (state.equals(State.PreparingShoot)) idle();
+        else prepareShoot();
     }
 
     /**
      * Feed the note into the shooter by setting the intake motor to the feed voltage.
      */
-    public void shoot (){
-        if (!geraldState.equals(GeraldState.Shooting)) {
-            intakeMotor.setVoltage(kShooterFeedVoltage);
-            geraldState = GeraldState.Shooting;
-        }
-        // if the note was just detected on this cycle
-        if (!noteDetected() && lastDetected) {
-            detectDelayTimer.start();
-            lastDetected = false;
-        // if the note was not detected but was detected on the last cycle, set lastDetected to false;
-        } else if (noteDetected() && !lastDetected) {
-            lastDetected = true;
-        }
-        // if the timer has finished, idle gerald and stop the timer
-        if (detectDelayTimer.hasElapsed(kShootDetectDelay)) {
-            idle();
-            detectDelayTimer.stop();
-            detectDelayTimer.reset();
-        }
-    }
-
-    /**
-     * Feed the note into the shooter by setting the intake motor to the feed voltage.
-     */
-    public void amp (){
+    public void feed (){
         /* if the state is not already in amping, set the state to amping and the voltage to kAmpFeedVoltage, which
            will feed the note into the shooter */
-        if (!geraldState.equals(GeraldState.Amping)) {
+        if (!state.equals(State.Feeding)) {
             intakeMotor.setVoltage(kAmpFeedVoltage);
-            geraldState = GeraldState.Amping;
+            state = State.Feeding;
         }
-        /* if the note was not detected on the cycle (if all goes well mechanically, it just got shot out of the gerald)
+        /* if the note was not detected on the cycle (if all goes well mechanically, it just got shot out of gerald)
            set the timer for to idle the shooter */
         if (!noteDetected() && lastDetected) {
-            detectDelayTimer.start();
+            detectDelayTimer.restart(); // restart instead of start in the case that a timer was already running
             lastDetected = false;
         /* if the note just detected on this cycle (which should not happen because the note shoot not come back into
            gerald after amping) set last detected to true */
         } else if (noteDetected() && !lastDetected) {
             lastDetected = true;
+            unexpectedNote.set(true);
         }
         // if the timer has finished, idle gerald and stop the timer
         if (detectDelayTimer.hasElapsed(kAmpDetectDelay)) {
@@ -174,11 +172,11 @@ public class Gerald extends SubsystemBase {
      * making the arm shake to much.
      */
     public void idle() {
-        if (!geraldState.equals(GeraldState.Idling)) {
+        if (!state.equals(State.Idling)) {
             shooterMotor.setVoltage(kIdleVoltage);
             ampMotor.setVoltage(kIdleVoltage);
             intakeMotor.setVoltage(0);
-            geraldState = GeraldState.Idling;
+            state = State.Idling;
         }
     }
 
@@ -193,11 +191,11 @@ public class Gerald extends SubsystemBase {
 
     @Override
     public void periodic() {
-        switch (geraldState) {
+        SmartDashboard.putBoolean("Note Sensor", noteDetected()); // show on advantage scope
+        switch (state) {
             case Idling -> idle();
-            case Amping -> amp();
+            case Feeding -> feed();
             case Intaking -> intake();
-            case Shooting -> shoot();
             case PreparingAmp -> prepareAmp();
             case PreparingShoot -> prepareShoot();
         }

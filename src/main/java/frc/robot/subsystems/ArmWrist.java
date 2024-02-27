@@ -9,6 +9,11 @@ public class ArmWrist extends SubsystemBase {
     private static final Arm arm = new Arm();
     private static final Wrist wrist = new Wrist();
     private boolean safe = false;
+
+    public void disable() {
+
+    }
+
     private enum State {
         Stowed,
         Intaking,
@@ -16,7 +21,8 @@ public class ArmWrist extends SubsystemBase {
         ShootingSubwoofer,
         ShootingPodium
     }
-    private State state = State.Stowed;
+    private State state;
+    private boolean lowMode = false;
 
     /**
      * Set the arm and wrist to the stow position.
@@ -51,6 +57,7 @@ public class ArmWrist extends SubsystemBase {
      * @param lowMode true if shooting low and false if shooting high
      */
     public void subwooferShoot(boolean lowMode) {
+        this.lowMode = lowMode;
         if (safe) return; // do not run if in safe mode
         /* if the state is not already in shooting subwoofer, shoot in low or high mode (specified in parameter lowMode)
         and set the state to ShootingSubwoofer */
@@ -74,6 +81,7 @@ public class ArmWrist extends SubsystemBase {
      * @param lowMode true if shooting low and false if shooting high
      */
     public void podiumShoot(boolean lowMode) {
+        this.lowMode = lowMode;
         if (safe) return; // do not run if in safe mode
         /* if the state is not already in shooting podium, shoot in low or high mode (specified in parameter lowMode)
         and set the state to ShootingPodium */
@@ -117,5 +125,17 @@ public class ArmWrist extends SubsystemBase {
      */
     public void disableSafeMode() {
         safe = false;
+    }
+
+    @Override
+    public void periodic() {
+        if (state == null) return;
+        switch (state) {
+            case Stowed -> stow();
+            case Amping -> amp();
+            case Intaking -> intake();
+            case ShootingSubwoofer -> subwooferShoot(lowMode);
+            case ShootingPodium -> podiumShoot(lowMode);
+        }
     }
 }
