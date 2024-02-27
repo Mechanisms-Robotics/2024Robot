@@ -31,7 +31,7 @@ public class Arm extends SingleJointSubystem {
     private static final Rotation2d kStowed = Rotation2d.fromDegrees(60);
     private static final Rotation2d kIntaking = Rotation2d.fromDegrees(3);
     private static final Rotation2d kShooting = Rotation2d.fromDegrees(95);
-    private static final double kSensorRatio = 64.0/12.0;
+    private static final double kSensorRatio = 68.0/16.0;
     private static final double kMotorRatio = 60 * kSensorRatio;
     private static final Rotation2d kForwardLimit = Rotation2d.fromDegrees(95);
     private static final Rotation2d kReverseLimit = Rotation2d.fromDegrees(3);
