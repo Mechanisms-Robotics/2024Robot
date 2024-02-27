@@ -23,6 +23,11 @@ public class Wrist extends SingleJointSubystem {
     private static final Rotation2d kStowed = Rotation2d.fromDegrees(90);
     private static final Rotation2d kIntaking = Rotation2d.fromDegrees(95);
     private static final Rotation2d kShooting = Rotation2d.fromDegrees(90);
+    private static final Rotation2d kSubwooferHigh = Rotation2d.fromDegrees(90);
+    private static final Rotation2d kSubwooferLow = Rotation2d.fromDegrees(90);
+    private static final Rotation2d kPodiumHigh = kSubwooferHigh;
+    private static final Rotation2d kPodiumLow = kSubwooferLow;
+    private static final Rotation2d kAmp = Rotation2d.fromDegrees(90);
     private static final double kSensorRatio = 1.0;
     private static final double kMotorRatio = 25 * kSensorRatio;
     private static final Rotation2d kForwardLimit = Rotation2d.fromDegrees(140);
@@ -58,11 +63,36 @@ public class Wrist extends SingleJointSubystem {
     }
 
     /**
-     * Set wrist to the shoot/amp position
+     * Set arm to the shoot/amp position
      */
-    public void shoot() {
-        pivotTo(kShooting);
-    }   
+    public void shootHighSubwoofer() {
+        pivotTo(kSubwooferHigh);
+    }
+
+    /**
+     * Set arm to the shoot/amp position
+     */
+    public void shootLowSubwoofer() {
+        pivotTo(kSubwooferLow);
+    }
+
+    /**
+     * Set arm to the shoot/amp position
+     */
+    public void shootHighPodium() {
+        pivotTo(kPodiumHigh);
+    }
+
+    /**
+     * Set arm to the shoot/amp position
+     */
+    public void shootLowPodium() {
+        pivotTo(kPodiumLow);
+    }
+
+    public void amp() {
+        pivotTo(kAmp);
+    }
 
     @Override
     public void periodic() {

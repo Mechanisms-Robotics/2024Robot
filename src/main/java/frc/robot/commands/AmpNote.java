@@ -1,12 +1,11 @@
 package frc.robot.commands;
 
-import frc.robot.subsystems.Arm;
+import frc.robot.subsystems.ArmWrist;
 import frc.robot.subsystems.Gerald;
-import frc.robot.subsystems.Wrist;
 
 public class AmpNote extends ShootNote {
-    public AmpNote(Gerald gerald, Arm arm, Wrist wrist) {
-        super(gerald, arm, wrist);
+    public AmpNote(Gerald gerald, ArmWrist armWrist) {
+        super(gerald, armWrist);
         feedTime = 1.0;
     }
 }

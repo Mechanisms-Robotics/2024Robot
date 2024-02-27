@@ -4,31 +4,27 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.Arm;
+import frc.robot.subsystems.ArmWrist;
 import frc.robot.subsystems.Gerald;
-import frc.robot.subsystems.Wrist;
 
 public class IntakeCommand extends Command{
     private static final double kDelayTime = 0.0625;
-    private final Arm arm;
-    private final Wrist wrist;
+    private final ArmWrist armWrist;
     private final Gerald gerald;
     private final DigitalInput notesensor = new DigitalInput(0);
     private final Timer delayTimer = new Timer();
     private boolean delayStarted = false;
 
-    public IntakeCommand(Arm arm, Wrist wrist, Gerald gerald)
+    public IntakeCommand(ArmWrist armWrist, Gerald gerald)
     {
-        this.arm=arm;
-        this.wrist=wrist;
-        this.gerald=gerald;
-        addRequirements(arm, wrist, gerald);  //subsystems require these commands
+        this.armWrist = armWrist;
+        this.gerald = gerald;
+        addRequirements(armWrist, gerald);  //subsystems require these commands
     }
 
     @Override
     public void initialize (){
-        arm.intake();
-        wrist.intake();
+        armWrist.intake();
         gerald.intake();
     }
     @Override
@@ -47,9 +43,8 @@ public class IntakeCommand extends Command{
 
     @Override
     public void end(boolean interrupted) {
-        arm.stow();
-        wrist.stow();
-        gerald.stopIntake();
+        armWrist.stow();
+        gerald.idle();
         delayTimer.stop();
         delayTimer.reset();
         delayStarted = false;

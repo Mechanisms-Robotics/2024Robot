@@ -2,6 +2,8 @@ package frc.robot.subsystems;
 
 import com.mechlib.hardware.TalonFX;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -10,8 +12,16 @@ public class Gerald extends SubsystemBase {
     private static final double kIntakeVoltage = 5; // volts
     private static final double kOuttakeVoltage = -5; // volts
     private static final double kShooterVoltage = 5;
-    private static final double kFeedVoltage = 3; // volts
     private static final double kAmpVoltage = 5; // volts
+    private static final double kIdleVoltage = 2;
+    private static final double kShooterFeedVoltage = 3;
+    private static final double kAmpFeedVoltage = 3;
+    private static final double kIntakeDetectDelay = 0.0625;
+    private static final double kShootDetectDelay = 0;
+    private static final double kAmpDetectDelay = 0;
+    private static final Timer detectDelayTimer = new Timer();
+
+    private boolean lastDetected = false;
 
     // naming is based off of the unique function
     private final TalonFX intakeMotor = new TalonFX(14);
@@ -19,6 +29,17 @@ public class Gerald extends SubsystemBase {
     private final TalonFX ampMotor = new TalonFX(15);
     // only shoots
     private final TalonFX shooterMotor = new TalonFX(16);
+    private final DigitalInput noteSensor = new DigitalInput(0);
+
+    public enum GeraldState {
+        Idling,
+        Intaking,
+        PreparingShoot,
+        Shooting,
+        PreparingAmp,
+        Amping
+    }
+    private GeraldState geraldState = GeraldState.Idling;
 
 
     public Gerald() {
@@ -43,7 +64,24 @@ public class Gerald extends SubsystemBase {
      * Set the intake motor speed (voltage) to kIntakeVoltage
      */
     public void intake() {
-        intakeMotor.setVoltage(kIntakeVoltage);
+        if (!geraldState.equals(GeraldState.Intaking)) {
+            intakeMotor.setVoltage(kIntakeVoltage);
+            geraldState = GeraldState.Intaking;
+        }
+        // if the note was just detected on this cycle
+        if (noteDetected() && !lastDetected) {
+            detectDelayTimer.start();
+            lastDetected = true;
+        // if the note was not detected but was detected on the last cycle, set lastDetected to false;
+        } else if (!noteDetected() && lastDetected) {
+            lastDetected = false;
+        }
+        // if the timer has finished, idle gerald and stop the timer
+        if (detectDelayTimer.hasElapsed(kIntakeDetectDelay)) {
+            idle();
+            detectDelayTimer.stop();
+            detectDelayTimer.reset();
+        }
     }
 
     /**
@@ -56,39 +94,96 @@ public class Gerald extends SubsystemBase {
     /**
      * Set the amp and shooter motors to the shooter voltage
      */
-    public void shoot() {
-        shooterMotor.setVoltage(kShooterVoltage);
-        ampMotor.setVoltage(kShooterVoltage);
+    public void prepareShoot() {
+        if (!geraldState.equals(GeraldState.PreparingShoot)) {
+            shooterMotor.setVoltage(kShooterVoltage);
+            ampMotor.setVoltage(kShooterVoltage);
+            geraldState = GeraldState.PreparingShoot;
+        }
     }
 
     /**
      * Set the shooter and amp motors to the amp voltage. The motors spin in the same direction
      */
-    public void amp () {
-        // spins in the same direction as they are inverted and the amp motor is negative
-        shooterMotor.setVoltage(kAmpVoltage);
-        ampMotor.setVoltage(-kAmpVoltage);
+    public void prepareAmp () {
+        if (!geraldState.equals(GeraldState.PreparingAmp)) {
+            // spins in the same direction as they are inverted and the amp motor is negative
+            shooterMotor.setVoltage(kAmpVoltage);
+            ampMotor.setVoltage(-kAmpVoltage);
+            geraldState = GeraldState.PreparingAmp;
+        }
     }
 
     /**
      * Feed the note into the shooter by setting the intake motor to the feed voltage.
      */
-    public void feed (){
-        intakeMotor.setVoltage(kFeedVoltage);
+    public void shoot (){
+        if (!geraldState.equals(GeraldState.Shooting)) {
+            intakeMotor.setVoltage(kShooterFeedVoltage);
+            geraldState = GeraldState.Shooting;
+        }
+        // if the note was just detected on this cycle
+        if (!noteDetected() && lastDetected) {
+            detectDelayTimer.start();
+            lastDetected = false;
+        // if the note was not detected but was detected on the last cycle, set lastDetected to false;
+        } else if (noteDetected() && !lastDetected) {
+            lastDetected = true;
+        }
+        // if the timer has finished, idle gerald and stop the timer
+        if (detectDelayTimer.hasElapsed(kShootDetectDelay)) {
+            idle();
+            detectDelayTimer.stop();
+            detectDelayTimer.reset();
+        }
     }
 
     /**
-     * Sets the intakeMotor to 0 percent
+     * Feed the note into the shooter by setting the intake motor to the feed voltage.
      */
-    public void stopIntake() {
-        intakeMotor.setPercent(0);
+    public void amp (){
+        if (!geraldState.equals(GeraldState.Amping)) {
+            intakeMotor.setVoltage(kAmpFeedVoltage);
+            geraldState = GeraldState.Amping;
+        }
+        // if the note was just detected on this cycle
+        if (!noteDetected() && lastDetected) {
+            detectDelayTimer.start();
+            lastDetected = false;
+            // if the note was not detected but was detected on the last cycle, set lastDetected to false;
+        } else if (noteDetected() && !lastDetected) {
+            lastDetected = true;
+        }
+        // if the timer has finished, idle gerald and stop the timer
+        if (detectDelayTimer.hasElapsed(kAmpDetectDelay)) {
+            idle();
+            detectDelayTimer.stop();
+            detectDelayTimer.reset();
+        }
     }
 
-    /**
-     * Sets the motors for shooting (shooterMotor and ampMotor) to 0 percent
-     */
-    public void stopShooter() {
-        shooterMotor.setPercent(0);
-        ampMotor.setPercent(0);
+    public void idle() {
+        if (!geraldState.equals(GeraldState.Idling)) {
+            shooterMotor.setVoltage(kIdleVoltage);
+            ampMotor.setVoltage(kIdleVoltage);
+            intakeMotor.setVoltage(0);
+            geraldState = GeraldState.Idling;
+        }
+    }
+
+    public boolean noteDetected() {
+        return !noteSensor.get();
+    }
+
+    @Override
+    public void periodic() {
+        switch (geraldState) {
+            case Idling -> idle();
+            case Amping -> amp();
+            case Intaking -> intake();
+            case Shooting -> shoot();
+            case PreparingAmp -> prepareAmp();
+            case PreparingShoot -> prepareShoot();
+        }
     }
 }

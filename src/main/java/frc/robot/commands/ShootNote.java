@@ -2,26 +2,23 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.Arm;
+import frc.robot.subsystems.ArmWrist;
 import frc.robot.subsystems.Gerald;
-import frc.robot.subsystems.Wrist;
 
 public class ShootNote extends Command {
     private final Gerald gerald;
-    private final Arm arm;
-    private final Wrist wrist;
+    private final ArmWrist armWrist;
     private final Timer feedTimer = new Timer();
     protected double feedTime = 1.0;
-    public ShootNote(Gerald gerald, Arm arm, Wrist wrist) {
+    public ShootNote(Gerald gerald, ArmWrist armWrist) {
         this.gerald = gerald;
-        this.arm = arm;
-        this.wrist = wrist;
-        addRequirements(gerald, arm, wrist);
+        this.armWrist = armWrist;
+        addRequirements(gerald, armWrist);
     }
 
     @Override
     public void initialize() {
-        gerald.feed();
+        gerald.shoot();
         feedTimer.start();
     }
 
@@ -32,10 +29,8 @@ public class ShootNote extends Command {
 
     @Override
     public void end(boolean interrupted) {
-        gerald.stopIntake();
-        gerald.stopShooter();
-        arm.stow();
-        wrist.stow();
+        gerald.idle();
+        armWrist.stow();
         feedTimer.stop();
         feedTimer.reset();
     }
