@@ -9,8 +9,7 @@ import com.mechlib.commands.SwerveTeleopDriveCommand;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.robot.commands.IntakeCommand;
-import frc.robot.commands.PrepareShoot;
+import frc.robot.commands.*;
 import frc.robot.commands.autos.TimedShootLeave;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Gerald;
@@ -51,49 +50,22 @@ public class RobotContainer {
     // hold right trigger: shoot
     xboxController.rightTrigger().onTrue(
             new PrepareShoot(gerald, arm, wrist)
-    ).onFalse(new SequentialCommandGroup(
-        new InstantCommand(gerald::feed),
-        new WaitCommand(1.0),
-        new InstantCommand(gerald::stopIntake),
-        new InstantCommand(gerald::stopShooter),
-        new InstantCommand(arm::stow),
-        new InstantCommand(wrist::stow)
-    ));
+    ).onFalse(new ShootNote(gerald, arm, wrist));
     // right bumper: amp
     xboxController.rightBumper().onTrue(
-        new ParallelCommandGroup(
-                  new InstantCommand(gerald::amp),
-                  new InstantCommand(arm::shoot),
-                  new InstantCommand(wrist::shoot)
-        )
-    ).onFalse(new SequentialCommandGroup(
-        new InstantCommand(gerald::feed),
-        new WaitCommand(1.0),
-        new InstantCommand(gerald::stopIntake),
-        new InstantCommand(gerald::stopShooter),
-        new InstantCommand(arm::stow),
-        new InstantCommand(wrist::stow)
-    ));
+      new PrepareAmp(gerald, arm, wrist)
+    ).onFalse(new AmpNote(gerald, arm, wrist));
     // up on d-pad: move arm and wrist to shoot/amp position
     xboxController.povUp().onTrue(
-        new ParallelCommandGroup(
-          new InstantCommand(arm::shoot),
-          new InstantCommand(wrist::shoot)
-        )
+        new ShootPosition(arm, wrist)
     );
     // right on d-pad: set arm and wrist to shoot/amp position
     xboxController.povRight().onTrue(
-        new ParallelCommandGroup(
-          new InstantCommand(arm::stow),
-          new InstantCommand(wrist::stow)
-        )
+        new StowPosition(arm, wrist)
     );
     // down on d-pad: set arm and wrist to intake position
     xboxController.povDown().onTrue(
-        new ParallelCommandGroup(
-          new InstantCommand(arm::intake),
-          new InstantCommand(wrist::intake)
-        )
+        new IntakePosition(arm, wrist)
     );
 
     // secondary driver x: disable the arm (SAFETY)
