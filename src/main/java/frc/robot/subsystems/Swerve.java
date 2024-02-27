@@ -8,7 +8,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 
 public class Swerve extends SwerveDrive {
-
     private static final int FL_STEER_MOTOR_ID = 5;
     private static final int FL_STEER_ENCODER_ID = 5;
     private static final double FL_STEER_OFFSET = 0.387 + 0.5;

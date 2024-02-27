@@ -1,12 +1,13 @@
 package frc.robot.subsystems;
 
 import com.mechlib.hardware.TalonFX;
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+/**
+ * The box of wheels that intakes, shoots, and amps the notes.
+ */
 public class Gerald extends SubsystemBase {
     // intake percent speed for the intake motor to run at
     private static final double kIntakeVoltage = 5; // volts
@@ -29,6 +30,7 @@ public class Gerald extends SubsystemBase {
     private final TalonFX ampMotor = new TalonFX(15);
     // only shoots
     private final TalonFX shooterMotor = new TalonFX(16);
+
     private final DigitalInput noteSensor = new DigitalInput(0);
 
     public enum GeraldState {
@@ -85,7 +87,7 @@ public class Gerald extends SubsystemBase {
     }
 
     /**
-     * Sets the outtake motor speed (percent) to kOuttakeVoltage
+     * Sets the outtake motor speed (voltage) to kOuttakeVoltage
      */
     public void outtake() {
         intakeMotor.setVoltage(kOuttakeVoltage);
@@ -142,15 +144,19 @@ public class Gerald extends SubsystemBase {
      * Feed the note into the shooter by setting the intake motor to the feed voltage.
      */
     public void amp (){
+        /* if the state is not already in amping, set the state to amping and the voltage to kAmpFeedVoltage, which
+           will feed the note into the shooter */
         if (!geraldState.equals(GeraldState.Amping)) {
             intakeMotor.setVoltage(kAmpFeedVoltage);
             geraldState = GeraldState.Amping;
         }
-        // if the note was just detected on this cycle
+        /* if the note was not detected on the cycle (if all goes well mechanically, it just got shot out of the gerald)
+           set the timer for to idle the shooter */
         if (!noteDetected() && lastDetected) {
             detectDelayTimer.start();
             lastDetected = false;
-            // if the note was not detected but was detected on the last cycle, set lastDetected to false;
+        /* if the note just detected on this cycle (which should not happen because the note shoot not come back into
+           gerald after amping) set last detected to true */
         } else if (noteDetected() && !lastDetected) {
             lastDetected = true;
         }
@@ -162,6 +168,11 @@ public class Gerald extends SubsystemBase {
         }
     }
 
+    /**
+     * Set the shooter and amp voltage to kIdleVoltage and stop the intakeMotor.
+     * The shooter and amp motor idle voltage should be as high as possible without overloading the battery or
+     * making the arm shake to much.
+     */
     public void idle() {
         if (!geraldState.equals(GeraldState.Idling)) {
             shooterMotor.setVoltage(kIdleVoltage);
@@ -171,6 +182,11 @@ public class Gerald extends SubsystemBase {
         }
     }
 
+    /**
+     * Returns a boolean of whether the note sensor detected anything
+     *
+     * @return if the note sensor detected anything
+     */
     public boolean noteDetected() {
         return !noteSensor.get();
     }

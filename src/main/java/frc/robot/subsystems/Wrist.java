@@ -6,13 +6,12 @@ import com.mechlib.hardware.CANCoder;
 import com.mechlib.hardware.TalonFX;
 import com.mechlib.subsystems.SingleJointSubystem;
 import com.mechlib.util.MechUnits;
-import edu.wpi.first.math.controller.ArmFeedforward;
-import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+/**
+ * Controls the motor that pivots Gerald
+ */
 public class Wrist extends SingleJointSubystem {
     // magnet offset for the wrist motor
     private static final double kMagnetOffset = -0.0419;
@@ -32,7 +31,6 @@ public class Wrist extends SingleJointSubystem {
     private static final double kMotorRatio = 25 * kSensorRatio;
     private static final Rotation2d kForwardLimit = Rotation2d.fromDegrees(140);
     private static final Rotation2d kReverseLimit = Rotation2d.fromDegrees(90);
-
 
     public Wrist() {
         addMotor(WristMotor, true);
@@ -63,33 +61,36 @@ public class Wrist extends SingleJointSubystem {
     }
 
     /**
-     * Set arm to the shoot/amp position
+     * Set arm to the shoot high subwoofer position
      */
     public void shootHighSubwoofer() {
         pivotTo(kSubwooferHigh);
     }
 
     /**
-     * Set arm to the shoot/amp position
+     * Set arm to the shoot low subwoofer position
      */
     public void shootLowSubwoofer() {
         pivotTo(kSubwooferLow);
     }
 
     /**
-     * Set arm to the shoot/amp position
+     * Set arm to the shoot high podium position
      */
     public void shootHighPodium() {
         pivotTo(kPodiumHigh);
     }
 
     /**
-     * Set arm to the shoot/amp position
+     * Set arm to the shoot low podium position
      */
     public void shootLowPodium() {
         pivotTo(kPodiumLow);
     }
 
+    /**
+     * Pivot to the amp position
+     */
     public void amp() {
         pivotTo(kAmp);
     }

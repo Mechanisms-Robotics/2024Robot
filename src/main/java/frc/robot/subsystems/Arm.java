@@ -6,13 +6,12 @@ import com.mechlib.hardware.CANCoder;
 import com.mechlib.hardware.TalonFX;
 import com.mechlib.subsystems.SingleJointSubystem;
 import com.mechlib.util.MechUnits;
-import edu.wpi.first.math.controller.ArmFeedforward;
-import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+/**
+ * The arm that Gerald is attached to. It is directly connected to the swerve.
+ */
 public class Arm extends SingleJointSubystem {
     // true if the arm runs in open loop, false if it runs in closed loop
     private static final boolean kOpenLoop = true;
@@ -74,33 +73,36 @@ public class Arm extends SingleJointSubystem {
     }
 
     /**
-     * Set arm to the shoot/amp position
+     * Set arm to the shoot high subwoofer position
      */
     public void shootHighSubwoofer() {
         pivotTo(kSubwooferHigh);
     }
 
     /**
-     * Set arm to the shoot/amp position
+     * Set arm to the shoot low subwoofer position
      */
     public void shootLowSubwoofer() {
         pivotTo(kSubwooferLow);
     }
 
     /**
-     * Set arm to the shoot/amp position
+     * Set arm to the shoot high podium position
      */
     public void shootHighPodium() {
         pivotTo(kPodiumHigh);
     }
 
     /**
-     * Set arm to the shoot/amp position
+     * Set arm to the shoot low podium position
      */
     public void shootLowPodium() {
         pivotTo(kPodiumLow);
     }
 
+    /**
+     * Set the arm to the amp position
+     */
     public void amp() {
         pivotTo(kAmp);
     }
