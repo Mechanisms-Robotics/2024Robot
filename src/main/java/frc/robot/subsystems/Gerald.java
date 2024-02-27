@@ -40,14 +40,14 @@ public class Gerald extends SubsystemBase {
     }
 
     /**
-     * Set the intake motor speed (percent) to kIntakeSpeed
+     * Set the intake motor speed (voltage) to kIntakeVoltage
      */
     public void intake() {
         intakeMotor.setVoltage(kIntakeVoltage);
     }
 
     /**
-     * Sets the outtake motor speed (percent) to kOuttakeSpeed
+     * Sets the outtake motor speed (percent) to kOuttakeVoltage
      */
     public void outtake() {
         intakeMotor.setVoltage(kOuttakeVoltage);
@@ -76,6 +76,7 @@ public class Gerald extends SubsystemBase {
     public void feed (){
         intakeMotor.setVoltage(kFeedVoltage);
     }
+
     /**
      * Sets the intakeMotor to 0 percent
      */
