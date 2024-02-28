@@ -336,11 +336,6 @@ public abstract class BrushlessMotorController {
     );
   }
 
-  public void setContinuousInput(double minInput, double maxInput) {
-    this.pidController.enableContinuousInput(minInput, maxInput);
-    this.ppidController.enableContinuousInput(minInput, maxInput);
-  }
-
   /**
    * Zeroes encoder
    */
