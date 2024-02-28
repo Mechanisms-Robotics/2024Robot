@@ -1,6 +1,10 @@
 package com.mechlib.swerve;
 
 import com.mechlib.hardware.BrushlessMotorControllerType;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
+import com.pathplanner.lib.util.PIDConstants;
+import com.pathplanner.lib.util.ReplanningConfig;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -11,6 +15,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Voltage;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -18,6 +23,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Robot;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * MechLib SwerveDrive class
@@ -253,6 +260,31 @@ public class SwerveDrive extends SubsystemBase {
       brModuleLocation,
       blModuleLocation
     };
+
+    // Configure AutoBuilder holonomic control
+    AutoBuilder.configureHolonomic(
+      this::getEstimatedPose,
+      this::setPose,
+      this::getSpeeds,
+      this::autoDrive,
+      new HolonomicPathFollowerConfig(
+        new PIDConstants(0, 0, 0),
+        new PIDConstants(0, 0, 0),
+
+        4.25,
+        0.5388,
+
+        new ReplanningConfig()
+      ),
+      () -> {
+        var alliance = DriverStation.getAlliance();
+        if (alliance.isPresent()) {
+          return alliance.get() == DriverStation.Alliance.Red;
+        }
+        return false;
+      },
+      this
+    );
   }
 
   /**
@@ -318,6 +350,20 @@ public class SwerveDrive extends SubsystemBase {
   }
 
   /**
+   * Gets the current swerve module states (in order of FL, FR, BR, FL)
+   *
+   * @return Swerve module states
+   */
+  public SwerveModuleState[] getModuleStates() {
+    return new SwerveModuleState[] {
+      flModule.getModuleState(),
+      frModule.getModuleState(),
+      brModule.getModuleState(),
+      blModule.getModuleState()
+    };
+  }
+
+  /**
    * Sets all module states
    *
    * @param desiredStates Desired module states
@@ -337,6 +383,30 @@ public class SwerveDrive extends SubsystemBase {
   public Pose2d getEstimatedPose() {
     // Return estimated pose from pose estimator
     return poseEstimator.getEstimatedPosition();
+  }
+
+  /**
+   * Sets pose of swerve drive
+   *
+   * @param pose Pose2d instance
+   */
+  public void setPose(Pose2d pose) {
+    // Reset pose
+    poseEstimator.resetPosition(getHeading(), getModulePositions(), pose);
+
+    // Reset simulated heading
+    if (Robot.isSimulation()) {
+      simHeading = pose.getRotation();
+    }
+  }
+
+  /**
+   * Get the current speeds of the swerve drive as ChassisSpeeds
+   *
+   * @return Current speeds as ChassisSpeeds
+   */
+  public ChassisSpeeds getSpeeds() {
+    return kinematics.toChassisSpeeds(getModuleStates());
   }
 
   /**
@@ -399,6 +469,42 @@ public class SwerveDrive extends SubsystemBase {
 
     // Lock heading to target heading
     lockHeading(targetHeading);
+  }
+
+  /**
+   * Used to drive in autonomous mode, drives robot relative without heading stabilization
+   *
+   * @param speeds Desired speeds as ChassisSpeeds
+   */
+  public void autoDrive(ChassisSpeeds speeds) {
+    // Check if running in simulation
+    if (Robot.isSimulation()) {
+      // If so divide velocities by 2
+      speeds.vxMetersPerSecond /= 2.0;
+      speeds.vyMetersPerSecond /= 2.0;
+    }
+
+    // Output velocities to SmartDashboard
+    SmartDashboard.putNumber("[Swerve] vX", speeds.vxMetersPerSecond);
+    SmartDashboard.putNumber("[Swerve] vY", speeds.vyMetersPerSecond);
+    SmartDashboard.putNumber("[Swerve] Omega", speeds.omegaRadiansPerSecond);
+
+    // Get the desired swerve module states
+    SwerveModuleState[] desiredStates =  kinematics.toSwerveModuleStates(speeds);
+
+    // Desaturate module speeds
+    SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, MAX_ATTAINABLE_SPEED);
+
+    // Set module states to desired states
+    setModuleStates(desiredStates);
+
+    // Check if this is a simulation
+    if (Robot.isSimulation()) {
+      // If so update simulated heading depending on omega
+      simHeading = simHeading.rotateBy(new Rotation2d(
+        speeds.omegaRadiansPerSecond * Robot.kDefaultPeriod
+      ));
+    }
   }
 
   /**
