@@ -30,6 +30,9 @@ public class LimeLight extends SubsystemBase {
 
     @Override
     public void periodic() {
+        SmartDashboard.putBoolean("Has Target", hasTarget());
+        SmartDashboard.putNumber("Target Yaw", yaw);
+        SmartDashboard.putNumber("Target Area", area);
         if (DriverStation.getAlliance().isPresent()) {
             if (DriverStation.getAlliance().equals(Alliance.Blue)) aprilTagID = 8;
             else aprilTagID = 4;
