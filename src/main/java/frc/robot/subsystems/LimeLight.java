@@ -16,14 +16,31 @@ public class LimeLight extends SubsystemBase {
     private double yaw = 0;
     private double area = 0;
 
+    /**
+     * Returns the yaw of the angle made between the camera and the target.
+     * This serves to make sure that the target is centered on the camera for aiming at an april tag.
+     *
+     * @return the yaw of the angle made between the camera and the target
+     */
     public double getYaw() {
         return yaw;
     }
 
+    /**
+     * Returns the area that the target takes on the limelight.
+     * This is used for determininig the distance from the april tags.
+     *
+     * @return the area that the target takes on the limelight
+     */
     public double getArea() {
         return area;
     }
 
+    /**
+     * Returns whether a target has been found
+     *
+     * @return whether a target has been found
+     */
     public boolean hasTarget() {
         return getArea() != 0;
     }
