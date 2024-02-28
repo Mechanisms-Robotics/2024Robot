@@ -95,6 +95,10 @@ public class Wrist extends SingleJointSubystem {
         pivotTo(kAmp);
     }
 
+    public void aim(Rotation2d rotation) {
+        pivotTo(rotation);
+    }
+
     @Override
     public void periodic() {
         super.periodic();

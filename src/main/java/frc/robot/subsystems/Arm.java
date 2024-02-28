@@ -116,6 +116,10 @@ public class Arm extends SingleJointSubystem {
         SmartDashboard.putBoolean("[Arm] disabled", disabled);
     }
 
+    public void aim(Rotation2d rotation) {
+        pivotTo(rotation);
+    }
+
     /**
      * Periodically output the data (right and left arm position) to SmartDashBoard. Do not run the arms if the robot
      * is disabled. Runs the PIDFs if the robot is in closed loop.

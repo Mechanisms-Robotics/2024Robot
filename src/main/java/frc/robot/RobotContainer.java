@@ -21,6 +21,7 @@ public class RobotContainer {
   public final Gerald gerald = new Gerald();
   public final Wrist wrist = new Wrist();
   public final ArmWrist armWrist = new ArmWrist();
+  public final LimeLight limeLight = new LimeLight();
 
   private final CommandXboxController xboxController = new CommandXboxController(0);
   private final CommandXboxController xboxController2 = new CommandXboxController(1);
@@ -104,8 +105,12 @@ public class RobotContainer {
     xboxController2.povUp().onTrue(
             new StowPosition(armWrist)
     );
-    xboxController.povDown().whileTrue(
+    xboxController2.povDown().whileTrue(
             new Savery(armWrist)
+    );
+    xboxController.rightStick().whileTrue(
+            new DriveWhileAim(swerve, limeLight, armWrist,
+                  () -> -xboxController.getLeftY(), () -> -xboxController.getLeftX(), () -> -xboxController.getRightX())
     );
   }
 

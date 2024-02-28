@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /**
@@ -10,16 +11,13 @@ public class ArmWrist extends SubsystemBase {
     private static final Wrist wrist = new Wrist();
     private boolean safe = false;
 
-    public void disable() {
-
-    }
-
     private enum State {
         Stowed,
         Intaking,
         Amping,
         ShootingSubwoofer,
-        ShootingPodium
+        ShootingPodium,
+        Aiming
     }
     private State state;
     private boolean lowMode = false;
@@ -125,6 +123,13 @@ public class ArmWrist extends SubsystemBase {
      */
     public void disableSafeMode() {
         safe = false;
+    }
+
+    public void aim(Rotation2d desiredArmRotation, Rotation2d desiredWristRotation) {
+        if (safe) return;
+        if (!state.equals(State.Aiming)) state = State.Aiming;
+        arm.aim(desiredArmRotation);
+        wrist.aim(desiredWristRotation);
     }
 
     @Override
