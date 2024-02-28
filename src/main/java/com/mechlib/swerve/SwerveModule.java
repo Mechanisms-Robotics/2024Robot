@@ -147,8 +147,6 @@ public class SwerveModule extends SubsystemBase {
     // Set the steer motor PID tolerance
     steerMotor.setTolerance(moduleConfiguration.steerTolerance);
 
-    steerMotor.setContinuousInput(-Math.PI, Math.PI);
-
     // Set the drive motor inversion and switch it to brake mode
     driveMotor.setInverted(driveInverted);
     driveMotor.brakeMode();
@@ -222,6 +220,19 @@ public class SwerveModule extends SubsystemBase {
   }
 
   /**
+   * Returns current module state as a SwerveModuleState
+   *
+   * @return Current module state
+   */
+  public SwerveModuleState getModuleState() {
+    // Create a new SwerveModuleState and return it
+    return new SwerveModuleState(
+      driveMotor.getVelocity(),
+      curAngle
+    );
+  }
+
+  /**
    * Sets drive closed-loop flag
    *
    * @param driveClosedLoop Drive closed-loop flag
@@ -283,6 +294,7 @@ public class SwerveModule extends SubsystemBase {
    * @param state SwerveModuleState
    */
   public void setState(SwerveModuleState state) {
+    // Optimize state
     SwerveModuleState desiredState = SwerveModuleState.optimize(state, curAngle);
 
     // Steer to state angle
@@ -292,45 +304,6 @@ public class SwerveModule extends SubsystemBase {
     drive(desiredState.speedMetersPerSecond);
   }
 
-  /**
-   * Optimizes an angle to minimize the steer time
-   *
-   * @param desiredAngle Angle to Optimize
-   *
-   * @return Optimized angle
-   */
-  private Rotation2d optimizeAngle(Rotation2d desiredAngle) {
-    // Calculate distance to desired angle
-    double desiredDist = Math.abs(desiredAngle.minus(curAngle).getRadians());
-
-    // Get the opposite angle (rotated by 180 degrees)
-    Rotation2d oppAngle = desiredAngle.rotateBy(new Rotation2d(Math.PI));
-    // Calculate distance to opposite angle
-    double oppDist = Math.abs(oppAngle.minus(curAngle).getRadians());
-
-    // Check which angle is closest
-    Rotation2d closestAngle;
-    if (desiredDist <= oppDist) {
-      // Set closestAngle to desiredAngle
-      closestAngle = desiredAngle;
-
-      // Set drive inversion
-      driveInverted = false;
-    } else {
-      // Set closestAngle to oppAngle
-      closestAngle = oppAngle;
-
-      // Set drive inversion
-      driveInverted = true;
-    }
-
-    // Optimize closest angle rotation
-    closestAngle = MechMath.optimizeRotation(curAngle, closestAngle);
-
-    // Return the closest angle
-    return closestAngle;
-  }
-
   @Override
   public void periodic() {
     // Update curAngle
@@ -338,9 +311,6 @@ public class SwerveModule extends SubsystemBase {
 
     // Output current angle to SmartDashboard
     SmartDashboard.putNumber("[" + moduleName + "] Current Angle", curAngle.getDegrees());
-
-    // // Optimize desired angle
-    // desiredAngle = optimizeAngle(desiredAngle);
 
     // Output desiredAngle to SmartDashboard
     SmartDashboard.putNumber("[" + moduleName + "] Desired Angle", desiredAngle.getDegrees());
