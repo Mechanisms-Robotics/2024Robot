@@ -6,7 +6,9 @@ package frc.robot;
 
 
 import com.mechlib.commands.SwerveTeleopDriveCommand;
+import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.*;
@@ -32,6 +34,9 @@ public class RobotContainer {
   public RobotContainer() {
     configureBindings();
 
+    m_chooser.setDefaultOption("TopLeave", new PathPlannerAuto("TopLeave"));
+
+    SmartDashboard.putData("Auto Chooser", m_chooser);
     configureDefaultCommands();
   }
 
@@ -90,5 +95,5 @@ public class RobotContainer {
     ));
   }
 
-  public Command getAutonomousCommand() { return new TimedShootLeave(swerve, gerald, arm ); }
+  public Command getAutonomousCommand() { return m_chooser.getSelected(); }
 }
