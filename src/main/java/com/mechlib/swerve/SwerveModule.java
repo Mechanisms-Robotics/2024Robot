@@ -146,6 +146,7 @@ public class SwerveModule extends SubsystemBase {
 
     // Set the steer motor PID tolerance
     steerMotor.setTolerance(moduleConfiguration.steerTolerance);
+    steerMotor.setContinuous(-Math.PI, Math.PI);
 
     // Set the drive motor inversion and switch it to brake mode
     driveMotor.setInverted(driveInverted);

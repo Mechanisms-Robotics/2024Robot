@@ -623,6 +623,11 @@ public abstract class BrushlessMotorController {
     return getRelativePosition();
   }
 
+  public void setContinuous(double minInput, double maxInput) {
+    ppidController.enableContinuousInput(minInput, maxInput);
+    pidController.enableContinuousInput(minInput, maxInput);
+  }
+
   /**
    * Returns the velocity of the encoder if one exists
    *

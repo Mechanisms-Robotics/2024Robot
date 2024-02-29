@@ -261,30 +261,30 @@ public class SwerveDrive extends SubsystemBase {
       blModuleLocation
     };
 
-    // Configure AutoBuilder holonomic control
-    AutoBuilder.configureHolonomic(
-      this::getEstimatedPose,
-      this::setPose,
-      this::getSpeeds,
-      this::autoDrive,
-      new HolonomicPathFollowerConfig(
-        new PIDConstants(0, 0, 0),
-        new PIDConstants(0, 0, 0),
-
-        4.25,
-        0.5388,
-
-        new ReplanningConfig()
-      ),
-      () -> {
-        var alliance = DriverStation.getAlliance();
-        if (alliance.isPresent()) {
-          return alliance.get() == DriverStation.Alliance.Red;
-        }
-        return false;
-      },
-      this
-    );
+//    // Configure AutoBuilder holonomic control
+//    AutoBuilder.configureHolonomic(
+//      this::getEstimatedPose,
+//      this::setPose,
+//      this::getSpeeds,
+//      this::autoDrive,
+//      new HolonomicPathFollowerConfig(
+//        new PIDConstants(0, 0, 0),
+//        new PIDConstants(0, 0, 0),
+//
+//        4.25,
+//        0.5388,
+//
+//        new ReplanningConfig()
+//      ),
+//      () -> {
+//        var alliance = DriverStation.getAlliance();
+//        if (alliance.isPresent()) {
+//          return alliance.get() == DriverStation.Alliance.Red;
+//        }
+//        return false;
+//      },
+//      this
+//    );
   }
 
   /**
@@ -476,36 +476,36 @@ public class SwerveDrive extends SubsystemBase {
    *
    * @param speeds Desired speeds as ChassisSpeeds
    */
-  public void autoDrive(ChassisSpeeds speeds) {
-    // Check if running in simulation
-    if (Robot.isSimulation()) {
-      // If so divide velocities by 2
-      speeds.vxMetersPerSecond /= 2.0;
-      speeds.vyMetersPerSecond /= 2.0;
-    }
-
-    // Output velocities to SmartDashboard
-    SmartDashboard.putNumber("[Swerve] vX", speeds.vxMetersPerSecond);
-    SmartDashboard.putNumber("[Swerve] vY", speeds.vyMetersPerSecond);
-    SmartDashboard.putNumber("[Swerve] Omega", speeds.omegaRadiansPerSecond);
-
-    // Get the desired swerve module states
-    SwerveModuleState[] desiredStates =  kinematics.toSwerveModuleStates(speeds);
-
-    // Desaturate module speeds
-    SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, MAX_ATTAINABLE_SPEED);
-
-    // Set module states to desired states
-    setModuleStates(desiredStates);
-
-    // Check if this is a simulation
-    if (Robot.isSimulation()) {
-      // If so update simulated heading depending on omega
-      simHeading = simHeading.rotateBy(new Rotation2d(
-        speeds.omegaRadiansPerSecond * Robot.kDefaultPeriod
-      ));
-    }
-  }
+//  public void autoDrive(ChassisSpeeds speeds) {
+//    // Check if running in simulation
+//    if (Robot.isSimulation()) {
+//      // If so divide velocities by 2
+//      speeds.vxMetersPerSecond /= 2.0;
+//      speeds.vyMetersPerSecond /= 2.0;
+//    }
+//
+//    // Output velocities to SmartDashboard
+//    SmartDashboard.putNumber("[Swerve] vX", speeds.vxMetersPerSecond);
+//    SmartDashboard.putNumber("[Swerve] vY", speeds.vyMetersPerSecond);
+//    SmartDashboard.putNumber("[Swerve] Omega", speeds.omegaRadiansPerSecond);
+//
+//    // Get the desired swerve module states
+//    SwerveModuleState[] desiredStates =  kinematics.toSwerveModuleStates(speeds);
+//
+//    // Desaturate module speeds
+//    SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, MAX_ATTAINABLE_SPEED);
+//
+//    // Set module states to desired states
+//    setModuleStates(desiredStates);
+//
+//    // Check if this is a simulation
+//    if (Robot.isSimulation()) {
+//      // If so update simulated heading depending on omega
+//      simHeading = simHeading.rotateBy(new Rotation2d(
+//        speeds.omegaRadiansPerSecond * Robot.kDefaultPeriod
+//      ));
+//    }
+//  }
 
   /**
    * Drives the swerve drive given desired velocities
