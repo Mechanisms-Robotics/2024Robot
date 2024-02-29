@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /**
@@ -31,7 +32,7 @@ public class ArmWrist extends SubsystemBase {
     public void stow() {
         if (safe) return; // do not run if in safety mode
         // if the state is not already stowed set the state to stow and set the arm and wrist position to stow
-        if (!state.equals(State.Stowed)) {
+        if (state != State.Stowed) {
             arm.stow();
             wrist.stow();
             state = State.Stowed;
@@ -44,7 +45,7 @@ public class ArmWrist extends SubsystemBase {
      */
     public void intake() {
         // if the state is not already intaking set the state to intaking and set the arm and wrist position to intaking
-        if (!state.equals(State.Intaking)) {
+        if (state != State.Intaking) {
             arm.intake();
             wrist.intake();
             state = State.Intaking;
@@ -61,7 +62,7 @@ public class ArmWrist extends SubsystemBase {
         if (safe) return; // do not run if in safe mode
         /* if the state is not already in shooting subwoofer, shoot in low or high mode (specified in parameter lowMode)
         and set the state to ShootingSubwoofer */
-        if (!state.equals(State.ShootingSubwoofer)) {
+        if (state != State.ShootingSubwoofer) {
             // if in low mode, set the arm and wrist position to shooting low
             if (lowMode) {
                 arm.shootLowSubwoofer();
@@ -85,7 +86,7 @@ public class ArmWrist extends SubsystemBase {
         if (safe) return; // do not run if in safe mode
         /* if the state is not already in shooting podium, shoot in low or high mode (specified in parameter lowMode)
         and set the state to ShootingPodium */
-        if (!state.equals(State.ShootingPodium)) {
+        if (state != State.ShootingPodium) {
             // if in low mode, set the arm and wrist position to shooting low
             if (lowMode) {
                 arm.shootLowPodium();
@@ -105,7 +106,7 @@ public class ArmWrist extends SubsystemBase {
     public void amp() {
         if (safe) return; // do not run if in safe mode
         // if not already in amping position, set the arm and wrist position to amp and set the state to Amping
-        if (!state.equals(State.Amping)) {
+        if (state != State.Amping) {
             arm.amp();
             wrist.amp();
             state = State.Amping;
@@ -130,6 +131,7 @@ public class ArmWrist extends SubsystemBase {
     @Override
     public void periodic() {
         if (state == null) return;
+        SmartDashboard.putString("[Arm Wrist] state", state.toString());
         switch (state) {
             case Stowed -> stow();
             case Amping -> amp();

@@ -188,6 +188,7 @@ public class Gerald extends SubsystemBase {
     @Override
     public void periodic() {
         SmartDashboard.putBoolean("Note Sensor", noteDetected()); // show on advantage scope
+        SmartDashboard.putString("[Gerald] state", state.toString());
         switch (state) {
             case Idling -> idle();
             case Feeding -> feed();
