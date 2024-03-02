@@ -4,6 +4,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.LimeLight;
 import frc.robot.subsystems.Swerve;
@@ -15,8 +16,8 @@ public class DriveWhileAim extends Command {
     private final LimeLight limeLight;
     private static final double kMaxVelocity = 1;
     private static final double kMaxAcceleration = 1;
-    private static final double kMaxOmega = Math.PI / 4;
-    private static final double kMaxOmegaAcceleration = Math.PI / 2;
+    private static final double kMaxOmega = Math.PI / 8;
+    private static final double kMaxOmegaAcceleration = Math.PI / 4;
     private static final SlewRateLimiter xLimiter = new SlewRateLimiter(kMaxAcceleration);
     private static final SlewRateLimiter yLimiter = new SlewRateLimiter(kMaxAcceleration);
     private static final SlewRateLimiter omegaLimiter = new SlewRateLimiter(kMaxOmegaAcceleration);
@@ -24,7 +25,7 @@ public class DriveWhileAim extends Command {
     private final Supplier<Double> yVal;
     private final Supplier<Double> rVal;
     private static final double kDeadBand = 0.1;
-    private static final ProfiledPIDController controller = new ProfiledPIDController(0.01, 0, 0, new Constraints(kMaxOmega, kMaxOmegaAcceleration));
+    private static final ProfiledPIDController controller = new ProfiledPIDController(.1, 0, 0, new Constraints(kMaxOmega, kMaxOmegaAcceleration));
 
     public DriveWhileAim(Swerve swerve, LimeLight limeLight, Supplier<Double> xVal, Supplier<Double> yVal, Supplier<Double> rVal) {
         this.swerve = swerve;
@@ -51,6 +52,7 @@ public class DriveWhileAim extends Command {
         double vomega;
         if (!limeLight.hasTarget()) vomega = omegaLimiter.calculate(deadBand(rVal.get()) * kMaxOmega);
         else vomega = controller.calculate(limeLight.getYaw(), 0);
+        SmartDashboard.putNumber("[Drive While Aim] omega", vomega);
         swerve.drive(vx, vy, vomega);
     }
 }

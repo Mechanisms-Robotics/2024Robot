@@ -12,9 +12,9 @@ import frc.util6328.Alert.AlertType;
  * The box of wheels that intakes, shoots, and amps the notes.
  */
 public class Gerald extends SubsystemBase {
-    private static final double kIntakeVoltage = 5; // volts
+    private static final double kIntakeVoltage = 6; // volts
     private static final double kOuttakeVoltage = -5; // volts
-    private static final double kShooterVoltage = 6;
+    private static final double kShooterVoltage = 8;
     private static final double kAmpVoltage = 5; // volts
     private static final double kIdleVoltage = 2;
     private static final double kAmpFeedVoltage = 3;

@@ -105,6 +105,13 @@ public class RobotContainer {
             new SubwooferLowPosition.DisableArm(arm)
     );
 
+    xboxController2.x().whileTrue( // square on ps4
+            new DriveWhileAim(swerve, limeLight,
+                    () -> -xboxController.getLeftY(),
+                    () -> -xboxController.getLeftX(),
+                    () -> -xboxController.getRightX())
+    );
+
     xboxController2.a().onTrue(
             new IntakePosition(armWrist)
     );
@@ -116,7 +123,6 @@ public class RobotContainer {
             new Savery(armWrist)
     );
   }
-
 
   private void configureDefaultCommands() {
     // Set the swerves default command to teleop drive

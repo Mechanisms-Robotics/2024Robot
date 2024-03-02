@@ -32,7 +32,7 @@ public class Arm extends SingleJointSubystem {
        for different mechanical structures, such as belt tensioning */
     private static final double kTolerance = Math.toRadians(1);
     private static final Rotation2d kStowed = Rotation2d.fromDegrees(60);
-    private static final Rotation2d kIntaking = Rotation2d.fromDegrees(3);
+    private static final Rotation2d kIntaking = Rotation2d.fromDegrees(3.5);
     private static final Rotation2d kSubwooferHigh = Rotation2d.fromDegrees(95);
     private static final Rotation2d kSubwooferLow = Rotation2d.fromDegrees(10);
     private static final Rotation2d kPodiumHigh = kSubwooferHigh;
@@ -42,7 +42,7 @@ public class Arm extends SingleJointSubystem {
     private static final double kMotorRatio = 60 * kSensorRatio;
     private static final Rotation2d kForwardLimit = Rotation2d.fromDegrees(95);
     private static final Rotation2d kReverseLimit = Rotation2d.fromDegrees(3);
-    private static final double kAllowableDifference = 5.0;
+    private static final double kAllowableDifference = 7.5;
     // safety disable feature, triggered by the secondary driver when x is pressed
     private boolean disabled = false;
 
