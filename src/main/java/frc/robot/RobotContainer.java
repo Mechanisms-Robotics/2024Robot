@@ -11,10 +11,7 @@ import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.*;
 import frc.robot.commands.autos.TimedShootLeave;
-import frc.robot.subsystems.Arm;
-import frc.robot.subsystems.Gerald;
-import frc.robot.subsystems.Swerve;
-import frc.robot.subsystems.Wrist;
+import frc.robot.subsystems.*;
 
 public class RobotContainer {
   private final SendableChooser<Command> routineChooser = new SendableChooser<>();
@@ -23,6 +20,8 @@ public class RobotContainer {
   public final Arm arm = new Arm();
   public final Gerald gerald = new Gerald();
   public final Wrist wrist = new Wrist();
+  public final ArmWrist armWrist = new ArmWrist();
+  public final LimeLight limeLight = new LimeLight();
 
   private final CommandXboxController xboxController = new CommandXboxController(0);
   private final CommandXboxController xboxController2 = new CommandXboxController(1);
@@ -36,59 +35,104 @@ public class RobotContainer {
   }
 
   public void configureBindings() {
-    xboxController.a().onTrue( // a is uh x cuh
-            new InstantCommand(swerve::zeroGyro)
-    );
-    // b pressed: lock the swerve in x configuration
-    xboxController.b().onTrue(
-            new InstantCommand(swerve::lock)
+    //////////////////
+    //Primary Driver//
+    //////////////////
+    xboxController.leftStick().onTrue(
+            new ZeroGyro(swerve)
     );
 
-    // hold left trigger: intake
-    xboxController.leftTrigger().whileTrue(new IntakeCommand(arm, wrist, gerald));
+    xboxController.leftTrigger().onTrue(
+            new ToggleIntake(gerald)
+    );
 
-    // hold right trigger: shoot
-    xboxController.rightTrigger().onTrue(
-            new PrepareShoot(gerald, arm, wrist)
-    ).onFalse(new ShootNote(gerald, arm, wrist));
-    // right bumper: amp
+    xboxController.leftBumper().onTrue(
+            new ToggleSpinupAmp(gerald)
+    );
+
     xboxController.rightBumper().onTrue(
-      new PrepareAmp(gerald, arm, wrist)
-    ).onFalse(new AmpNote(gerald, arm, wrist));
-    // up on d-pad: move arm and wrist to shoot/amp position
-    xboxController.povUp().onTrue(
-        new ShootPosition(arm, wrist)
-    );
-    // right on d-pad: set arm and wrist to shoot/amp position
-    xboxController.povRight().onTrue(
-        new StowPosition(arm, wrist)
-    );
-    // down on d-pad: set arm and wrist to intake position
-    xboxController.povDown().onTrue(
-        new IntakePosition(arm, wrist)
+            new ToggleSpinupShoot(gerald)
     );
 
-    // secondary driver x: disable the arm (SAFETY)
-    xboxController2.a().onTrue( // x on xbox controller
-            new InstantCommand(arm::disable)
+    xboxController.rightTrigger().onTrue(
+            new FeedNote(gerald)
+    );
+
+    xboxController.y().onTrue(
+            new PodiumHighPosition(armWrist)
+    );
+
+    xboxController.b().onTrue(
+            new SubwooferLowPosition(armWrist)
+    );
+
+    xboxController.x().onTrue(
+            new SubwooferHighPosition(armWrist)
+    );
+
+    xboxController.a().onTrue(
+            new IntakePosition(armWrist)
+    );
+
+    ////////////////////
+    //Secondary Driver//
+    ////////////////////
+
+    xboxController2.leftTrigger().onTrue(
+            new SubwooferLowPosition(armWrist)
+    );
+
+    xboxController2.leftBumper().onTrue(
+            new SubwooferHighPosition(armWrist)
+    );
+
+    xboxController2.rightTrigger().onTrue(
+            new PodiumLowPosition(armWrist)
+    );
+
+    xboxController2.rightBumper().onTrue(
+            new PodiumHighPosition(armWrist)
+    );
+
+    xboxController2.rightStick().whileTrue(
+            new DriveWhileAim(swerve, limeLight,
+                    () -> -xboxController.getLeftY(),
+                    () -> -xboxController.getLeftX(),
+                    () -> -xboxController.getRightX())
+    );
+
+    xboxController2.y().onTrue(
+            new DisableArm(arm)
+    );
+
+    xboxController2.a().onTrue(
+            new IntakePosition(armWrist)
+    );
+
+    xboxController2.povUp().onTrue(
+            new StowPosition(armWrist)
+    );
+    xboxController.povDown().whileTrue(
+            new Savery(armWrist)
     );
   }
+
 
   private void configureDefaultCommands() {
     //Set the swerves default command to teleop drive
-    swerve.setDefaultCommand(new SwerveTeleopDriveCommand(
-            swerve,
-            () -> -xboxController.getLeftY(),
-            () -> -xboxController.getLeftX(),
-            () -> -xboxController.getRightX(),
-            0.1,
-            4.5,
-            5,
-            Math.PI,
-            2*Math.PI,
-            true
-    ));
+//    swerve.setDefaultCommand(new SwerveTeleopDriveCommand(
+//            swerve,
+//            () -> -xboxController.getLeftY(),
+//            () -> -xboxController.getLeftX(),
+//            () -> -xboxController.getRightX(),
+//            0.1,
+//            4.5,
+//            5,
+//            Math.PI,
+//            2*Math.PI,
+//            true
+//    ));
   }
 
-  public Command getAutonomousCommand() { return new TimedShootLeave(swerve, gerald, arm ); }
+  public Command getAutonomousCommand() { return new TimedShootLeave(swerve, gerald, armWrist); }
 }

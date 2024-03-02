@@ -1,0 +1,43 @@
+{
+  "version": 1.0,
+  "startingPose": {
+    "position": {
+      "x": 0.6529766905687672,
+      "y": 6.679920282917489
+    },
+    "rotation": 60.538525029032094
+  },
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "SubLNoteL"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "NoteLSubC"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "SubCNoteC"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "NoteCSubC"
+          }
+        }
+      ]
+    }
+  },
+  "folder": null,
+  "choreoAuto": false
+}

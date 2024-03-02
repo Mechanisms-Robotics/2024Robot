@@ -13,13 +13,16 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+/**
+ * The arm that Gerald is attached to. It is directly connected to the swerve.
+ */
 public class Arm extends SingleJointSubystem {
     // true if the arm runs in open loop, false if it runs in closed loop
     private static final boolean kOpenLoop = true;
     // left arm motor magnet offset (acquired in Phoenix Tuner X)
-    private static final double kLeftMagnetOffset = 1 - 0.379639;
+    private static final double kLeftMagnetOffset = 1 - 0.913086;
     // right arm motor magnet offset
-    private static final double kRightMagnetOffset = 1 - 0.375000;
+    private static final double kRightMagnetOffset = 1 - 0.233154;
     // right arm TalonFX motor and it's can coder
     private final TalonFX rightArmMotor = new TalonFX(13, new CANCoder(13, kRightMagnetOffset, AbsoluteSensorRangeValue.Unsigned_0To1, SensorDirectionValue.Clockwise_Positive));
     // left arm TalonFX motor with it's can coder
@@ -27,10 +30,14 @@ public class Arm extends SingleJointSubystem {
     // feed forward controller for the arm
     /* PID controller for the right and left arm, which will always have the same values they are different to account
        for different mechanical structures, such as belt tensioning */
-    private static final double kTolerance = Math.toRadians(0.5);
+    private static final double kTolerance = Math.toRadians(1);
     private static final Rotation2d kStowed = Rotation2d.fromDegrees(60);
     private static final Rotation2d kIntaking = Rotation2d.fromDegrees(3);
-    private static final Rotation2d kShooting = Rotation2d.fromDegrees(95);
+    private static final Rotation2d kSubwooferHigh = Rotation2d.fromDegrees(95);
+    private static final Rotation2d kSubwooferLow = Rotation2d.fromDegrees(3);
+    private static final Rotation2d kPodiumHigh = kSubwooferHigh;
+    private static final Rotation2d kPodiumLow = kSubwooferLow;
+    private static final Rotation2d kAmp = Rotation2d.fromDegrees(95);
     private static final double kSensorRatio = 64.0/16.0;
     private static final double kMotorRatio = 60 * kSensorRatio;
     private static final Rotation2d kForwardLimit = Rotation2d.fromDegrees(95);
@@ -75,10 +82,49 @@ public class Arm extends SingleJointSubystem {
     }
 
     /**
+<<<<<<< HEAD
      * Set arm to the shoot position
+=======
+<<<<<<< HEAD
+     * Set arm to the shoot high subwoofer position
+=======
+     * Set arm to the shoot position
+>>>>>>> main
+>>>>>>> work_in_progress2/28/2024
      */
-    public void shoot() {
-        pivotTo(kShooting);
+    public void shootHighSubwoofer() {
+        System.out.println("kSubwooferHigh: " + kSubwooferHigh.getDegrees());
+        pivotTo(kSubwooferHigh);
+    }
+
+
+
+    /**
+     * Set arm to the shoot low subwoofer position
+     */
+    public void shootLowSubwoofer() {
+        pivotTo(kSubwooferLow);
+    }
+
+    /**
+     * Set arm to the shoot high podium position
+     */
+    public void shootHighPodium() {
+        pivotTo(kPodiumHigh);
+    }
+
+    /**
+     * Set arm to the shoot low podium position
+     */
+    public void shootLowPodium() {
+        pivotTo(kPodiumLow);
+    }
+
+    /**
+     * Set the arm to the amp position
+     */
+    public void amp() {
+        pivotTo(kAmp);
     }
 
 
@@ -114,7 +160,5 @@ public class Arm extends SingleJointSubystem {
         SmartDashboard.putNumber("[arm] Right position", rightArmMotor.getRawPosition());
         SmartDashboard.putNumber("[arm] current angle", getAngle().getDegrees());
         SmartDashboard.putNumber("[arm] desired angle", getDesiredAngle().getDegrees());
-
-
     }
 }
