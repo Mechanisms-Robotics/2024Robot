@@ -38,10 +38,6 @@ public class RobotContainer {
     //////////////////
     //Primary Driver//
     //////////////////
-    xboxController.leftStick().onTrue(
-            new ZeroGyro(swerve)
-    );
-
     xboxController.leftTrigger().onTrue(
             new ToggleIntake(gerald)
     );
@@ -77,6 +73,10 @@ public class RobotContainer {
     ////////////////////
     //Secondary Driver//
     ////////////////////
+
+    xboxController.leftStick().onTrue(
+            new ZeroGyro(swerve)
+    );
 
     xboxController2.leftTrigger().onTrue(
             new SubwooferLowPosition(armWrist)

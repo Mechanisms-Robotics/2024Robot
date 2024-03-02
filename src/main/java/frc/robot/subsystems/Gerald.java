@@ -19,7 +19,7 @@ public class Gerald extends SubsystemBase {
     private static final double kIdleVoltage = 2;
     private static final double kAmpFeedVoltage = 3;
     private static final double kIntakeDetectDelay = 0.0625;
-    private static final double kAmpDetectDelay = 0;
+    private static final double kFeedDetectDelay = 0.5;
     private static final Timer detectDelayTimer = new Timer();
     private final Alert unexpectedNote =
             new Alert("an unexpected note was detected in gerald after feeding it to the shooter",
@@ -155,7 +155,7 @@ public class Gerald extends SubsystemBase {
             unexpectedNote.set(true);
         }
         // if the timer has finished, idle gerald and stop the timer
-        if (detectDelayTimer.hasElapsed(kAmpDetectDelay)) {
+        if (detectDelayTimer.hasElapsed(kFeedDetectDelay)) {
             idle();
             detectDelayTimer.stop();
             detectDelayTimer.reset();

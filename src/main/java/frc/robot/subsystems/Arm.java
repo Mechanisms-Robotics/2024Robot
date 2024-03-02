@@ -20,9 +20,9 @@ public class Arm extends SingleJointSubystem {
     // true if the arm runs in open loop, false if it runs in closed loop
     private static final boolean kOpenLoop = true;
     // left arm motor magnet offset (acquired in Phoenix Tuner X)
-    private static final double kLeftMagnetOffset = 1 - 0.913086;
+    private static final double kLeftMagnetOffset = 1 - 0.470215;
     // right arm motor magnet offset
-    private static final double kRightMagnetOffset = 1 - 0.233154;
+    private static final double kRightMagnetOffset = 1 - 0.256104;
     // right arm TalonFX motor and it's can coder
     private final TalonFX rightArmMotor = new TalonFX(13, new CANCoder(13, kRightMagnetOffset, AbsoluteSensorRangeValue.Unsigned_0To1, SensorDirectionValue.Clockwise_Positive));
     // left arm TalonFX motor with it's can coder
@@ -150,15 +150,14 @@ public class Arm extends SingleJointSubystem {
      */
     @Override
     public void periodic() {
-        // if disabled, do not run any processes on the arm
-        if (Math.abs(leftArmMotor.getRawPosition() -rightArmMotor.getRawPosition()) > kAllowableDifference){
-          disable();
-         }
-        if (disabled) return;
-        super.periodic();
         SmartDashboard.putNumber("[arm] Left position", leftArmMotor.getRawPosition());
         SmartDashboard.putNumber("[arm] Right position", rightArmMotor.getRawPosition());
         SmartDashboard.putNumber("[arm] current angle", getAngle().getDegrees());
         SmartDashboard.putNumber("[arm] desired angle", getDesiredAngle().getDegrees());
+        // if disabled, do not run any processes on the arm
+        if (Math.abs(leftArmMotor.getRawPosition() -rightArmMotor.getRawPosition()) > kAllowableDifference)
+            disable();
+        if (disabled) return;
+        super.periodic();
     }
 }

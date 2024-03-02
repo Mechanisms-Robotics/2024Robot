@@ -107,12 +107,15 @@ public class CANCoder extends SubsystemBase {
   ) {
     // Set magnet offset
     this.magnetOffset = magnetOffset;
+    CANcoderConfiguration currentConfig = new CANcoderConfiguration();
+    canCoder.getConfigurator().refresh(currentConfig);
 
     // Set configuration
     config = config.withMagnetSensor(
       new MagnetSensorConfigs()
         .withAbsoluteSensorRange(sensorRange)
         .withSensorDirection(sensorDirection)
+        .withMagnetOffset(currentConfig.MagnetSensor.MagnetOffset)
     );
 
     // Apply configuration
