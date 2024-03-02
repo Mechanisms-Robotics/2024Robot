@@ -18,7 +18,7 @@ public class Wrist extends SingleJointSubystem {
     // true if the arm runs in open loop, false if it runs in closed loop
     // left arm motor magnet offset (acquired in Phoenix Tuner X)
 //    private static final double kMagnetOffset = -0.167969 - 0.25;
-    private static final double kMagnetOffset = (kSensorRatio * 0.25) - 0.226562;
+    private static final double kMagnetOffset = (kSensorRatio * 0.25) - 0.964600;
     // right arm motor magnet offset
     // right arm TalonFX motor and it's can coder
     private final TalonFX WristMotor = new TalonFX(17, new CANCoder(17, kMagnetOffset, AbsoluteSensorRangeValue.Unsigned_0To1, SensorDirectionValue.CounterClockwise_Positive));
@@ -34,8 +34,9 @@ public class Wrist extends SingleJointSubystem {
     private static final Rotation2d kPodiumHigh = kSubwooferHigh;
     private static final Rotation2d kPodiumLow = kSubwooferLow;
     private static final Rotation2d kAmp = Rotation2d.fromDegrees(90);
-    private static final Rotation2d kForwardLimit = Rotation2d.fromDegrees(140);
+    private static final Rotation2d kForwardLimit = Rotation2d.fromDegrees(115);
     private static final Rotation2d kReverseLimit = Rotation2d.fromDegrees(90);
+    private boolean disabled = false;
 
     public Wrist() {
         addMotor(WristMotor, true);
@@ -110,6 +111,8 @@ public class Wrist extends SingleJointSubystem {
      */
     @Override
     public void periodic() {
+        if (getAngle().getDegrees() < 0) disabled = true;
+        if (disabled) return;
         super.periodic();
         SmartDashboard.putNumber("[wrist] Wrist position", WristMotor.getRawPosition());
         SmartDashboard.putNumber("[wrist] current angle", getAngle().getDegrees());

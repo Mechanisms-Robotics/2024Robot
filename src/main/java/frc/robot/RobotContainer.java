@@ -101,7 +101,7 @@ public class RobotContainer {
                     () -> -xboxController.getRightX())
     );
 
-    xboxController2.a().onTrue(
+    xboxController2.y().onTrue(
             new DisableArm(arm)
     );
 
@@ -120,18 +120,18 @@ public class RobotContainer {
 
   private void configureDefaultCommands() {
     //Set the swerves default command to teleop drive
-    swerve.setDefaultCommand(new SwerveTeleopDriveCommand(
-            swerve,
-            () -> -xboxController.getLeftY(),
-            () -> -xboxController.getLeftX(),
-            () -> -xboxController.getRightX(),
-            0.1,
-            4.5,
-            5,
-            Math.PI,
-            2*Math.PI,
-            true
-    ));
+//    swerve.setDefaultCommand(new SwerveTeleopDriveCommand(
+//            swerve,
+//            () -> -xboxController.getLeftY(),
+//            () -> -xboxController.getLeftX(),
+//            () -> -xboxController.getRightX(),
+//            0.1,
+//            4.5,
+//            5,
+//            Math.PI,
+//            2*Math.PI,
+//            true
+//    ));
   }
 
   public Command getAutonomousCommand() { return new TimedShootLeave(swerve, gerald, armWrist); }

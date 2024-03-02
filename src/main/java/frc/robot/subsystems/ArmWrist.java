@@ -11,10 +11,6 @@ public class ArmWrist extends SubsystemBase {
     private static final Wrist wrist = new Wrist();
     private boolean safe = false;
 
-    public void disable() {
-
-    }
-
     private enum State {
         Stowed,
         Intaking,
@@ -58,22 +54,24 @@ public class ArmWrist extends SubsystemBase {
      * @param lowMode true if shooting low and false if shooting high
      */
     public void subwooferShoot(boolean lowMode) {
-        this.lowMode = lowMode;
         if (safe) return; // do not run if in safe mode
         /* if the state is not already in shooting subwoofer, shoot in low or high mode (specified in parameter lowMode)
         and set the state to ShootingSubwoofer */
-        if (state != State.ShootingSubwoofer) {
+        if (state != State.ShootingSubwoofer || lowMode != this.lowMode) {
             // if in low mode, set the arm and wrist position to shooting low
             if (lowMode) {
+                SmartDashboard.putString("[Arm Wrist] shooting",  "subwoofer low");
                 arm.shootLowSubwoofer();
                 wrist.shootLowSubwoofer();
             // if in high mode (low mode false), set the arm and wrist position to shooting high
             } else {
+                SmartDashboard.putString("[Arm Wrist] shooting",  "subwoofer high");
                 arm.shootHighSubwoofer();
                 wrist.shootHighSubwoofer();
             }
             state = State.ShootingSubwoofer;
         }
+        this.lowMode = lowMode;
     }
 
     /**
@@ -89,10 +87,12 @@ public class ArmWrist extends SubsystemBase {
         if (state != State.ShootingPodium) {
             // if in low mode, set the arm and wrist position to shooting low
             if (lowMode) {
+                SmartDashboard.putString("[Arm Wrist] shooting",  "podium low");
                 arm.shootLowPodium();
                 wrist.shootLowPodium();
             // if in high mode (low mode false), set the arm and wrist position to shooting high
             } else {
+                SmartDashboard.putString("[Arm Wrist] shooting",  "podium high");
                 arm.shootHighPodium();
                 wrist.shootHighPodium();
             }
