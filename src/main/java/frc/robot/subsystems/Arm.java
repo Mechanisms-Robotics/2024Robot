@@ -20,9 +20,9 @@ public class Arm extends SingleJointSubystem {
     // true if the arm runs in open loop, false if it runs in closed loop
     private static final boolean kOpenLoop = true;
     // left arm motor magnet offset (acquired in Phoenix Tuner X)
-    private static final double kLeftMagnetOffset = 1 - 0.470215;
+    private static final double kLeftMagnetOffset = 1 - 0.614502;
     // right arm motor magnet offset
-    private static final double kRightMagnetOffset = 1 - 0.256104;
+    private static final double kRightMagnetOffset = 1 - 0.346680;
     // right arm TalonFX motor and it's can coder
     private final TalonFX rightArmMotor = new TalonFX(13, new CANCoder(13, kRightMagnetOffset, AbsoluteSensorRangeValue.Unsigned_0To1, SensorDirectionValue.Clockwise_Positive));
     // left arm TalonFX motor with it's can coder
@@ -32,7 +32,7 @@ public class Arm extends SingleJointSubystem {
        for different mechanical structures, such as belt tensioning */
     private static final double kTolerance = Math.toRadians(1);
     private static final Rotation2d kStowed = Rotation2d.fromDegrees(60);
-    private static final Rotation2d kIntaking = Rotation2d.fromDegrees(3.5);
+    private static final Rotation2d kIntaking = Rotation2d.fromDegrees(4);
     private static final Rotation2d kSubwooferHigh = Rotation2d.fromDegrees(95);
     private static final Rotation2d kSubwooferLow = Rotation2d.fromDegrees(10);
     private static final Rotation2d kPodiumHigh = kSubwooferHigh;

@@ -17,7 +17,7 @@ public class Wrist extends SingleJointSubystem {
     private static final double kMotorRatio = 25.0 * kSensorRatio;
     // true if the arm runs in open loop, false if it runs in closed loop
     // left arm motor magnet offset (acquired in Phoenix Tuner X)
-    private static final double kMagnetOffset = (kSensorRatio * 0.25) - 0.510742;
+    private static final double kMagnetOffset = (kSensorRatio * 0.25) - 0.793213;
     // right arm motor magnet offset
     // right arm TalonFX motor and it's can coder
     private final TalonFX WristMotor = new TalonFX(17, new CANCoder(17, kMagnetOffset, AbsoluteSensorRangeValue.Unsigned_0To1, SensorDirectionValue.CounterClockwise_Positive));
