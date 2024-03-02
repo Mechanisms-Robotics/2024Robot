@@ -298,6 +298,7 @@ public class SwerveDrive extends SubsystemBase {
 
     // Set gyro yaw to 0
     gyro.setYaw(0.0);
+    headingController.reset();
   }
 
   /**

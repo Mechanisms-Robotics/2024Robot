@@ -137,4 +137,9 @@ public class HeadingController {
     // Return omega
     return omega;
   }
+
+  public void reset() {
+    prevHeading = new Rotation2d();
+    prevOmega = 0;
+  }
 }
