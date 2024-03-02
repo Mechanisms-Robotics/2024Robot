@@ -7,6 +7,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.ArmWrist;
@@ -21,8 +22,8 @@ public class DriveWhileAim extends Command {
     private final ArmWrist armWrist;
     private static final double kMaxVelocity = 1;
     private static final double kMaxAcceleration = 1;
-    private static final double kMaxOmega = Math.PI / 4;
-    private static final double kMaxOmegaAcceleration = Math.PI / 2;
+    private static final double kMaxOmega = Math.PI / 8;
+    private static final double kMaxOmegaAcceleration = Math.PI / 4;
     private static final SlewRateLimiter xLimiter = new SlewRateLimiter(kMaxAcceleration);
     private static final SlewRateLimiter yLimiter = new SlewRateLimiter(kMaxAcceleration);
     private static final SlewRateLimiter omegaLimiter = new SlewRateLimiter(kMaxOmegaAcceleration);
@@ -30,12 +31,12 @@ public class DriveWhileAim extends Command {
     private final Supplier<Double> yVal;
     private final Supplier<Double> rVal;
     private static final double kDeadBand = 0.1;
-    private static final ProfiledPIDController controller = new ProfiledPIDController(.01, 0, 0, new Constraints(kMaxOmega, kMaxOmegaAcceleration));
     private static final InterpolatingDoubleTreeMap wristAimMap = new InterpolatingDoubleTreeMap();
     static {
         wristAimMap.put(00.00, 90.);
         wristAimMap.put(1000., 90.);
     }
+    private static final ProfiledPIDController controller = new ProfiledPIDController(.1, 0, 0, new Constraints(kMaxOmega, kMaxOmegaAcceleration));
     public DriveWhileAim(Swerve swerve, LimeLight limeLight, ArmWrist armWrist,
                          Supplier<Double> xVal, Supplier<Double> yVal, Supplier<Double> rVal) {
         this.swerve = swerve;
@@ -68,6 +69,7 @@ public class DriveWhileAim extends Command {
             Rotation2d desiredWristRotation = Rotation2d.fromDegrees(wristAimMap.get(limeLight.getArea()));
             armWrist.aim(desiredArmRotation, desiredWristRotation);
         }
+        SmartDashboard.putNumber("[Drive While Aim] omega", vomega);
         swerve.drive(vx, vy, vomega);
     }
 }

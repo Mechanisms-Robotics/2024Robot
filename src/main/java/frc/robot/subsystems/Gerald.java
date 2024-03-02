@@ -12,14 +12,14 @@ import frc.util6328.Alert.AlertType;
  * The box of wheels that intakes, shoots, and amps the notes.
  */
 public class Gerald extends SubsystemBase {
-    private static final double kIntakeVoltage = 5; // volts
+    private static final double kIntakeVoltage = 6; // volts
     private static final double kOuttakeVoltage = -5; // volts
-    private static final double kShooterVoltage = 5;
+    private static final double kShooterVoltage = 8;
     private static final double kAmpVoltage = 5; // volts
     private static final double kIdleVoltage = 2;
     private static final double kAmpFeedVoltage = 3;
     private static final double kIntakeDetectDelay = 0.0625;
-    private static final double kAmpDetectDelay = 0;
+    private static final double kFeedDetectDelay = 0.5;
     private static final Timer detectDelayTimer = new Timer();
     private final Alert unexpectedNote =
             new Alert("an unexpected note was detected in gerald after feeding it to the shooter",
@@ -155,7 +155,7 @@ public class Gerald extends SubsystemBase {
             unexpectedNote.set(true);
         }
         // if the timer has finished, idle gerald and stop the timer
-        if (detectDelayTimer.hasElapsed(kAmpDetectDelay)) {
+        if (detectDelayTimer.hasElapsed(kFeedDetectDelay)) {
             idle();
             detectDelayTimer.stop();
             detectDelayTimer.reset();
@@ -188,6 +188,7 @@ public class Gerald extends SubsystemBase {
     @Override
     public void periodic() {
         SmartDashboard.putBoolean("Note Sensor", noteDetected()); // show on advantage scope
+        SmartDashboard.putString("[Gerald] state", state.toString());
         switch (state) {
             case Idling -> idle();
             case Feeding -> feed();

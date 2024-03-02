@@ -38,10 +38,6 @@ public class RobotContainer {
     //////////////////
     //Primary Driver//
     //////////////////
-    xboxController.leftStick().onTrue(
-            new ZeroGyro(swerve)
-    );
-
     xboxController.leftTrigger().onTrue(
             new ToggleIntake(gerald)
     );
@@ -78,6 +74,10 @@ public class RobotContainer {
     //Secondary Driver//
     ////////////////////
 
+    xboxController.leftStick().onTrue(
+            new ZeroGyro(swerve)
+    );
+
     xboxController2.leftTrigger().onTrue(
             new SubwooferLowPosition(armWrist)
     );
@@ -94,8 +94,15 @@ public class RobotContainer {
             new PodiumHighPosition(armWrist)
     );
 
-    xboxController2.a().onTrue(
-            new DisableArm(arm)
+    xboxController2.y().onTrue(
+            new SubwooferLowPosition.DisableArm(arm)
+    );
+
+    xboxController2.x().whileTrue( // square on ps4
+            new DriveWhileAim(swerve, limeLight, armWrist,
+                    () -> -xboxController.getLeftY(),
+                    () -> -xboxController.getLeftX(),
+                    () -> -xboxController.getRightX())
     );
 
     xboxController2.a().onTrue(
@@ -114,9 +121,8 @@ public class RobotContainer {
     );
   }
 
-
   private void configureDefaultCommands() {
-    //Set the swerves default command to teleop drive
+    // Set the swerves default command to teleop drive
     swerve.setDefaultCommand(new SwerveTeleopDriveCommand(
             swerve,
             () -> -xboxController.getLeftY(),
