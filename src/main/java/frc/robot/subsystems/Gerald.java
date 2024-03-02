@@ -14,7 +14,7 @@ import frc.util6328.Alert.AlertType;
 public class Gerald extends SubsystemBase {
     private static final double kIntakeVoltage = 5; // volts
     private static final double kOuttakeVoltage = -5; // volts
-    private static final double kShooterVoltage = 5;
+    private static final double kShooterVoltage = 6;
     private static final double kAmpVoltage = 5; // volts
     private static final double kIdleVoltage = 2;
     private static final double kAmpFeedVoltage = 3;

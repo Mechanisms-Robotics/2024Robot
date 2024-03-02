@@ -102,7 +102,7 @@ public class RobotContainer {
     );
 
     xboxController2.y().onTrue(
-            new DisableArm(arm)
+            new SubwooferLowPosition.DisableArm(arm)
     );
 
     xboxController2.a().onTrue(

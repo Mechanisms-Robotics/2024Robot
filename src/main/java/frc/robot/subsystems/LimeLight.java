@@ -14,7 +14,7 @@ public class LimeLight extends SubsystemBase {
     private final PhotonCamera camera = new PhotonCamera("LimeLight");
     private int aprilTagID = 8;
     private double yaw = 0;
-    private double area = 0;
+    private double area ;
 
     /**
      * Returns the yaw of the angle made between the camera and the target.

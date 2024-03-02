@@ -34,7 +34,7 @@ public class Arm extends SingleJointSubystem {
     private static final Rotation2d kStowed = Rotation2d.fromDegrees(60);
     private static final Rotation2d kIntaking = Rotation2d.fromDegrees(3);
     private static final Rotation2d kSubwooferHigh = Rotation2d.fromDegrees(95);
-    private static final Rotation2d kSubwooferLow = Rotation2d.fromDegrees(3);
+    private static final Rotation2d kSubwooferLow = Rotation2d.fromDegrees(10);
     private static final Rotation2d kPodiumHigh = kSubwooferHigh;
     private static final Rotation2d kPodiumLow = kSubwooferLow;
     private static final Rotation2d kAmp = Rotation2d.fromDegrees(95);
@@ -45,7 +45,6 @@ public class Arm extends SingleJointSubystem {
     private static final double kAllowableDifference = 5.0;
     // safety disable feature, triggered by the secondary driver when x is pressed
     private boolean disabled = false;
-
 
     public Arm() {
         addMotor(leftArmMotor, true);
@@ -61,10 +60,7 @@ public class Arm extends SingleJointSubystem {
         setPPIDConstraints(2*Math.PI, 8*Math.PI);
         setTolerance(kTolerance);
         SmartDashboard.putBoolean("[arm] disabled", disabled);
-
     }
-
-
 
 
     /**
@@ -82,15 +78,7 @@ public class Arm extends SingleJointSubystem {
     }
 
     /**
-<<<<<<< HEAD
-     * Set arm to the shoot position
-=======
-<<<<<<< HEAD
      * Set arm to the shoot high subwoofer position
-=======
-     * Set arm to the shoot position
->>>>>>> main
->>>>>>> work_in_progress2/28/2024
      */
     public void shootHighSubwoofer() {
         System.out.println("kSubwooferHigh: " + kSubwooferHigh.getDegrees());
@@ -136,12 +124,7 @@ public class Arm extends SingleJointSubystem {
         stop();
         disabled = true;
         SmartDashboard.putBoolean("[arm] disabled", disabled);
-
     }
-
-
-
-
 
 
     /**

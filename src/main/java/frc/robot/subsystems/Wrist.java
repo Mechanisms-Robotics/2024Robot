@@ -17,7 +17,6 @@ public class Wrist extends SingleJointSubystem {
     private static final double kMotorRatio = 25.0 * kSensorRatio;
     // true if the arm runs in open loop, false if it runs in closed loop
     // left arm motor magnet offset (acquired in Phoenix Tuner X)
-//    private static final double kMagnetOffset = -0.167969 - 0.25;
     private static final double kMagnetOffset = (kSensorRatio * 0.25) - 0.942871;
     // right arm motor magnet offset
     // right arm TalonFX motor and it's can coder
@@ -52,9 +51,6 @@ public class Wrist extends SingleJointSubystem {
         setTolerance(kTolerance);
     }
 
-
-
-
     /**
      * Set arm to the stow position
      */
@@ -70,7 +66,6 @@ public class Wrist extends SingleJointSubystem {
     }
 
     /**
-<<<<<<< HEAD
      * Set arm to the shoot position
      */
     public void shoot() {
@@ -78,8 +73,6 @@ public class Wrist extends SingleJointSubystem {
     }
 
     /**
-=======
-<<<<<<< HEAD
      * Set arm to the shoot high subwoofer position
      */
     public void shootHighSubwoofer() {
@@ -115,7 +108,6 @@ public class Wrist extends SingleJointSubystem {
     }
 
     /**
->>>>>>> work_in_progress2/28/2024
      * Periodically output the data (right and left arm position) to SmartDashBoard. Do not run the arms if the robot
      * is disabled. Runs the PIDFs if the robot is in closed loop.
      */
