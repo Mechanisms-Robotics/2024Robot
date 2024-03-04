@@ -32,7 +32,13 @@ public class DriveWhileAim extends Command {
     private final Supplier<Double> rVal;
     private static final double kDeadBand = 0.1;
     private static final Rotation2d desiredArmRotation = Rotation2d.fromDegrees(15);
+    /**
+     * Wrist angle look up table ,
+     * key: apriltag area (the percentage of the camera the april tag takes up which corresponds to distance),
+     * values: wrist angle
+     */
     private static final InterpolatingDoubleTreeMap wristAimMap = new InterpolatingDoubleTreeMap();
+    // create the wristAimMap interpolating treemap
     static {
         wristAimMap.put(00.00, 90.);
         wristAimMap.put(0.135, 115.5);
@@ -57,10 +63,6 @@ public class DriveWhileAim extends Command {
         return MathUtil.isNear(0, val, kDeadBand) ? 0 : val;
     }
 
-    @Override
-    public void initialize() {
-
-    }
 
     @Override
     public void execute() {
