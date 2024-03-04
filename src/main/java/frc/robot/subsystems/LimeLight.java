@@ -48,15 +48,14 @@ public class LimeLight extends SubsystemBase {
 
     @Override
     public void periodic() {
-        SmartDashboard.putNumber("Target Yaw", yaw);
-        SmartDashboard.putNumber("Target Area", area);
+        SmartDashboard.putNumber("[Lime Light] Target Yaw", yaw);
+        SmartDashboard.putNumber("[Lime Light] Target Area", area);
         if (DriverStation.getAlliance().isPresent()) {
             if (DriverStation.getAlliance().get() == Alliance.Blue) aprilTagID = 7;
             else aprilTagID = 4;
-        } else {
-            System.out.println("The Alliance was no found");
-        }
-        SmartDashboard.putNumber("[Lime Light] april tag target ID", aprilTagID);
+        } else { System.out.println("The Alliance was no found"); }
+
+        SmartDashboard.putNumber("[Lime Light] Target ID", aprilTagID);
 
         PhotonPipelineResult result = camera.getLatestResult();
         boolean hasTarget = result.hasTargets();
@@ -66,14 +65,14 @@ public class LimeLight extends SubsystemBase {
                 if (target.getFiducialId() == aprilTagID) {
                     yaw = target.getYaw();
                     area = target.getArea();
+                    // turn on the LED if yaw is within 5 degrees
                     if (Math.abs(yaw) < 5) camera.setLED(VisionLEDMode.kOn);
                     else camera.setLED(VisionLEDMode.kOff);
                     return;
                 }
             }
-        } else {
-            camera.setLED(VisionLEDMode.kOff);
-        }
+            // turn off the LED, it no work
+        } else { camera.setLED(VisionLEDMode.kOff); }
         yaw = 0;
         area = 0;
     }

@@ -132,7 +132,7 @@ public class ArmWrist extends SubsystemBase {
 
     public void aim(Rotation2d desiredArmRotation, Rotation2d desiredWristRotation) {
         if (safe) return;
-        if (!state.equals(State.Aiming)) state = State.Aiming;
+        if (state != State.Aiming) state = State.Aiming;
         arm.aim(desiredArmRotation);
         wrist.aim(desiredWristRotation);
     }

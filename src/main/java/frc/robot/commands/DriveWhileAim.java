@@ -31,9 +31,14 @@ public class DriveWhileAim extends Command {
     private final Supplier<Double> yVal;
     private final Supplier<Double> rVal;
     private static final double kDeadBand = 0.1;
+    private static final Rotation2d desiredArmRotation = Rotation2d.fromDegrees(15);
     private static final InterpolatingDoubleTreeMap wristAimMap = new InterpolatingDoubleTreeMap();
     static {
         wristAimMap.put(00.00, 90.);
+        wristAimMap.put(0.135, 115.5);
+        wristAimMap.put(0.22, 113.);
+        wristAimMap.put(0.43, 100.);
+        wristAimMap.put(1., 90.);
         wristAimMap.put(1000., 90.);
     }
     private static final ProfiledPIDController controller = new ProfiledPIDController(.1, 0, 0, new Constraints(kMaxOmega, kMaxOmegaAcceleration));
@@ -65,7 +70,6 @@ public class DriveWhileAim extends Command {
         if (!limeLight.hasTarget()) vomega = omegaLimiter.calculate(deadBand(rVal.get()) * kMaxOmega);
         else {
             vomega = controller.calculate(limeLight.getYaw(), 0);
-            Rotation2d desiredArmRotation = Rotation2d.fromDegrees(95);
             Rotation2d desiredWristRotation = Rotation2d.fromDegrees(wristAimMap.get(limeLight.getArea()));
             armWrist.aim(desiredArmRotation, desiredWristRotation);
         }

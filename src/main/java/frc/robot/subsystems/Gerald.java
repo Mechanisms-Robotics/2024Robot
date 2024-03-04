@@ -68,7 +68,7 @@ public class Gerald extends SubsystemBase {
      * Set the intake motor speed (voltage) to kIntakeVoltage
      */
     public void intake() {
-        if (!state.equals(State.Intaking)) {
+        if (state != State.Intaking) {
             intakeMotor.setVoltage(kIntakeVoltage);
             state = State.Intaking;
         }
@@ -89,7 +89,7 @@ public class Gerald extends SubsystemBase {
     }
 
     public void toggleIntake() {
-        if (!state.equals(State.Intaking)) intake();
+        if (state != State.Intaking) intake();
         else idle();
     }
 
@@ -104,7 +104,7 @@ public class Gerald extends SubsystemBase {
      * Set the amp and shooter motors to the shooter voltage
      */
     public void prepareShoot() {
-        if (!state.equals(State.PreparingShoot)) {
+        if (state != State.PreparingShoot) {
             shooterMotor.setVoltage(kShooterVoltage);
             ampMotor.setVoltage(kShooterVoltage);
             state = State.PreparingShoot;
@@ -115,7 +115,7 @@ public class Gerald extends SubsystemBase {
      * Set the shooter and amp motors to the amp voltage. The motors spin in the same direction
      */
     public void prepareAmp () {
-        if (!state.equals(State.PreparingAmp)) {
+        if (state != State.PreparingAmp) {
             // spins in the same direction as they are inverted and the amp motor is negative
             shooterMotor.setVoltage(kAmpVoltage);
             ampMotor.setVoltage(-kAmpVoltage);
@@ -124,12 +124,12 @@ public class Gerald extends SubsystemBase {
     }
 
     public void toggleSpinupAmp() {
-        if (state.equals(State.PreparingAmp)) idle();
+        if (state == State.PreparingAmp) idle();
         else prepareAmp();
     }
 
     public void toggleSpinupShoot() {
-        if (state.equals(State.PreparingShoot)) idle();
+        if (state == State.PreparingShoot) idle();
         else prepareShoot();
     }
 
@@ -139,7 +139,7 @@ public class Gerald extends SubsystemBase {
     public void feed (){
         /* if the state is not already in amping, set the state to amping and the voltage to kAmpFeedVoltage, which
            will feed the note into the shooter */
-        if (!state.equals(State.Feeding)) {
+        if (state != State.Feeding) {
             intakeMotor.setVoltage(kAmpFeedVoltage);
             state = State.Feeding;
         }
@@ -168,7 +168,7 @@ public class Gerald extends SubsystemBase {
      * making the arm shake to much.
      */
     public void idle() {
-        if (!state.equals(State.Idling)) {
+        if (state != State.Idling) {
             shooterMotor.setVoltage(kIdleVoltage);
             ampMotor.setVoltage(kIdleVoltage);
             intakeMotor.setVoltage(0);
