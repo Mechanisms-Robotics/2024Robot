@@ -6,12 +6,8 @@ import com.mechlib.hardware.CANCoder;
 import com.mechlib.hardware.TalonFX;
 import com.mechlib.subsystems.SingleJointSubystem;
 import com.mechlib.util.MechUnits;
-import edu.wpi.first.math.controller.ArmFeedforward;
-import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /**
  * The arm that Gerald is attached to. It is directly connected to the swerve.
@@ -62,7 +58,6 @@ public class Arm extends SingleJointSubystem {
         SmartDashboard.putBoolean("[arm] disabled", disabled);
     }
 
-
     /**
      * Set arm to the stow position
      */
@@ -84,8 +79,6 @@ public class Arm extends SingleJointSubystem {
         System.out.println("kSubwooferHigh: " + kSubwooferHigh.getDegrees());
         pivotTo(kSubwooferHigh);
     }
-
-
 
     /**
      * Set arm to the shoot low subwoofer position
@@ -114,8 +107,6 @@ public class Arm extends SingleJointSubystem {
     public void amp() {
         pivotTo(kAmp);
     }
-
-
 
     /**
      * Stops voltage and disables all processes on the arm (PID etc)

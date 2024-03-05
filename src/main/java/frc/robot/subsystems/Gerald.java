@@ -45,7 +45,6 @@ public class Gerald extends SubsystemBase {
 
     private State state = State.Idling;
 
-
     public Gerald() {
         // set gerald motors to brake mode
         intakeMotor.brakeMode();
@@ -88,6 +87,9 @@ public class Gerald extends SubsystemBase {
         }
     }
 
+    /**
+     * If the state is in intaking, it spins up the intake motors, otherwise it idles
+     */
     public void toggleIntake() {
         if (!state.equals(State.Intaking)) intake();
         else idle();
@@ -123,11 +125,17 @@ public class Gerald extends SubsystemBase {
         }
     }
 
+    /**
+     * If the state is in PreparingAmp, it idles, otherwise it spins for amping
+     */
     public void toggleSpinupAmp() {
         if (state.equals(State.PreparingAmp)) idle();
         else prepareAmp();
     }
 
+    /**
+     * If the state is in PreparShoot in idles, otherwise it spins up for shooting
+     */
     public void toggleSpinupShoot() {
         if (state.equals(State.PreparingShoot)) idle();
         else prepareShoot();
