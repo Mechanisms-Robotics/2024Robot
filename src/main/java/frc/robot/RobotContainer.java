@@ -119,7 +119,7 @@ public class RobotContainer {
     xboxController2.povUp().onTrue(
             new StowPosition(armWrist)
     );
-    xboxController.povDown().whileTrue(
+    xboxController2.povDown().whileTrue(
             new Savery(armWrist)
     );
   }
