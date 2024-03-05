@@ -59,6 +59,14 @@ public class DriveWhileAim extends Command {
         addRequirements(swerve, limeLight, armWrist);
     }
 
+    /**
+     * Deadbands the controller.
+     * Returns 0 if the input is not more than kDeadBand.
+     * This is to account for joy con drift.
+     *
+     * @param val value to be deadbanded
+     * @return deadbanded value
+     */
     private double deadBand(double val) {
         return MathUtil.isNear(0, val, kDeadBand) ? 0 : val;
     }

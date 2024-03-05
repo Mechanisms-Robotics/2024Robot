@@ -63,7 +63,6 @@ public class Arm extends SingleJointSubystem {
         SmartDashboard.putBoolean("[arm] disabled", disabled);
     }
 
-
     /**
      * Set arm to the stow position
      */
@@ -85,8 +84,6 @@ public class Arm extends SingleJointSubystem {
         System.out.println("kSubwooferHigh: " + kSubwooferHigh.getDegrees());
         pivotTo(kSubwooferHigh);
     }
-
-
 
     /**
      * Set arm to the shoot low subwoofer position
@@ -116,6 +113,9 @@ public class Arm extends SingleJointSubystem {
         pivotTo(kAmp);
     }
 
+    /**
+     * Pivots to the shuttle position (kShuttle)
+     */
     public void shuttle() {
         pivotTo(kShuttle);
     }
@@ -129,13 +129,18 @@ public class Arm extends SingleJointSubystem {
         SmartDashboard.putBoolean("[arm] disabled", disabled);
     }
 
+    /**
+     * Sets the arm rotation to a given angle
+     *
+     * @param rotation
+     */
     public void aim(Rotation2d rotation) {
         pivotTo(rotation);
     }
 
     /**
      * Periodically output the data (right and left arm position) to SmartDashBoard. Do not run the arms if the robot
-     * is disabled. Runs the PIDFs if the robot is in closed loop.
+     * is disabled. Runs the PIDFs if the robot is in closed loop cuh.
      */
     @Override
     public void periodic() {

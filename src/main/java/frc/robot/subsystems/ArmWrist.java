@@ -116,6 +116,11 @@ public class ArmWrist extends SubsystemBase {
         }
     }
 
+    /**
+     * Shuttles the note across the floor.
+     * Useful for transporting notes to your side of the field.
+     * Sets the arm and wrist to their shuttle positions.
+     */
     public void shuttle() {
         if (safe) return; // do not run if in safe mode
         if (state != State.Shuttleing) {
@@ -126,7 +131,7 @@ public class ArmWrist extends SubsystemBase {
     }
 
     /**
-     * Set safe mode to true and set the arm and wrist to intaking
+     * Set safe mode to true and set the arm and wrist to intaking cuh
      */
     public void enableSafeMode() {
         intake();
@@ -140,6 +145,12 @@ public class ArmWrist extends SubsystemBase {
         safe = false;
     }
 
+    /**
+     * Aims the arm and wrist at the given angles
+     *
+     * @param desiredArmRotation angle of the arm
+     * @param desiredWristRotation angle of the wrist
+     */
     public void aim(Rotation2d desiredArmRotation, Rotation2d desiredWristRotation) {
         if (safe) return;
         if (state != State.Aiming) state = State.Aiming;
