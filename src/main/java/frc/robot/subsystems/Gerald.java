@@ -14,13 +14,15 @@ import frc.util6328.Alert.AlertType;
 public class Gerald extends SubsystemBase {
     private static final double kIntakeVoltage = 6; // volts
     private static final double kOuttakeVoltage = -5; // volts
-    private static final double kShooterVoltage = 8;
+    private static final double kShooterVoltage = 8; // volts
     private static final double kAmpVoltage = 5; // volts
     private static final double kIdleVoltage = 2;
     private static final double kAmpFeedVoltage = 3;
-    private static final double kIntakeDetectDelay = 0.0625;
+    private static final double kIntakeDetectDelay = 0.0001;
     private static final double kFeedDetectDelay = 0.5;
     private static final Timer detectDelayTimer = new Timer();
+    private final DigitalInput noteSensor = new DigitalInput(8);
+    private final DigitalInput noteSensorConfirm = new DigitalInput(9);
     private final Alert unexpectedNote =
             new Alert("an unexpected note was detected in gerald after feeding it to the shooter",
                     AlertType.ERROR);
@@ -33,8 +35,6 @@ public class Gerald extends SubsystemBase {
     // only shoots
     private final TalonFX shooterMotor = new TalonFX(16);
 
-    private final DigitalInput noteSensor = new DigitalInput(8);
-    private final DigitalInput noteSensorConfirm = new DigitalInput(9);
 
     public enum State {
         Idling,
@@ -44,8 +44,8 @@ public class Gerald extends SubsystemBase {
         PreparingShoot
     }
 
-    private State state = State.Idling;
 
+    private State state = State.Idling;
 
     public Gerald() {
         // set gerald motors to brake mode
@@ -89,6 +89,9 @@ public class Gerald extends SubsystemBase {
         }
     }
 
+    /**
+     * If the state is in intaking, it spins up the intake motors, otherwise it idles
+     */
     public void toggleIntake() {
         if (state != State.Intaking) intake();
         else idle();
@@ -124,11 +127,17 @@ public class Gerald extends SubsystemBase {
         }
     }
 
+    /**
+     * If the state is in PreparingAmp, it idles, otherwise it spins for amping
+     */
     public void toggleSpinupAmp() {
         if (state == State.PreparingAmp) idle();
         else prepareAmp();
     }
 
+    /**
+     * If the state is in PreparShoot in idles, otherwise it spins up for shooting
+     */
     public void toggleSpinupShoot() {
         if (state == State.PreparingShoot) idle();
         else prepareShoot();
