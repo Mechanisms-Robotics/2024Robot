@@ -33,8 +33,8 @@ public class Gerald extends SubsystemBase {
     // only shoots
     private final TalonFX shooterMotor = new TalonFX(16);
 
-    private final DigitalInput noteSensor = new DigitalInput(0);
-    private final DigitalInput noteSensorConfirm = new DigitalInput(1);
+    private final DigitalInput noteSensor = new DigitalInput(8);
+    private final DigitalInput noteSensorConfirm = new DigitalInput(9);
 
     public enum State {
         Idling,
