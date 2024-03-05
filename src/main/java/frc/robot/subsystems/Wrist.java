@@ -7,6 +7,7 @@ import com.mechlib.hardware.TalonFX;
 import com.mechlib.subsystems.SingleJointSubystem;
 import com.mechlib.util.MechUnits;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
@@ -32,9 +33,12 @@ public class Wrist extends SingleJointSubystem {
     private static final Rotation2d kPodiumHigh = Rotation2d.fromDegrees(115);
     private static final Rotation2d kPodiumLow = kSubwooferLow;
     private static final Rotation2d kAmp = Rotation2d.fromDegrees(90);
+    private static final Rotation2d kShuttle = Rotation2d.fromDegrees((125));
     private static final Rotation2d kForwardLimit = Rotation2d.fromDegrees(125);
     private static final Rotation2d kReverseLimit = Rotation2d.fromDegrees(85);
     private boolean disabled = false;
+    private double wristAdjustment = 0;
+    private final SendableChooser<Double> adjustmentAmount = new SendableChooser<>();
 
     public Wrist() {
         addMotor(WristMotor, true);
@@ -48,6 +52,11 @@ public class Wrist extends SingleJointSubystem {
         setPPIDGains(0.4, 0.0, 0.0);
         setPPIDConstraints(Math.PI, 2*Math.PI);
         setTolerance(kTolerance);
+
+        adjustmentAmount.addOption("^", -1./2.);
+        adjustmentAmount.setDefaultOption("None", 0.);
+        adjustmentAmount.addOption("v", 1./2.);
+        SmartDashboard.putData("Shot Adjustment", adjustmentAmount);
     }
 
     /**
@@ -68,28 +77,28 @@ public class Wrist extends SingleJointSubystem {
      * Set arm to the shoot high subwoofer position
      */
     public void shootHighSubwoofer() {
-        pivotTo(kSubwooferHigh);
+        pivotTo(kSubwooferHigh.plus(Rotation2d.fromDegrees(wristAdjustment)));
     }
 
     /**
      * Set arm to the shoot low subwoofer position
      */
     public void shootLowSubwoofer() {
-        pivotTo(kSubwooferLow);
+        pivotTo(kSubwooferLow.plus(Rotation2d.fromDegrees(wristAdjustment)));
     }
 
     /**
      * Set arm to the shoot high podium position
      */
     public void shootHighPodium() {
-        pivotTo(kPodiumHigh);
+        pivotTo(kPodiumHigh.plus(Rotation2d.fromDegrees(wristAdjustment)));
     }
 
     /**
      * Set arm to the shoot low podium position
      */
     public void shootLowPodium() {
-        pivotTo(kPodiumLow);
+        pivotTo(kPodiumLow.plus(Rotation2d.fromDegrees(wristAdjustment)));
     }
 
     /**
@@ -99,8 +108,12 @@ public class Wrist extends SingleJointSubystem {
         pivotTo(kAmp);
     }
 
+    public void shuttle() {
+        pivotTo(kShuttle);
+    }
+
     public void aim(Rotation2d rotation) {
-        pivotTo(rotation);
+        pivotTo(rotation.plus(Rotation2d.fromDegrees(wristAdjustment)));
     }
 
     /**
@@ -109,11 +122,12 @@ public class Wrist extends SingleJointSubystem {
      */
     @Override
     public void periodic() {
-        if (getAngle().getDegrees() < 0) disabled = true;
-        if (disabled) return;
-        super.periodic();
         SmartDashboard.putNumber("[wrist] Wrist position", WristMotor.getRawPosition());
         SmartDashboard.putNumber("[wrist] current angle", getAngle().getDegrees());
         SmartDashboard.putNumber("[wrist] desired angle", getDesiredAngle().getDegrees());
+        if (getAngle().getDegrees() < 0) disabled = true;
+        if (disabled) return;
+        super.periodic();
+        wristAdjustment = adjustmentAmount.getSelected();
     }
 }

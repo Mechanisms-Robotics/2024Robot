@@ -108,16 +108,18 @@ public class RobotContainer {
     xboxController2.a().onTrue(
             new IntakePosition(armWrist)
     );
+//    xboxController2.b().onTrue(
+//            new MoveTestaThing(swerve).withTimeout(0.25)
+//    );
+    xboxController2.b().onTrue(
+            new ShuttleNote(armWrist, gerald)
+    );
 
     xboxController2.povUp().onTrue(
             new StowPosition(armWrist)
     );
     xboxController2.povDown().whileTrue(
             new Savery(armWrist)
-    );
-    xboxController.rightStick().whileTrue(
-            new DriveWhileAim(swerve, limeLight, armWrist,
-                  () -> -xboxController.getLeftY(), () -> -xboxController.getLeftX(), () -> -xboxController.getRightX())
     );
   }
 
@@ -129,7 +131,7 @@ public class RobotContainer {
             () -> -xboxController.getLeftX(),
             () -> -xboxController.getRightX(),
             0.1,
-            4.5,
+            0.5,
             5,
             Math.PI,
             2*Math.PI,

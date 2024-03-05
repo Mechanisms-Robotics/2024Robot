@@ -18,7 +18,8 @@ public class ArmWrist extends SubsystemBase {
         Amping,
         ShootingSubwoofer,
         ShootingPodium,
-        Aiming
+        Aiming,
+        Shuttleing
     }
     private State state;
     private boolean lowMode = false;
@@ -115,6 +116,15 @@ public class ArmWrist extends SubsystemBase {
         }
     }
 
+    public void shuttle() {
+        if (safe) return; // do not run if in safe mode
+        if (state != State.Shuttleing) {
+            arm.shuttle();
+            wrist.shuttle();
+            state = State.Shuttleing;
+        }
+    }
+
     /**
      * Set safe mode to true and set the arm and wrist to intaking
      */
@@ -147,6 +157,7 @@ public class ArmWrist extends SubsystemBase {
             case Intaking -> intake();
             case ShootingSubwoofer -> subwooferShoot(lowMode);
             case ShootingPodium -> podiumShoot(lowMode);
+            case Shuttleing -> shuttle();
         }
     }
 }

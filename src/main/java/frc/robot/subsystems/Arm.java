@@ -40,6 +40,7 @@ public class Arm extends SingleJointSubystem {
     private static final Rotation2d kAmp = Rotation2d.fromDegrees(95);
     private static final double kSensorRatio = 64.0/16.0;
     private static final double kMotorRatio = 60 * kSensorRatio;
+    private static final Rotation2d kShuttle = Rotation2d.fromDegrees(15);
     private static final Rotation2d kForwardLimit = Rotation2d.fromDegrees(95);
     private static final Rotation2d kReverseLimit = Rotation2d.fromDegrees(3);
     private static final double kAllowableDifference = 7.5;
@@ -115,7 +116,9 @@ public class Arm extends SingleJointSubystem {
         pivotTo(kAmp);
     }
 
-
+    public void shuttle() {
+        pivotTo(kShuttle);
+    }
 
     /**
      * Stops voltage and disables all processes on the arm (PID etc)
