@@ -17,12 +17,26 @@ public class LimeLight extends SubsystemBase {
     private double yaw = 0;
     private double area = 0;
 
+    /**
+     * Data of the LimeLight
+     *
+     * @param yaw angle made by the center of the camera and the target
+     * @param area % area that the target takes up on the camera, used for distance
+     * @param hasTarget true if the camera sees an AprilTag otherwise false
+     */
+
     public record LimeLightData(
             double yaw,
             double area,
             boolean hasTarget
     ) {}
 
+    /**
+     * Returns all of the data of the LimeLight.
+     * hasTarget is true if the area is not 0 (if the target is not showing on the camera.
+     *
+     * @return data of the LimeLight: yaw, area, and hasTarget
+     */
     public LimeLightData getData() {
         return new LimeLightData(yaw, area, area!=0);
     }
