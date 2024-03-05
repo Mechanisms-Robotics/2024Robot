@@ -34,6 +34,7 @@ public class Gerald extends SubsystemBase {
     private final TalonFX shooterMotor = new TalonFX(16);
 
     private final DigitalInput noteSensor = new DigitalInput(0);
+    private final DigitalInput noteSensorConfirm = new DigitalInput(1);
 
     public enum State {
         Idling,
@@ -177,12 +178,13 @@ public class Gerald extends SubsystemBase {
     }
 
     /**
-     * Returns a boolean of whether the note sensor detected anything
+     * Returns a boolean of whether the note sensors detected anything.
+     * Both sensors have to detect something in order for it to return true.
      *
      * @return if the note sensor detected anything
      */
     public boolean noteDetected() {
-        return !noteSensor.get();
+        return !noteSensor.get()&&!noteSensorConfirm.get();
     }
 
     @Override
