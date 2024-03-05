@@ -15,10 +15,12 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class Arm extends SingleJointSubystem {
     // true if the arm runs in open loop, false if it runs in closed loop
     private static final boolean kOpenLoop = true;
+    // rotations as detected by the CanCoder at the start position if there was no offset
+    private static final double kIdealStartRotation = 1.0533;
     // left arm motor magnet offset (acquired in Phoenix Tuner X)
-    private static final double kLeftMagnetOffset = 1 - 0.614502;
+    private static final double kLeftMagnetOffset = kIdealStartRotation - 0.754883;
     // right arm motor magnet offset
-    private static final double kRightMagnetOffset = 1 - 0.346680;
+    private static final double kRightMagnetOffset = kIdealStartRotation - 0.484131;
     // right arm TalonFX motor and it's can coder
     private final TalonFX rightArmMotor = new TalonFX(13, new CANCoder(13, kRightMagnetOffset, AbsoluteSensorRangeValue.Unsigned_0To1, SensorDirectionValue.Clockwise_Positive));
     // left arm TalonFX motor with it's can coder
@@ -29,14 +31,14 @@ public class Arm extends SingleJointSubystem {
     private static final double kTolerance = Math.toRadians(1);
     private static final Rotation2d kStowed = Rotation2d.fromDegrees(60);
     private static final Rotation2d kIntaking = Rotation2d.fromDegrees(4);
-    private static final Rotation2d kSubwooferHigh = Rotation2d.fromDegrees(95);
+    private static final Rotation2d kSubwooferHigh = Rotation2d.fromDegrees(94);
     private static final Rotation2d kSubwooferLow = Rotation2d.fromDegrees(10);
     private static final Rotation2d kPodiumHigh = kSubwooferHigh;
     private static final Rotation2d kPodiumLow = kSubwooferLow;
-    private static final Rotation2d kAmp = Rotation2d.fromDegrees(95);
+    private static final Rotation2d kAmp = Rotation2d.fromDegrees(94);
     private static final double kSensorRatio = 64.0/16.0;
     private static final double kMotorRatio = 60 * kSensorRatio;
-    private static final Rotation2d kForwardLimit = Rotation2d.fromDegrees(95);
+    private static final Rotation2d kForwardLimit = Rotation2d.fromDegrees(94);
     private static final Rotation2d kReverseLimit = Rotation2d.fromDegrees(3);
     private static final double kAllowableDifference = 7.5;
     // safety disable feature, triggered by the secondary driver when x is pressed

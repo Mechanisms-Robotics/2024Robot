@@ -6,12 +6,19 @@ package frc.robot;
 
 
 import com.mechlib.commands.SwerveTeleopDriveCommand;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.*;
 import frc.robot.commands.autos.TimedShootLeave;
 import frc.robot.subsystems.*;
+
+import javax.lang.model.element.ModuleElement;
+import java.util.Optional;
 
 public class RobotContainer {
   private final SendableChooser<Command> routineChooser = new SendableChooser<>();
@@ -27,6 +34,7 @@ public class RobotContainer {
   private final CommandXboxController xboxController2 = new CommandXboxController(1);
 
   private final SendableChooser<Command> m_chooser = new SendableChooser<>();
+  private static final double kEndGameTime = 250.0;
 
   public RobotContainer() {
     configureBindings();
@@ -122,6 +130,14 @@ public class RobotContainer {
     xboxController2.povDown().whileTrue(
             new Savery(armWrist)
     );
+
+    XboxController rumble = new XboxController(0);
+    XboxController rumble2 = new XboxController(1);
+    new Trigger(
+            () -> DriverStation.isTeleopEnabled()
+            && DriverStation.getMatchTime() > 0
+            && DriverStation.getMatchTime() <= kEndGameTime)
+            .onTrue(new Rumble(rumble, rumble2));
   }
 
   private void configureDefaultCommands() {
