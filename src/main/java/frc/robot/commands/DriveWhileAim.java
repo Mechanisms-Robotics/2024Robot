@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.ArmWrist;
 import frc.robot.subsystems.LimeLight;
+import frc.robot.subsystems.LimeLight.LimeLightData;
 import frc.robot.subsystems.Swerve;
 
 import java.util.function.Supplier;
@@ -77,11 +78,12 @@ public class DriveWhileAim extends Command {
         double vx = xLimiter.calculate(deadBand(xVal.get()) * kMaxVelocity);
         double vy = yLimiter.calculate(deadBand(yVal.get()) * kMaxVelocity);
         double vomega;
+        LimeLightData limeLightData = limeLight.getData();
 
-        if (!limeLight.hasTarget()) vomega = omegaLimiter.calculate(deadBand(rVal.get()) * kMaxOmega);
+        if (!limeLightData.hasTarget()) vomega = omegaLimiter.calculate(deadBand(rVal.get()) * kMaxOmega);
         else {
-            vomega = controller.calculate(limeLight.getYaw(), 0);
-            Rotation2d desiredWristRotation = Rotation2d.fromDegrees(wristAimMap.get(limeLight.getArea()));
+            vomega = controller.calculate(limeLightData.yaw(), 0);
+            Rotation2d desiredWristRotation = Rotation2d.fromDegrees(wristAimMap.get(limeLightData.area()));
             armWrist.aim(desiredArmRotation, desiredWristRotation);
         }
         SmartDashboard.putNumber("[Drive While Aim] omega", vomega);
