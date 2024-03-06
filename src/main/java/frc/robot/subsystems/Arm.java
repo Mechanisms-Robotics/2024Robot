@@ -37,7 +37,7 @@ public class Arm extends SingleJointSubystem {
     private static final Rotation2d kPodiumLow = kSubwooferLow;
     private static final Rotation2d kAmp = Rotation2d.fromDegrees(94);
     private static final Rotation2d kPrepClimb = Rotation2d.fromDegrees(90);
-    private static final Rotation2d kClimb = Rotation2d.fromDegrees(60);
+    private static final Rotation2d kClimb = Rotation2d.fromDegrees(20);
     private static final double kSensorRatio = 64.0/16.0;
     private static final double kMotorRatio = 60 * kSensorRatio;
     private static final Rotation2d kShuttle = Rotation2d.fromDegrees(60);
@@ -113,10 +113,18 @@ public class Arm extends SingleJointSubystem {
         pivotTo(kAmp);
     }
 
+    /**
+     * Set the arm to the preparing climb position.
+     * Preparing the climb brings the Arm to the position so that Gerald can go over the chain.
+     */
     public void prepClimb() {
         pivotTo(kPrepClimb);
     }
 
+    /**
+     * Set the arm to the climb position.
+     * This is when the arm folds down, bringing the robot up
+     */
     public void climb() {
         pivotTo(kClimb);
     }
@@ -135,6 +143,10 @@ public class Arm extends SingleJointSubystem {
         stop();
         disabled = true;
         SmartDashboard.putBoolean("[arm] disabled", disabled);
+    }
+
+    public void unDisable() {
+        disabled = false;
     }
 
     /**

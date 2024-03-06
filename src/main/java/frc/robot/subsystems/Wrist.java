@@ -34,8 +34,8 @@ public class Wrist extends SingleJointSubystem {
     private static final Rotation2d kPodiumHigh = Rotation2d.fromDegrees(115);
     private static final Rotation2d kPodiumLow = kSubwooferLow;
     private static final Rotation2d kAmp = Rotation2d.fromDegrees(90);
-    private static final Rotation2d kPrepClimb = Rotation2d.fromDegrees(130);
-    private static final Rotation2d kClimb = Rotation2d.fromDegrees(85);
+    private static final Rotation2d kPrepClimb = Rotation2d.fromDegrees(110);
+    private static final Rotation2d kClimb = Rotation2d.fromDegrees(110);
     private static final Rotation2d kShuttle = Rotation2d.fromDegrees(130);
     private static final Rotation2d kForwardLimit = Rotation2d.fromDegrees(130);
     private static final Rotation2d kReverseLimit = Rotation2d.fromDegrees(85);

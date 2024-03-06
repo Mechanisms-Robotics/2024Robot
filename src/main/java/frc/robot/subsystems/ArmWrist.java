@@ -147,6 +147,9 @@ public class ArmWrist extends SubsystemBase {
         safe = false;
     }
 
+    /**
+     * Sets the arm and the wrist positions
+     */
     public void prepClimb() {
         if (safe) return;
         if (state != State.PrepClimb) {
@@ -155,6 +158,7 @@ public class ArmWrist extends SubsystemBase {
             state = State.PrepClimb;
         }
     }
+
 
     public void climb() {
         if (safe) return;

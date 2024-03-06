@@ -94,7 +94,7 @@ public class RobotContainer {
     );
 
     xboxController2.leftStick().onTrue(
-            new ZeroGyro(swerve)
+            new UnDisable(arm)
     );
     // -----------------Right-----------------
     xboxController2.rightTrigger().onTrue(
@@ -133,7 +133,9 @@ public class RobotContainer {
     xboxController2.povUp().onTrue(
             new StowPosition(armWrist)
     );
-    xboxController2.povDown().whileTrue(
+    xboxController2.povDown(
+
+    ).whileTrue(
             new Savery(armWrist)
     );
 
