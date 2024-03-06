@@ -13,10 +13,10 @@ import frc.util6328.Alert.AlertType;
  */
 public class Gerald extends SubsystemBase {
     private static final double kIntakeVoltage = 6; // volts
-    private static final double kOuttakeVoltage = -5; // volts
+    private static final double kOuttakeVoltage = -3; // volts
     private static final double kShooterVoltage = 8; // volts
     private static final double kAmpVoltage = 5; // volts
-    private static final double kIdleVoltage = 2;
+    private static final double kIdleVoltage = 4;
     private static final double kAmpFeedVoltage = 3;
     private static final double kIntakeDetectDelay = 0.0001;
     private static final double kFeedDetectDelay = 0.5;
@@ -41,7 +41,8 @@ public class Gerald extends SubsystemBase {
         Feeding,
         Intaking,
         PreparingAmp,
-        PreparingShoot
+        PreparingShoot,
+        Outtaking
     }
 
 
@@ -101,7 +102,10 @@ public class Gerald extends SubsystemBase {
      * Sets the outtake motor speed (voltage) to kOuttakeVoltage
      */
     public void outtake() {
-        intakeMotor.setVoltage(kOuttakeVoltage);
+        if (state!=State.Outtaking) {
+            intakeMotor.setVoltage(kOuttakeVoltage);
+            state = State.Outtaking;
+        }
     }
 
     /**
@@ -206,6 +210,7 @@ public class Gerald extends SubsystemBase {
             case Intaking -> intake();
             case PreparingAmp -> prepareAmp();
             case PreparingShoot -> prepareShoot();
+            case Outtaking -> outtake();
         }
     }
 }

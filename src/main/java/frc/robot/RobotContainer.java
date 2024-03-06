@@ -62,26 +62,30 @@ public class RobotContainer {
             new FeedNote(gerald)
     );
 
-    xboxController.y().onTrue(
-            new PodiumHighPosition(armWrist)
-    );
-
-    xboxController.b().onTrue(
-            new SubwooferLowPosition(armWrist)
-    );
+    xboxController.rightStick().onTrue(
+            new OuttakeCommand(gerald)
+    ).onFalse(new Idle(gerald));
 
     xboxController.x().onTrue(
             new SubwooferHighPosition(armWrist)
     );
 
+    xboxController.y().onTrue(
+            new PodiumHighPosition(armWrist)
+    );
+
     xboxController.a().onTrue(
             new IntakePosition(armWrist)
+    );
+    xboxController.b().onTrue(
+            new SubwooferLowPosition(armWrist)
     );
 
     ////////////////////
     //Secondary Driver//
     ////////////////////
 
+    // -----------------Left-----------------
     xboxController.leftStick().onTrue(
             new ZeroGyro(swerve)
     );
@@ -93,7 +97,7 @@ public class RobotContainer {
     xboxController2.leftBumper().onTrue(
             new SubwooferHighPosition(armWrist)
     );
-
+    // -----------------Right-----------------
     xboxController2.rightTrigger().onTrue(
             new PodiumLowPosition(armWrist)
     );
@@ -101,6 +105,7 @@ public class RobotContainer {
     xboxController2.rightBumper().onTrue(
             new PodiumHighPosition(armWrist)
     );
+
 
     xboxController2.y().onTrue(
             new SubwooferLowPosition.DisableArm(arm)
@@ -120,7 +125,7 @@ public class RobotContainer {
 //            new MoveTestaThing(swerve).withTimeout(0.25)
 //    );
     xboxController2.b().onTrue(
-            new ShuttleNote(armWrist, gerald)
+            new ShuttleNote(armWrist)
     );
 
     xboxController2.povUp().onTrue(
@@ -147,7 +152,7 @@ public class RobotContainer {
             () -> -xboxController.getLeftX(),
             () -> -xboxController.getRightX(),
             0.1,
-            0.5,
+            1,
             5,
             Math.PI,
             2*Math.PI,

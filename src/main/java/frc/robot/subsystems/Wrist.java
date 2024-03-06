@@ -18,7 +18,8 @@ public class Wrist extends SingleJointSubystem {
     private static final double kMotorRatio = 25.0 * kSensorRatio;
     private static final double kStartRotations = 0.29027778;
     // left arm motor magnet offset (acquired in Phoenix Tuner X)
-    private static final double kMagnetOffset = (kSensorRatio * kStartRotations) - 0.609619;
+    private static final double kMagnetOffset = (kSensorRatio * kStartRotations) - 0.597656;
+
     // right arm motor magnet offset
     // right arm TalonFX motor and it's can coder
     private final TalonFX WristMotor = new TalonFX(17, new CANCoder(17, kMagnetOffset, AbsoluteSensorRangeValue.Unsigned_0To1, SensorDirectionValue.CounterClockwise_Positive));
@@ -27,14 +28,14 @@ public class Wrist extends SingleJointSubystem {
        for different mechanical structures, such as belt tensioning */
     private static final double kTolerance = Math.toRadians(0.5);
     private static final Rotation2d kStowed = Rotation2d.fromDegrees(90);
-    private static final Rotation2d kIntaking = Rotation2d.fromDegrees(90);
+    private static final Rotation2d kIntaking = Rotation2d.fromDegrees(87.5);
     private static final Rotation2d kSubwooferHigh = Rotation2d.fromDegrees(90);
     private static final Rotation2d kSubwooferLow = Rotation2d.fromDegrees(95);
     private static final Rotation2d kPodiumHigh = Rotation2d.fromDegrees(115);
     private static final Rotation2d kPodiumLow = kSubwooferLow;
     private static final Rotation2d kAmp = Rotation2d.fromDegrees(90);
-    private static final Rotation2d kShuttle = Rotation2d.fromDegrees((125));
-    private static final Rotation2d kForwardLimit = Rotation2d.fromDegrees(125);
+    private static final Rotation2d kShuttle = Rotation2d.fromDegrees(130);
+    private static final Rotation2d kForwardLimit = Rotation2d.fromDegrees(130);
     private static final Rotation2d kReverseLimit = Rotation2d.fromDegrees(85);
     private boolean disabled = false;
     private double wristAdjustment = 0;
@@ -50,7 +51,7 @@ public class Wrist extends SingleJointSubystem {
         setLimits(kReverseLimit, kForwardLimit, kMotorRatio);
         setFeedforwardGains(0.15, 0, 0.0, 0.0);
         setPPIDGains(0.4, 0.0, 0.0);
-        setPPIDConstraints(Math.PI, 2*Math.PI);
+        setPPIDConstraints(Math.PI/4, Math.PI/2);
         setTolerance(kTolerance);
 
         adjustmentAmount.addOption("^", -1./2.);

@@ -5,11 +5,9 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
-import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.RobotContainer;
 import frc.robot.subsystems.ArmWrist;
 import frc.robot.subsystems.LimeLight;
 import frc.robot.subsystems.LimeLight.LimeLightData;
@@ -41,12 +39,14 @@ public class DriveWhileAim extends Command {
     private static final InterpolatingDoubleTreeMap wristAimMap = new InterpolatingDoubleTreeMap();
     // create the wristAimMap interpolating treemap
     static {
-        wristAimMap.put(00.00, 90.);
-        wristAimMap.put(0.135, 115.5);
-        wristAimMap.put(0.22, 113.);
-        wristAimMap.put(0.43, 100.);
-        wristAimMap.put(1., 90.);
-        wristAimMap.put(1000., 90.);
+        wristAimMap.put(00.00, 120.);
+        wristAimMap.put(0.30, 110.5);
+        wristAimMap.put(0.36, 107.5);
+        wristAimMap.put(0.43, 105.);
+        wristAimMap.put(0.56, 102.5);
+        wristAimMap.put(0.67, 100.);
+        wristAimMap.put(0.875, 95.);
+        wristAimMap.put(100., 95.);
     }
     private static final ProfiledPIDController controller = new ProfiledPIDController(.1, 0, 0, new Constraints(kMaxOmega, kMaxOmegaAcceleration));
     public DriveWhileAim(Swerve swerve, LimeLight limeLight, ArmWrist armWrist,

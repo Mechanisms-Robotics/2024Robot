@@ -18,9 +18,9 @@ public class Arm extends SingleJointSubystem {
     // rotations as detected by the CanCoder at the start position if there was no offset
     private static final double kIdealStartRotation = 1.0533;
     // left arm motor magnet offset (acquired in Phoenix Tuner X)
-    private static final double kLeftMagnetOffset = kIdealStartRotation - 0.754883;
+    private static final double kLeftMagnetOffset = kIdealStartRotation - 0.735840;
     // right arm motor magnet offset
-    private static final double kRightMagnetOffset = kIdealStartRotation - 0.484131;
+    private static final double kRightMagnetOffset = kIdealStartRotation - 0.467041;
     // right arm TalonFX motor and it's can coder
     private final TalonFX rightArmMotor = new TalonFX(13, new CANCoder(13, kRightMagnetOffset, AbsoluteSensorRangeValue.Unsigned_0To1, SensorDirectionValue.Clockwise_Positive));
     // left arm TalonFX motor with it's can coder
@@ -30,7 +30,7 @@ public class Arm extends SingleJointSubystem {
        for different mechanical structures, such as belt tensioning */
     private static final double kTolerance = Math.toRadians(1);
     private static final Rotation2d kStowed = Rotation2d.fromDegrees(60);
-    private static final Rotation2d kIntaking = Rotation2d.fromDegrees(4);
+    private static final Rotation2d kIntaking = Rotation2d.fromDegrees(2);
     private static final Rotation2d kSubwooferHigh = Rotation2d.fromDegrees(94);
     private static final Rotation2d kSubwooferLow = Rotation2d.fromDegrees(15);
     private static final Rotation2d kPodiumHigh = kSubwooferHigh;
@@ -38,9 +38,9 @@ public class Arm extends SingleJointSubystem {
     private static final Rotation2d kAmp = Rotation2d.fromDegrees(94);
     private static final double kSensorRatio = 64.0/16.0;
     private static final double kMotorRatio = 60 * kSensorRatio;
-    private static final Rotation2d kShuttle = Rotation2d.fromDegrees(15);
+    private static final Rotation2d kShuttle = Rotation2d.fromDegrees(60);
     private static final Rotation2d kForwardLimit = Rotation2d.fromDegrees(94);
-    private static final Rotation2d kReverseLimit = Rotation2d.fromDegrees(3);
+    private static final Rotation2d kReverseLimit = Rotation2d.fromDegrees(2);
     private static final double kAllowableDifference = 7.5;
     // safety disable feature, triggered by the secondary driver when x is pressed
     private boolean disabled = false;

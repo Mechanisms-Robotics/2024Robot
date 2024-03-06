@@ -6,8 +6,8 @@ import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import frc.robot.subsystems.ArmWrist;
 import frc.robot.subsystems.Gerald;
 
-public class ShuttleNote extends ParallelCommandGroup {
-    public ShuttleNote(ArmWrist armWrist, Gerald gerald) {
-        addCommands(new InstantCommand(armWrist::shuttle), new InstantCommand(gerald::prepareShoot));
+public class ShuttleNote extends InstantCommand {
+    public ShuttleNote(ArmWrist armWrist) {
+        super(armWrist::shuttle);
     }
 }
