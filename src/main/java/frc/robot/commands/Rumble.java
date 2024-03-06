@@ -15,6 +15,7 @@ public class Rumble extends SequentialCommandGroup {
      * @param controller controller for the rumble to be applied to
      */
     public Rumble(XboxController controller) {
+        System.out.println("Rumble");
         addCommands(
                 new InstantCommand(
                         () -> controller.setRumble(GenericHID.RumbleType.kBothRumble, kValue)),

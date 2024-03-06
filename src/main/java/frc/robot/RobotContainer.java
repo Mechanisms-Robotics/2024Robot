@@ -45,6 +45,8 @@ public class RobotContainer {
     //////////////////
     //Primary Driver//
     //////////////////
+
+    // -----------------Left-----------------
     xboxController.leftTrigger().onTrue(
             new ToggleIntake(gerald)
     );
@@ -53,6 +55,11 @@ public class RobotContainer {
             new ToggleSpinupAmp(gerald)
     );
 
+    xboxController.leftStick().onTrue(
+            new ZeroGyro(swerve)
+    );
+
+    // -----------------Right-----------------
     xboxController.rightBumper().onTrue(
             new ToggleSpinupShoot(gerald)
     );
@@ -133,19 +140,9 @@ public class RobotContainer {
     xboxController2.povUp().onTrue(
             new StowPosition(armWrist)
     );
-    xboxController2.povDown(
-
-    ).whileTrue(
+    xboxController2.povDown().whileTrue(
             new Savery(armWrist)
     );
-
-    XboxController rumble = new XboxController(0);
-    XboxController rumble2 = new XboxController(1);
-    new Trigger(
-            () -> DriverStation.isTeleopEnabled()
-            && DriverStation.getMatchTime() > 0
-            && DriverStation.getMatchTime() <= kEndGameTime)
-            .onTrue(new Rumble(rumble, rumble2));
   }
 
   private void configureDefaultCommands() {
