@@ -62,7 +62,9 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
-    m_robotContainer.swerve.driveOpenLoop();
+    if (!Robot.isSimulation()) {
+      m_robotContainer.swerve.driveOpenLoop();
+    }
   }
 
   @Override
