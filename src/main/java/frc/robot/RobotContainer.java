@@ -7,18 +7,13 @@ package frc.robot;
 
 import com.mechlib.commands.SwerveTeleopDriveCommand;
 import com.pathplanner.lib.auto.NamedCommands;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.XboxController;
+import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.*;
-import frc.robot.commands.autos.TimedShootLeave;
 import frc.robot.subsystems.*;
-
-import javax.lang.model.element.ModuleElement;
-import java.util.Optional;
 
 public class RobotContainer {
   private final SendableChooser<Command> routineChooser = new SendableChooser<>();
@@ -46,6 +41,9 @@ public class RobotContainer {
     NamedCommands.registerCommand("shoot", new FeedNote(gerald));
     NamedCommands.registerCommand("aimSubwooferHigh", new SubwooferHighPosition(armWrist));
 
+    m_chooser.setDefaultOption("TuningL", new PathPlannerAuto("TuningL"));
+
+    SmartDashboard.putData("Auto Chooser", m_chooser);
     configureDefaultCommands();
   }
 
@@ -169,5 +167,5 @@ public class RobotContainer {
     ));
   }
 
-  public Command getAutonomousCommand() { return new TimedShootLeave(swerve, gerald, armWrist); }
+  public Command getAutonomousCommand() { return m_chooser.getSelected(); }
 }

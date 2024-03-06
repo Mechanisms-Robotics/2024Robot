@@ -3,6 +3,7 @@
   "waypoints": [
     {
       "anchor": {
+<<<<<<< HEAD:src/main/deploy/pathplanner/paths/SubRNoteR.path
         "x": 0.75,
         "y": 4.45
       },
@@ -10,18 +11,36 @@
       "nextControl": {
         "x": 1.3321496258377132,
         "y": 4.588137199351322
+=======
+        "x": 2.5,
+        "y": 5.55
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 1.2172969513091636,
+        "y": 5.461204495771967
+>>>>>>> auto:src/main/deploy/pathplanner/paths/New Path.path
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
+<<<<<<< HEAD:src/main/deploy/pathplanner/paths/SubRNoteR.path
         "x": 2.25,
         "y": 4.4
       },
       "prevControl": {
         "x": 1.8750444586973543,
         "y": 4.538105398716131
+=======
+        "x": 2.3,
+        "y": 4.15
+      },
+      "prevControl": {
+        "x": 1.2999999999999998,
+        "y": 4.15
+>>>>>>> auto:src/main/deploy/pathplanner/paths/New Path.path
       },
       "nextControl": null,
       "isLocked": false,
@@ -45,7 +64,11 @@
   "reversed": false,
   "folder": null,
   "previewStartingState": {
+<<<<<<< HEAD:src/main/deploy/pathplanner/paths/SubRNoteR.path
     "rotation": -60.0,
+=======
+    "rotation": 0,
+>>>>>>> auto:src/main/deploy/pathplanner/paths/New Path.path
     "velocity": 0
   },
   "useDefaultConstraints": true

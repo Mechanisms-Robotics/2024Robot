@@ -2,6 +2,7 @@ package com.mechlib.commands;
 
 import com.mechlib.swerve.SwerveDrive;
 import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import java.util.function.Supplier;
 
@@ -106,6 +107,7 @@ public class SwerveTeleopDriveCommand extends Command {
 
   @Override
   public void execute() {
+    if (DriverStation.isAutonomous()) return;
     // Calculate velocities
     double vx = vxLimiter.calculate(deadband(xSupplier.get()) * maxVelocity);
     double vy = vyLimiter.calculate(deadband(ySupplier.get()) * maxVelocity);

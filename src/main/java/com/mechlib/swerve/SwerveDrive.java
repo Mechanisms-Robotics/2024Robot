@@ -398,6 +398,7 @@ public class SwerveDrive extends SubsystemBase {
     // Reset simulated heading
     if (Robot.isSimulation()) {
       simHeading = pose.getRotation();
+      System.out.println(pose.getRotation().getDegrees());
     }
   }
 

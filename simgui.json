@@ -2,6 +2,7 @@
   "NTProvider": {
     "types": {
       "/FMSInfo": "FMSInfo",
+      "/SmartDashboard/Auto Chooser": "String Chooser",
       "/SmartDashboard/Field": "Field2d",
       "/SmartDashboard/Shot Adjustment": "String Chooser"
     },
@@ -68,6 +69,9 @@
       "open": false
     },
     "transitory": {
+      "CameraPublisher": {
+        "open": true
+      },
       "Shuffleboard": {
         ".recording": {
           "open": true
