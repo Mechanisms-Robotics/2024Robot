@@ -15,10 +15,10 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  */
 public class Wrist extends SingleJointSubystem {
     private static final double kSensorRatio = 38.0/16.0;
-    private static final double kMotorRatio = 80.0 * kSensorRatio;
+    private static final double kMotorRatio = 125.0 * kSensorRatio;
     private static final double kStartRotations = 0.29027778;
     // left arm motor magnet offset (acquired in Phoenix Tuner X)
-    private static final double kMagnetOffset = (kSensorRatio * kStartRotations) - 0.597656;
+    private static final double kMagnetOffset = (kSensorRatio * kStartRotations) - 0.520508;
 
     // right arm motor magnet offset
     // right arm TalonFX motor and it's can coder
