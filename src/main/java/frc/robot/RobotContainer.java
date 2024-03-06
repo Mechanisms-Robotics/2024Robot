@@ -7,7 +7,6 @@ package frc.robot;
 
 import com.mechlib.commands.SwerveTeleopDriveCommand;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.*;
@@ -86,16 +85,16 @@ public class RobotContainer {
     ////////////////////
 
     // -----------------Left-----------------
-    xboxController.leftStick().onTrue(
-            new ZeroGyro(swerve)
-    );
-
     xboxController2.leftTrigger().onTrue(
             new SubwooferLowPosition(armWrist)
     );
 
     xboxController2.leftBumper().onTrue(
             new SubwooferHighPosition(armWrist)
+    );
+
+    xboxController2.leftStick().onTrue(
+            new ZeroGyro(swerve)
     );
     // -----------------Right-----------------
     xboxController2.rightTrigger().onTrue(
@@ -106,9 +105,8 @@ public class RobotContainer {
             new PodiumHighPosition(armWrist)
     );
 
-
-    xboxController2.y().onTrue(
-            new SubwooferLowPosition.DisableArm(arm)
+    xboxController2.rightStick().whileTrue(
+            new Climb(armWrist)
     );
 
     xboxController2.x().whileTrue( // square on ps4
@@ -116,6 +114,10 @@ public class RobotContainer {
                     () -> -xboxController.getLeftY(),
                     () -> -xboxController.getLeftX(),
                     () -> -xboxController.getRightX())
+    );
+
+    xboxController2.y().onTrue(
+            new SubwooferLowPosition.DisableArm(arm)
     );
 
     xboxController2.a().onTrue(

@@ -19,7 +19,9 @@ public class ArmWrist extends SubsystemBase {
         ShootingSubwoofer,
         ShootingPodium,
         Aiming,
-        Shuttleing
+        Shuttleing,
+        PrepClimb,
+        Climb
     }
     private State state;
     private boolean lowMode = false;
@@ -145,6 +147,24 @@ public class ArmWrist extends SubsystemBase {
         safe = false;
     }
 
+    public void prepClimb() {
+        if (safe) return;
+        if (state != State.PrepClimb) {
+            arm.prepClimb();
+            wrist.prepClimb();
+            state = State.PrepClimb;
+        }
+    }
+
+    public void climb() {
+        if (safe) return;
+        if (state != State.Climb) {
+            arm.climb();
+            wrist.climb();
+            state = State.Climb;
+        }
+    }
+
     /**
      * Aims the arm and wrist at the given angles
      *
@@ -169,6 +189,8 @@ public class ArmWrist extends SubsystemBase {
             case ShootingSubwoofer -> subwooferShoot(lowMode);
             case ShootingPodium -> podiumShoot(lowMode);
             case Shuttleing -> shuttle();
+            case PrepClimb -> prepClimb();
+            case Climb -> climb();
         }
     }
 }

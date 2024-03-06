@@ -36,6 +36,8 @@ public class Arm extends SingleJointSubystem {
     private static final Rotation2d kPodiumHigh = kSubwooferHigh;
     private static final Rotation2d kPodiumLow = kSubwooferLow;
     private static final Rotation2d kAmp = Rotation2d.fromDegrees(94);
+    private static final Rotation2d kPrepClimb = Rotation2d.fromDegrees(90);
+    private static final Rotation2d kClimb = Rotation2d.fromDegrees(60);
     private static final double kSensorRatio = 64.0/16.0;
     private static final double kMotorRatio = 60 * kSensorRatio;
     private static final Rotation2d kShuttle = Rotation2d.fromDegrees(60);
@@ -109,6 +111,14 @@ public class Arm extends SingleJointSubystem {
      */
     public void amp() {
         pivotTo(kAmp);
+    }
+
+    public void prepClimb() {
+        pivotTo(kPrepClimb);
+    }
+
+    public void climb() {
+        pivotTo(kClimb);
     }
 
     /**
