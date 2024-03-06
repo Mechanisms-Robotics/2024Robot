@@ -109,10 +109,19 @@ public class Wrist extends SingleJointSubystem {
         pivotTo(kAmp);
     }
 
+    /**
+     * Pivot to the shuttle position (kShuttle)
+     *
+     */
     public void shuttle() {
         pivotTo(kShuttle);
     }
 
+    /**
+     * Pivot to the given rotation
+     *
+     * @param rotation angle fo the Wrist
+     */
     public void aim(Rotation2d rotation) {
         pivotTo(rotation.plus(Rotation2d.fromDegrees(wristAdjustment)));
     }

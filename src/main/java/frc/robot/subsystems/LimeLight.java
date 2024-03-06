@@ -5,7 +5,6 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.photonvision.PhotonCamera;
-import org.photonvision.common.hardware.VisionLEDMode;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
@@ -32,7 +31,7 @@ public class LimeLight extends SubsystemBase {
     ) {}
 
     /**
-     * Returns all of the data of the LimeLight.
+     * Returns object LimeLightData with all data of the LimeLight.
      * hasTarget is true if the area is not 0 (if the target is not showing on the camera.
      *
      * @return data of the LimeLight: yaw, area, and hasTarget
@@ -45,29 +44,26 @@ public class LimeLight extends SubsystemBase {
     public void periodic() {
         SmartDashboard.putNumber("[Lime Light] Target Yaw", yaw);
         SmartDashboard.putNumber("[Lime Light] Target Area", area);
+        // If the Alliance is Blue, look for AprilTag 7, otherwise (when it is red) look for AprilTag 4
+        // If there is no alliance specified, print error
         if (DriverStation.getAlliance().isPresent()) {
             if (DriverStation.getAlliance().get() == Alliance.Blue) aprilTagID = 7;
             else aprilTagID = 4;
         } else { System.out.println("The Alliance was no found"); }
-
         SmartDashboard.putNumber("[Lime Light] Target ID", aprilTagID);
 
         PhotonPipelineResult result = camera.getLatestResult();
         boolean hasTarget = result.hasTargets();
         SmartDashboard.putBoolean("[Lime Light] Has Target", hasTarget);
-        if (hasTarget) {
-            for (PhotonTrackedTarget target : result.getTargets()) {
-                if (target.getFiducialId() == aprilTagID) {
-                    yaw = target.getYaw();
-                    area = target.getArea();
-                    // turn on the LED if yaw is within 5 degrees
-                    if (Math.abs(yaw) < 5) camera.setLED(VisionLEDMode.kOn);
-                    else camera.setLED(VisionLEDMode.kOff);
-                    return;
-                }
+        // if any of the targets is the correct AprilTag, set the yaw and area
+        // otherwise set them to 0
+        for (PhotonTrackedTarget target : result.getTargets()) {
+            if (target.getFiducialId() == aprilTagID) {
+                yaw = target.getYaw();
+                area = target.getArea();
+                return;
             }
-            // turn off the LED, it no work
-        } else { camera.setLED(VisionLEDMode.kOff); }
+        }
         yaw = 0;
         area = 0;
     }
