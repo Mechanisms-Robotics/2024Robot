@@ -6,6 +6,7 @@ package frc.robot;
 
 
 import com.mechlib.commands.SwerveTeleopDriveCommand;
+import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -37,6 +38,13 @@ public class RobotContainer {
 
   public RobotContainer() {
     configureBindings();
+
+    NamedCommands.registerCommand("intake", new IntakeCommand(armWrist, gerald));
+    NamedCommands.registerCommand("spinup", new PrepareShoot(gerald));
+    NamedCommands.registerCommand("spindown", new Idle(gerald));
+    NamedCommands.registerCommand("aim", new DriveWhileAim(swerve, limeLight, armWrist, ()->0.,()->0.,()->0.));
+    NamedCommands.registerCommand("shoot", new FeedNote(gerald));
+    NamedCommands.registerCommand("aimSubwooferHigh", new SubwooferHighPosition(armWrist));
 
     configureDefaultCommands();
   }
