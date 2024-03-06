@@ -1,0 +1,20 @@
+package frc.robot.commands;
+
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import frc.robot.subsystems.Arm;
+import frc.robot.subsystems.ArmWrist;
+
+public class SubwooferLowPosition extends InstantCommand {
+    public SubwooferLowPosition(ArmWrist armWrist) {
+        super(() -> armWrist.subwooferShoot(true));
+    }
+
+    /**
+     * Disable the arm (safety)
+     */
+    public static class DisableArm extends InstantCommand {
+        public DisableArm(Arm arm) {
+            super(arm::disable);
+        }
+    }
+}

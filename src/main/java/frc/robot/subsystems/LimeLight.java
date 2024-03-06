@@ -12,56 +12,53 @@ import java.util.List;
 
 public class LimeLight extends SubsystemBase {
     private final PhotonCamera camera = new PhotonCamera("LimeLight");
-    private int aprilTagID = 8;
+    private int aprilTagID = 7;
     private double yaw = 0;
     private double area = 0;
 
     /**
-     * Returns the yaw of the angle made between the camera and the target.
-     * This serves to make sure that the target is centered on the camera for aiming at an april tag.
+     * Data of the LimeLight
      *
-     * @return the yaw of the angle made between the camera and the target
+     * @param yaw angle made by the center of the camera and the target
+     * @param area % area that the target takes up on the camera, used for distance
+     * @param hasTarget true if the camera sees an AprilTag otherwise false
      */
-    public double getYaw() {
-        return yaw;
-    }
+
+    public record LimeLightData(
+            double yaw,
+            double area,
+            boolean hasTarget
+    ) {}
 
     /**
-     * Returns the area that the target takes on the limelight.
-     * This is used for determininig the distance from the april tags.
+     * Returns object LimeLightData with all data of the LimeLight.
+     * hasTarget is true if the area is not 0 (if the target is not showing on the camera.
      *
-     * @return the area that the target takes on the limelight
+     * @return data of the LimeLight: yaw, area, and hasTarget
      */
-    public double getArea() {
-        return area;
-    }
-
-    /**
-     * Returns whether a target has been found
-     *
-     * @return whether a target has been found
-     */
-    public boolean hasTarget() {
-        return getArea() != 0;
+    public LimeLightData getData() {
+        return new LimeLightData(yaw, area, area!=0);
     }
 
     @Override
     public void periodic() {
+        SmartDashboard.putNumber("[Lime Light] Target Yaw", yaw);
+        SmartDashboard.putNumber("[Lime Light] Target Area", area);
+        // If the Alliance is Blue, look for AprilTag 7, otherwise (when it is red) look for AprilTag 4
+        // If there is no alliance specified, print error
         if (DriverStation.getAlliance().isPresent()) {
-            if (DriverStation.getAlliance().equals(Alliance.Blue)) aprilTagID = 8;
+            if (DriverStation.getAlliance().get() == Alliance.Blue) aprilTagID = 7;
             else aprilTagID = 4;
-        } else {
-            System.out.println("The Alliance was no found");
-        }
+        } else { System.out.println("The Alliance was no found"); }
+        SmartDashboard.putNumber("[Lime Light] Target ID", aprilTagID);
 
         PhotonPipelineResult result = camera.getLatestResult();
         boolean hasTarget = result.hasTargets();
-        SmartDashboard.putBoolean("Has Target", hasTarget);
-        if (hasTarget) {
-            List<PhotonTrackedTarget> targets = result.getTargets();
-            PhotonTrackedTarget target;
-            target = targets.stream().filter(t -> t.getFiducialId() == aprilTagID).toList().get(0);
-            if (target != null) {
+        SmartDashboard.putBoolean("[Lime Light] Has Target", hasTarget);
+        // if any of the targets is the correct AprilTag, set the yaw and area
+        // otherwise set them to 0
+        for (PhotonTrackedTarget target : result.getTargets()) {
+            if (target.getFiducialId() == aprilTagID) {
                 yaw = target.getYaw();
                 area = target.getArea();
                 return;

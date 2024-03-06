@@ -2,10 +2,10 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 1.1852004303152672,
-      "y": 6.827417706190619
+      "x": 0.45,
+      "y": 7.4
     },
-    "rotation": -0.7896452124161966
+    "rotation": 0
   },
   "command": {
     "type": "sequential",
@@ -14,7 +14,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "TopLeave"
+            "pathName": "TuningL"
           }
         }
       ]

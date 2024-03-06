@@ -3,7 +3,8 @@
     "types": {
       "/FMSInfo": "FMSInfo",
       "/SmartDashboard/Auto Chooser": "String Chooser",
-      "/SmartDashboard/Field": "Field2d"
+      "/SmartDashboard/Field": "Field2d",
+      "/SmartDashboard/Shot Adjustment": "String Chooser"
     },
     "windows": {
       "/SmartDashboard/Field": {
@@ -64,6 +65,9 @@
     }
   },
   "NetworkTables": {
+    "Persistent Values": {
+      "open": false
+    },
     "transitory": {
       "CameraPublisher": {
         "open": true
@@ -75,9 +79,6 @@
         "open": true
       },
       "SmartDashboard": {
-        "Auto Chooser": {
-          "open": true
-        },
         "open": true
       }
     }

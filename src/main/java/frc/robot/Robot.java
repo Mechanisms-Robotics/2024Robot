@@ -5,12 +5,6 @@
 package frc.robot;
 
 import com.ctre.phoenix6.SignalLogger;
-import com.ctre.phoenix6.configs.CANcoderConfiguration;
-import com.ctre.phoenix6.configs.MagnetSensorConfigs;
-import com.ctre.phoenix6.hardware.CANcoder;
-import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
-import com.ctre.phoenix6.signals.SensorDirectionValue;
-import com.mechlib.hardware.CANCoder;
 
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -39,8 +33,7 @@ public class Robot extends TimedRobot {
   public void disabledInit() {
     SignalLogger.stop();
     m_robotContainer.arm.stop();
-    m_robotContainer.gerald.stopIntake();
-    m_robotContainer.gerald.stopShooter();
+    m_robotContainer.gerald.idle();
     m_robotContainer.wrist.stop();
   }
 
@@ -53,7 +46,6 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
-
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
     }
@@ -70,7 +62,9 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
-//    m_robotContainer.swerve.driveClosedLoop();
+    if (!Robot.isSimulation()) {
+      m_robotContainer.swerve.driveOpenLoop();
+    }
   }
 
   @Override

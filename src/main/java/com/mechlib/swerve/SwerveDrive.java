@@ -261,15 +261,15 @@ public class SwerveDrive extends SubsystemBase {
       blModuleLocation
     };
 
-    // Configure AutoBuilder holonomic control
+//    // Configure AutoBuilder holonomic control
     AutoBuilder.configureHolonomic(
       this::getEstimatedPose,
       this::setPose,
       this::getSpeeds,
       this::autoDrive,
       new HolonomicPathFollowerConfig(
-        new PIDConstants(0, 0, 0),
-        new PIDConstants(0, 0, 0),
+        new PIDConstants(0.2, 0, 0),
+        new PIDConstants(0.2, 0, 0),
 
         4.25,
         0.5388,
@@ -298,6 +298,7 @@ public class SwerveDrive extends SubsystemBase {
 
     // Set gyro yaw to 0
     gyro.setYaw(0.0);
+    headingController.reset();
   }
 
   /**
@@ -397,6 +398,7 @@ public class SwerveDrive extends SubsystemBase {
     // Reset simulated heading
     if (Robot.isSimulation()) {
       simHeading = pose.getRotation();
+      System.out.println(pose.getRotation().getDegrees());
     }
   }
 

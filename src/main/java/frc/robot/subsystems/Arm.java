@@ -9,13 +9,18 @@ import com.mechlib.util.MechUnits;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
+/**
+ * The arm that Gerald is attached to. It is directly connected to the swerve.
+ */
 public class Arm extends SingleJointSubystem {
     // true if the arm runs in open loop, false if it runs in closed loop
     private static final boolean kOpenLoop = true;
+    // rotations as detected by the CanCoder at the start position if there was no offset
+    private static final double kIdealStartRotation = 1.0533;
     // left arm motor magnet offset (acquired in Phoenix Tuner X)
-    private static final double kLeftMagnetOffset = 0.2326;
+    private static final double kLeftMagnetOffset = kIdealStartRotation - 0.735840;
     // right arm motor magnet offset
-    private static final double kRightMagnetOffset = 0.675;
+    private static final double kRightMagnetOffset = kIdealStartRotation - 0.467041;
     // right arm TalonFX motor and it's can coder
     private final TalonFX rightArmMotor = new TalonFX(13, new CANCoder(13, kRightMagnetOffset, AbsoluteSensorRangeValue.Unsigned_0To1, SensorDirectionValue.Clockwise_Positive));
     // left arm TalonFX motor with it's can coder
@@ -23,15 +28,22 @@ public class Arm extends SingleJointSubystem {
     // feed forward controller for the arm
     /* PID controller for the right and left arm, which will always have the same values they are different to account
        for different mechanical structures, such as belt tensioning */
-    private static final double kTolerance = Math.toRadians(0.5);
+    private static final double kTolerance = Math.toRadians(1);
     private static final Rotation2d kStowed = Rotation2d.fromDegrees(60);
-    private static final Rotation2d kIntaking = Rotation2d.fromDegrees(3);
-    private static final Rotation2d kShooting = Rotation2d.fromDegrees(95);
-    private static final double kSensorRatio = 68.0/16.0;
+    private static final Rotation2d kIntaking = Rotation2d.fromDegrees(2);
+    private static final Rotation2d kSubwooferHigh = Rotation2d.fromDegrees(94);
+    private static final Rotation2d kSubwooferLow = Rotation2d.fromDegrees(15);
+    private static final Rotation2d kPodiumHigh = kSubwooferHigh;
+    private static final Rotation2d kPodiumLow = kSubwooferLow;
+    private static final Rotation2d kAmp = Rotation2d.fromDegrees(94);
+    private static final Rotation2d kPrepClimb = Rotation2d.fromDegrees(90);
+    private static final Rotation2d kClimb = Rotation2d.fromDegrees(20);
+    private static final double kSensorRatio = 64.0/16.0;
     private static final double kMotorRatio = 60 * kSensorRatio;
-    private static final Rotation2d kForwardLimit = Rotation2d.fromDegrees(95);
-    private static final Rotation2d kReverseLimit = Rotation2d.fromDegrees(3);
-    private static final double kAllowableDifference = 5.0;
+    private static final Rotation2d kShuttle = Rotation2d.fromDegrees(60);
+    private static final Rotation2d kForwardLimit = Rotation2d.fromDegrees(94);
+    private static final Rotation2d kReverseLimit = Rotation2d.fromDegrees(2);
+    private static final double kAllowableDifference = 7.5;
     // safety disable feature, triggered by the secondary driver when x is pressed
     private boolean disabled = false;
 
@@ -48,9 +60,9 @@ public class Arm extends SingleJointSubystem {
         setPPIDGains(1.0, 0.0, 0.0);
         setPPIDConstraints(2*Math.PI, 8*Math.PI);
         setTolerance(kTolerance);
-        SmartDashboard.putBoolean("[Arm] disabled", disabled);
+        SmartDashboard.putBoolean("[arm] disabled", disabled);
     }
-   
+
     /**
      * Set arm to the stow position
      */
@@ -66,10 +78,62 @@ public class Arm extends SingleJointSubystem {
     }
 
     /**
-     * Set arm to the shoot/amp position
+     * Set arm to the shoot high subwoofer position
      */
-    public void shoot() {
-        pivotTo(kShooting);
+    public void shootHighSubwoofer() {
+        System.out.println("kSubwooferHigh: " + kSubwooferHigh.getDegrees());
+        pivotTo(kSubwooferHigh);
+    }
+
+    /**
+     * Set arm to the shoot low subwoofer position
+     */
+    public void shootLowSubwoofer() {
+        pivotTo(kSubwooferLow);
+    }
+
+    /**
+     * Set arm to the shoot high podium position
+     */
+    public void shootHighPodium() {
+        pivotTo(kPodiumHigh);
+    }
+
+    /**
+     * Set arm to the shoot low podium position
+     */
+    public void shootLowPodium() {
+        pivotTo(kPodiumLow);
+    }
+
+    /**
+     * Set the arm to the amp position
+     */
+    public void amp() {
+        pivotTo(kAmp);
+    }
+
+    /**
+     * Set the arm to the preparing climb position.
+     * Preparing the climb brings the Arm to the position so that Gerald can go over the chain.
+     */
+    public void prepClimb() {
+        pivotTo(kPrepClimb);
+    }
+
+    /**
+     * Set the arm to the climb position.
+     * This is when the arm folds down, bringing the robot up
+     */
+    public void climb() {
+        pivotTo(kClimb);
+    }
+
+    /**
+     * Pivots to the shuttle position (kShuttle)
+     */
+    public void shuttle() {
+        pivotTo(kShuttle);
     }
 
     /**
@@ -78,24 +142,36 @@ public class Arm extends SingleJointSubystem {
     public void disable() {
         stop();
         disabled = true;
-        SmartDashboard.putBoolean("[Arm] disabled", disabled);
+        SmartDashboard.putBoolean("[arm] disabled", disabled);
+    }
+
+    public void unDisable() {
+        disabled = false;
+    }
+
+    /**
+     * Sets the arm rotation to a given angle
+     *
+     * @param rotation
+     */
+    public void aim(Rotation2d rotation) {
+        pivotTo(rotation);
     }
 
     /**
      * Periodically output the data (right and left arm position) to SmartDashBoard. Do not run the arms if the robot
-     * is disabled. Runs the PIDFs if the robot is in closed loop.
+     * is disabled. Runs the PIDFs if the robot is in closed loop cuh.
      */
     @Override
     public void periodic() {
+        SmartDashboard.putNumber("[arm] Left position", leftArmMotor.getRawPosition());
+        SmartDashboard.putNumber("[arm] Right position", rightArmMotor.getRawPosition());
+        SmartDashboard.putNumber("[arm] current angle", getAngle().getDegrees());
+        SmartDashboard.putNumber("[arm] desired angle", getDesiredAngle().getDegrees());
         // if disabled, do not run any processes on the arm
-        if (Math.abs(leftArmMotor.getRawPosition() -rightArmMotor.getRawPosition()) > kAllowableDifference){
-          disable();
-         }
+        if (Math.abs(leftArmMotor.getRawPosition() -rightArmMotor.getRawPosition()) > kAllowableDifference)
+            disable();
         if (disabled) return;
         super.periodic();
-        SmartDashboard.putNumber("[Arm] Left position", leftArmMotor.getRawPosition());
-        SmartDashboard.putNumber("[Arm] Right position", rightArmMotor.getRawPosition());
-        SmartDashboard.putNumber("[Arm] current angle", getAngle().getDegrees());
-        SmartDashboard.putNumber("[Arm] desired angle", getDesiredAngle().getDegrees());
     }
 }
