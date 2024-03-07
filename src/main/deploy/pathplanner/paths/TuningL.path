@@ -3,7 +3,6 @@
   "waypoints": [
     {
       "anchor": {
-<<<<<<<< HEAD:src/main/deploy/pathplanner/paths/SubRFieldRR.path
         "x": 0.75,
         "y": 4.45
       },
@@ -11,36 +10,19 @@
       "nextControl": {
         "x": 3.352382890522137,
         "y": 2.2663414763808114
-========
-        "x": 0.45,
         "y": 7.4
-      },
-      "prevControl": null,
-      "nextControl": {
-        "x": 1.4499999999999997,
-        "y": 7.4
->>>>>>>> auto:src/main/deploy/pathplanner/paths/TuningL.path
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-<<<<<<<< HEAD:src/main/deploy/pathplanner/paths/SubRFieldRR.path
         "x": 7.5,
         "y": 1.0
       },
       "prevControl": {
         "x": 5.927274733737822,
         "y": 1.4808303674015888
-========
-        "x": 4.0,
-        "y": 6.0
-      },
-      "prevControl": {
-        "x": 2.18448037521024,
-        "y": 6.0
->>>>>>>> auto:src/main/deploy/pathplanner/paths/TuningL.path
       },
       "nextControl": null,
       "isLocked": false,
@@ -58,11 +40,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-<<<<<<<< HEAD:src/main/deploy/pathplanner/paths/SubRFieldRR.path
     "rotation": -15.945395900922776,
-========
-    "rotation": 45.0,
->>>>>>>> auto:src/main/deploy/pathplanner/paths/TuningL.path
     "rotateFast": false
   },
   "reversed": false,
