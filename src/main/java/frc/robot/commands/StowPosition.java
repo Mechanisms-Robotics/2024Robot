@@ -1,12 +1,17 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.ArmWrist;
-import frc.robot.subsystems.Wrist;
 
+/**
+ * Pivots the arm and wrist to the stow position
+ */
 public class StowPosition extends InstantCommand {
+    /**
+     * Calls armWrist.stow to pivot the arm and the wrist to the stow position
+     *
+     * @param armWrist instance of armWrist
+     */
     public StowPosition(ArmWrist armWrist) {
         super(armWrist::stow);
     }

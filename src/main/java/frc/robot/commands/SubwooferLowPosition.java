@@ -8,13 +8,4 @@ public class SubwooferLowPosition extends InstantCommand {
     public SubwooferLowPosition(ArmWrist armWrist) {
         super(() -> armWrist.subwooferShoot(true));
     }
-
-    /**
-     * Disable the arm (safety)
-     */
-    public static class DisableArm extends InstantCommand {
-        public DisableArm(Arm arm) {
-            super(arm::disable);
-        }
-    }
 }
