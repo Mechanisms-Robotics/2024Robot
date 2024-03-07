@@ -15,6 +15,11 @@ import frc.robot.subsystems.Swerve;
 
 import java.util.function.Supplier;
 
+/**
+ * Turns toward the subwoofer on execute.
+ * Decreased the drive speed to kMaxVelocity and overrides the turning.
+ * The wrist aims to account for distance using and interpolated tree map.
+ */
 public class DriveWhileAim extends Command {
     private final Swerve swerve;
     private final LimeLight limeLight;
@@ -49,6 +54,18 @@ public class DriveWhileAim extends Command {
         wristAimMap.put(100., 95.);
     }
     private static final ProfiledPIDController controller = new ProfiledPIDController(.1, 0, 0, new Constraints(kMaxOmega, kMaxOmegaAcceleration));
+
+    /**
+     * Initializes the swerve, limelight and armWrist and gets x, y and rotational joystick values
+     *
+     * @param swerve instance of swerve, needed for turning toward the target and driving
+     * @param limeLight instance of limelight, needed for finding the aprilTag
+     * @param armWrist instance of the armWrist, needed for pivoting the wrist to account for distance
+     *
+     * @param xVal x drive component
+     * @param yVal y drive component
+     * @param rVal rotational drive component, used when there is no target found
+     */
     public DriveWhileAim(Swerve swerve, LimeLight limeLight, ArmWrist armWrist,
                          Supplier<Double> xVal, Supplier<Double> yVal, Supplier<Double> rVal) {
         this.swerve = swerve;
@@ -60,6 +77,13 @@ public class DriveWhileAim extends Command {
         addRequirements(swerve, limeLight, armWrist);
     }
 
+    /**
+     * Initializes the swerve, limelight and armWrist and passes in 0 as joystick values
+     *
+     * @param swerve instance of swerve, needed for turning toward the target and driving
+     * @param limeLight instance of limelight, needed for finding the aprilTag
+     * @param armWrist instance of the armWrist, needed for pivoting the wrist to account for distance
+     */
     public DriveWhileAim(Swerve swerve, LimeLight limeLight, ArmWrist armWrist) {
         this(swerve, limeLight, armWrist, ()->0., ()->0., ()->0.);
     }

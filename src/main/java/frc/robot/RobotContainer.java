@@ -13,7 +13,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.*;
-//import frc.robot.commands.autos.AutoAimShootIntake;
 import frc.robot.commands.autos.TimedLeave;
 import frc.robot.subsystems.*;
 
@@ -141,15 +140,12 @@ public class RobotContainer {
     );
 
     xboxController2.y().onTrue(
-            new SubwooferLowPosition.DisableArm(arm)
+            new DisableArm(arm)
     );
 
     xboxController2.a().onTrue(
             new IntakePosition(armWrist)
     );
-//    xboxController2.b().onTrue(
-//            new MoveTestaThing(swerve).withTimeout(0.25)
-//    );
     xboxController2.b().onTrue(
             new ShuttleNote(armWrist)
     );

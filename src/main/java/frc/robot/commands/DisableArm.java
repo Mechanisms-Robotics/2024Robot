@@ -4,15 +4,15 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.subsystems.Arm;
 
 /**
- * Undisables the arm
+ * Disable the arm (safety)
  */
-public class UnDisable extends InstantCommand {
+public class DisableArm extends InstantCommand {
     /**
-     * Calls arm.unDisable
+     * Calls arm.disable
      *
      * @param arm instance of arm
      */
-    public UnDisable(Arm arm) {
-        super(arm::unDisable);
+    public DisableArm(Arm arm) {
+        super(arm::disable);
     }
 }
