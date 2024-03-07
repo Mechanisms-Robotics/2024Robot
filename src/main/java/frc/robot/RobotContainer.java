@@ -41,7 +41,12 @@ public class RobotContainer {
     NamedCommands.registerCommand("shoot", new FeedNote(gerald));
     NamedCommands.registerCommand("aimSubwooferHigh", new SubwooferHighPosition(armWrist));
 
-    m_chooser.setDefaultOption("TuningL", new PathPlannerAuto("TuningL"));
+    m_chooser.setDefaultOption("YeetRight", new PathPlannerAuto("YeetRight"));
+    m_chooser.addOption("SubRNoteR2Note", new PathPlannerAuto("SubRNoteR2Note"));
+    m_chooser.addOption("SubCNoteCR", new PathPlannerAuto("SubCNoteCR"));
+    m_chooser.addOption("SubLNoteLC3Note", new PathPlannerAuto("SubLNoteLC3Note"));
+    m_chooser.addOption("SubRFieldRR1NoteGrab", new PathPlannerAuto("SubRFieldRR1NoteGrab"));
+    m_chooser.addOption("TuningL", new PathPlannerAuto("TuningL"));
 
     SmartDashboard.putData("Auto Chooser", m_chooser);
     configureDefaultCommands();

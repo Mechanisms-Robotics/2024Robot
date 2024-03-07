@@ -72,7 +72,6 @@ public class DriveWhileAim extends Command {
         return MathUtil.isNear(0, val, kDeadBand) ? 0 : val;
     }
 
-
     @Override
     public void execute() {
         double vx = xLimiter.calculate(deadBand(xVal.get()) * kMaxVelocity);
