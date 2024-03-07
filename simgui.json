@@ -7,6 +7,11 @@
       "/SmartDashboard/Shot Adjustment": "String Chooser"
     },
     "windows": {
+      "/SmartDashboard/Auto Chooser": {
+        "window": {
+          "visible": true
+        }
+      },
       "/SmartDashboard/Field": {
         "BL Module": {
           "color": [
@@ -79,6 +84,12 @@
         "open": true
       },
       "SmartDashboard": {
+        "Auto Chooser": {
+          "open": true,
+          "string[]##v_/SmartDashboard/Auto Chooser/options": {
+            "open": true
+          }
+        },
         "open": true
       }
     }

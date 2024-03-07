@@ -13,7 +13,11 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.*;
+//import frc.robot.commands.autos.AutoAimShootIntake;
+import frc.robot.commands.autos.TimedLeave;
 import frc.robot.subsystems.*;
+
+import java.sql.Time;
 
 public class RobotContainer {
   private final SendableChooser<Command> routineChooser = new SendableChooser<>();
@@ -37,9 +41,10 @@ public class RobotContainer {
     NamedCommands.registerCommand("intake", new IntakeCommand(armWrist, gerald));
     NamedCommands.registerCommand("spinup", new PrepareShoot(gerald));
     NamedCommands.registerCommand("spindown", new Idle(gerald));
-    NamedCommands.registerCommand("aim", new DriveWhileAim(swerve, limeLight, armWrist, ()->0.,()->0.,()->0.));
+    NamedCommands.registerCommand("aim", new DriveWhileAim(swerve, limeLight, armWrist));
     NamedCommands.registerCommand("shoot", new FeedNote(gerald));
     NamedCommands.registerCommand("aimSubwooferHigh", new SubwooferHighPosition(armWrist));
+//    NamedCommands.registerCommand("aimShootIntake", new AutoAimShootIntake(armWrist, gerald, swerve));
 
     m_chooser.setDefaultOption("YeetRight", new PathPlannerAuto("YeetRight"));
     m_chooser.addOption("SubRNoteR2Note", new PathPlannerAuto("SubRNoteR2Note"));
@@ -47,6 +52,7 @@ public class RobotContainer {
     m_chooser.addOption("SubLNoteLC3Note", new PathPlannerAuto("SubLNoteLC3Note"));
     m_chooser.addOption("SubRFieldRR1NoteGrab", new PathPlannerAuto("SubRFieldRR1NoteGrab"));
     m_chooser.addOption("TuningL", new PathPlannerAuto("TuningL"));
+    m_chooser.addOption("TimedLeave", new TimedLeave(swerve));
 
     SmartDashboard.putData("Auto Chooser", m_chooser);
     configureDefaultCommands();

@@ -60,6 +60,11 @@ public class DriveWhileAim extends Command {
         addRequirements(swerve, limeLight, armWrist);
     }
 
+    public DriveWhileAim(Swerve swerve, LimeLight limeLight, ArmWrist armWrist) {
+        this(swerve, limeLight, armWrist, ()->0., ()->0., ()->0.);
+    }
+
+
     /**
      * Deadbands the controller.
      * Returns 0 if the input is not more than kDeadBand.

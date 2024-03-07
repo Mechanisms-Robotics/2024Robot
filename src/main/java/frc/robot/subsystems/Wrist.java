@@ -18,7 +18,7 @@ public class Wrist extends SingleJointSubystem {
     private static final double kMotorRatio = 125.0 * kSensorRatio;
     private static final double kStartRotations = 0.29027778;
     // left arm motor magnet offset (acquired in Phoenix Tuner X)
-    private static final double kMagnetOffset = (kSensorRatio * kStartRotations) - 0.520508;
+    private static final double kMagnetOffset = (kSensorRatio * kStartRotations) - 0.491699;
 
     // right arm motor magnet offset
     // right arm TalonFX motor and it's can coder
@@ -52,7 +52,7 @@ public class Wrist extends SingleJointSubystem {
         setVelocityUnitsFunction((rotations) -> MechUnits.rotationsToRadians(rotations, kSensorRatio));
         setLimits(kReverseLimit, kForwardLimit, kMotorRatio);
         setFeedforwardGains(0.15, 0, 0.0, 0.0);
-        setPPIDGains(0.4, 0.0, 0.0);
+        setPPIDGains(0.6, 0.0, 0.0);
         setPPIDConstraints(Math.PI/4, Math.PI/2);
         setTolerance(kTolerance);
 
