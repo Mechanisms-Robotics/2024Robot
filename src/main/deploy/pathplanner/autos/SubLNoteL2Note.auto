@@ -3,9 +3,9 @@
   "startingPose": {
     "position": {
       "x": 0.75,
-      "y": 4.45
+      "y": 6.75
     },
-    "rotation": -60.0
+    "rotation": 60.0
   },
   "command": {
     "type": "sequential",
@@ -14,25 +14,13 @@
         {
           "type": "named",
           "data": {
-            "name": "aimSubwooferLowShootIntake"
+            "name": "aimShootIntake"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "SubRNoteR"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "aimShootIntake"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "stow"
+            "pathName": "SubLNoteL"
           }
         }
       ]

@@ -13,10 +13,11 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.*;
+import frc.robot.commands.autos.AutoAimShootIntake;
 import frc.robot.commands.autos.TimedLeave;
 import frc.robot.subsystems.*;
 
-import java.sql.Time;
+import javax.naming.Name;
 
 public class RobotContainer {
   private final SendableChooser<Command> routineChooser = new SendableChooser<>();
@@ -32,7 +33,6 @@ public class RobotContainer {
   private final CommandXboxController xboxController2 = new CommandXboxController(1);
 
   private final SendableChooser<Command> m_chooser = new SendableChooser<>();
-  private static final double kEndGameTime = 250.0;
 
   public RobotContainer() {
     configureBindings();
@@ -42,16 +42,31 @@ public class RobotContainer {
     NamedCommands.registerCommand("spindown", new Idle(gerald));
     NamedCommands.registerCommand("aim", new DriveWhileAim(swerve, limeLight, armWrist));
     NamedCommands.registerCommand("shoot", new FeedNote(gerald));
+    NamedCommands.registerCommand("stow", new StowPosition(armWrist));
     NamedCommands.registerCommand("aimSubwooferHigh", new SubwooferHighPosition(armWrist));
-//    NamedCommands.registerCommand("aimShootIntake", new AutoAimShootIntake(armWrist, gerald, swerve));
+    NamedCommands.registerCommand("aimShootIntake", new AutoAimShootIntake(armWrist, gerald, swerve, limeLight));
+    NamedCommands.registerCommand("aimSubwooferLowShootIntake",
+            new AutoAimShootIntake(armWrist, gerald, true, true));
+    NamedCommands.registerCommand("aimSubwooferHighShootIntake",
+            new AutoAimShootIntake(armWrist, gerald, true, false));
+    NamedCommands.registerCommand("aimPodiumLowShootIntake",
+            new AutoAimShootIntake(armWrist, gerald, false, true));
+    NamedCommands.registerCommand("aimPodiumHighShootIntake",
+            new AutoAimShootIntake(armWrist, gerald, false, false));
 
     m_chooser.setDefaultOption("YeetRight", new PathPlannerAuto("YeetRight"));
+    m_chooser.addOption("YeetLeft", new PathPlannerAuto("YeetRight"));
+    m_chooser.addOption("TimedLeave", new TimedLeave(swerve));
+    // ----------------2Note----------------
     m_chooser.addOption("SubRNoteR2Note", new PathPlannerAuto("SubRNoteR2Note"));
-    m_chooser.addOption("SubCNoteCR", new PathPlannerAuto("SubCNoteCR"));
+    // ----------------3Note----------------
+    m_chooser.addOption("SubCNoteCR3Note2", new PathPlannerAuto("SubCNoteCR3Note"));
     m_chooser.addOption("SubLNoteLC3Note", new PathPlannerAuto("SubLNoteLC3Note"));
+    // ----------------4Note----------------
+    m_chooser.addOption("SubLNoteLCR4Note", new PathPlannerAuto("SubLNoteLCR4Note"));
+    // ----------------Fied----------------
     m_chooser.addOption("SubRFieldRR1NoteGrab", new PathPlannerAuto("SubRFieldRR1NoteGrab"));
     m_chooser.addOption("TuningL", new PathPlannerAuto("TuningL"));
-    m_chooser.addOption("TimedLeave", new TimedLeave(swerve));
 
     SmartDashboard.putData("Auto Chooser", m_chooser);
     configureDefaultCommands();
