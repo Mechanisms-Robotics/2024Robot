@@ -18,7 +18,7 @@ public class Wrist extends SingleJointSubystem {
     private static final double kMotorRatio = 125.0 * kSensorRatio;
     private static final double kStartRotations = 0.29027778;
     // left arm motor magnet offset (acquired in Phoenix Tuner X)
-    private static final double kMagnetOffset = (kSensorRatio * kStartRotations) - 0.455811;
+    private static final double kMagnetOffset = (kSensorRatio * kStartRotations) - 0.468994;
 
     // right arm motor magnet offset
     // right arm TalonFX motor and it's can coder
@@ -32,7 +32,7 @@ public class Wrist extends SingleJointSubystem {
     private static final Rotation2d kSubwooferHigh = Rotation2d.fromDegrees(90);
     private static final Rotation2d kSubwooferLow = Rotation2d.fromDegrees(95);
     private static final Rotation2d kPodiumHigh = Rotation2d.fromDegrees(115);
-    private static final Rotation2d kPodiumLow = kSubwooferLow;
+    private static final Rotation2d kPodiumLow = kPodiumHigh;
     private static final Rotation2d kAmp = Rotation2d.fromDegrees(90);
     private static final Rotation2d kPrepClimb = Rotation2d.fromDegrees(110);
     private static final Rotation2d kClimb = Rotation2d.fromDegrees(110);

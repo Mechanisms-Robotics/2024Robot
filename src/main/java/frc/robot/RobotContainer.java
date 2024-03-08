@@ -183,7 +183,7 @@ public class RobotContainer {
             () -> -xboxController.getLeftX(),
             () -> -xboxController.getRightX(),
             0.1,
-            1,
+            4,
             5,
             Math.PI,
             2*Math.PI,
