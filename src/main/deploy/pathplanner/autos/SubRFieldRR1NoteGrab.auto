@@ -14,37 +14,7 @@
         {
           "type": "named",
           "data": {
-            "name": "aimSubwooferHigh"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "spinup"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 1.0
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "shoot"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.5
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "intake"
+            "name": "aimSubwooferHighShootIntake"
           }
         },
         {

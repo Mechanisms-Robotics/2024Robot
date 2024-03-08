@@ -28,8 +28,7 @@ public class AutoAimShootIntake extends SequentialCommandGroup {
      */
     public AutoAimShootIntake(ArmWrist armWrist, Gerald gerald, Swerve swerve, LimeLight limeLight) {
         addCommands(new PrepareShoot(gerald), // spins up the shooter
-                    new DriveWhileAim(swerve, limeLight, armWrist), // aims at the target
-                    new WaitCommand(kShootWaitTime), // waits for the spin up and aim
+                    new DriveWhileAim(swerve, limeLight, armWrist).withTimeout(kShootWaitTime), // aims at the target
                     new FeedNote(gerald), // feeds the note into the shooter
                     new WaitCommand(kFeedTime), // waits for the note to exit the shooter
                     new IntakeCommand(armWrist, gerald)); // puts intake down and spins up the intake

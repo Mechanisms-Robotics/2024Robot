@@ -19,7 +19,7 @@ public class AutoAimShootStow extends SequentialCommandGroup {
 
     /**
      * Spins up the shooter, aims at the target, shoots, and intakes.
-     * Calls PrepareShoot -> DriveWhileAim -> WaitCommand -> FeedNote -> WaitCommand -> StowPosition
+     * Calls PrepareShoot -> DriveWhileAim -> FeedNote -> WaitCommand -> StowPosition
      *
      * @param armWrist instance of armWrist, use for aiming at the target and stowing
      * @param gerald instance of gerald, used for shooting
@@ -28,11 +28,10 @@ public class AutoAimShootStow extends SequentialCommandGroup {
      */
     public AutoAimShootStow(ArmWrist armWrist, Gerald gerald, Swerve swerve, LimeLight limeLight) {
         addCommands(new PrepareShoot(gerald), // spins up the shooter
-                new DriveWhileAim(swerve, limeLight, armWrist), // aims at the target
-                new WaitCommand(kShootWaitTime), // waits for the spin up and aim
-                new FeedNote(gerald), // feeds the note into the shooter
-                new WaitCommand(kFeedTime), // waits for the note to exit the shooter
-                new StowPosition(armWrist)); // stows arm and wrist
+                    new DriveWhileAim(swerve, limeLight, armWrist).withTimeout(kShootWaitTime), // aims at the target
+                    new FeedNote(gerald), // feeds the note into the shooter
+                    new WaitCommand(kFeedTime), // waits for the note to exit the shooter
+                    new StowPosition(armWrist)); // stows arm and wrist
     }
 
     /**

@@ -39,18 +39,22 @@ public class RobotContainer {
     NamedCommands.registerCommand("intake", new IntakeCommand(armWrist, gerald));
     NamedCommands.registerCommand("spinup", new PrepareShoot(gerald));
     NamedCommands.registerCommand("spindown", new Idle(gerald));
-    NamedCommands.registerCommand("aim", new DriveWhileAim(swerve, limeLight, armWrist));
+    NamedCommands.registerCommand("aim", new DriveWhileAim(swerve, limeLight, armWrist).withTimeout(1.));
     NamedCommands.registerCommand("shoot", new FeedNote(gerald));
     NamedCommands.registerCommand("stow", new StowPosition(armWrist));
     NamedCommands.registerCommand("aimSubwooferHigh", new SubwooferHighPosition(armWrist));
     NamedCommands.registerCommand("aimShootStow", new AutoAimShootStow(armWrist, gerald, swerve, limeLight));
     NamedCommands.registerCommand("aimShootIntake", new AutoAimShootIntake(armWrist, gerald, swerve, limeLight));
+
     NamedCommands.registerCommand("aimSubwooferLowShootIntake",
             new AutoAimShootIntake(armWrist, gerald, true, true));
+
     NamedCommands.registerCommand("aimSubwooferHighShootIntake",
             new AutoAimShootIntake(armWrist, gerald, true, false));
+
     NamedCommands.registerCommand("aimPodiumLowShootIntake",
             new AutoAimShootIntake(armWrist, gerald, false, true));
+
     NamedCommands.registerCommand("aimPodiumHighShootIntake",
             new AutoAimShootIntake(armWrist, gerald, false, false));
 
