@@ -14,10 +14,9 @@ import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.*;
 import frc.robot.commands.autos.AutoAimShootIntake;
+import frc.robot.commands.autos.AutoAimShootStow;
 import frc.robot.commands.autos.TimedLeave;
 import frc.robot.subsystems.*;
-
-import javax.naming.Name;
 
 public class RobotContainer {
   private final SendableChooser<Command> routineChooser = new SendableChooser<>();
@@ -44,6 +43,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("shoot", new FeedNote(gerald));
     NamedCommands.registerCommand("stow", new StowPosition(armWrist));
     NamedCommands.registerCommand("aimSubwooferHigh", new SubwooferHighPosition(armWrist));
+    NamedCommands.registerCommand("aimShootStow", new AutoAimShootStow(armWrist, gerald, swerve, limeLight));
     NamedCommands.registerCommand("aimShootIntake", new AutoAimShootIntake(armWrist, gerald, swerve, limeLight));
     NamedCommands.registerCommand("aimSubwooferLowShootIntake",
             new AutoAimShootIntake(armWrist, gerald, true, true));
@@ -59,12 +59,14 @@ public class RobotContainer {
     m_chooser.addOption("TimedLeave", new TimedLeave(swerve));
     // ----------------2Note----------------
     m_chooser.addOption("SubRNoteR2Note", new PathPlannerAuto("SubRNoteR2Note"));
+    m_chooser.addOption("SubCNoteC2Note", new PathPlannerAuto("SubCNoteC2Note"));
+    m_chooser.addOption("SubLNoteL2Note", new PathPlannerAuto("SubLNoteL2Note"));
     // ----------------3Note----------------
-    m_chooser.addOption("SubCNoteCR3Note2", new PathPlannerAuto("SubCNoteCR3Note"));
+    m_chooser.addOption("SubCNoteCR3Note", new PathPlannerAuto("SubCNoteCR3Note"));
     m_chooser.addOption("SubLNoteLC3Note", new PathPlannerAuto("SubLNoteLC3Note"));
     // ----------------4Note----------------
     m_chooser.addOption("SubLNoteLCR4Note", new PathPlannerAuto("SubLNoteLCR4Note"));
-    // ----------------Fied----------------
+    // ----------------Field----------------
     m_chooser.addOption("SubRFieldRR1NoteGrab", new PathPlannerAuto("SubRFieldRR1NoteGrab"));
     m_chooser.addOption("TuningL", new PathPlannerAuto("TuningL"));
 

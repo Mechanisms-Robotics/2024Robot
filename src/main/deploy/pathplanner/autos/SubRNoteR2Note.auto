@@ -26,13 +26,7 @@
         {
           "type": "named",
           "data": {
-            "name": "aimShootIntake"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "stow"
+            "name": "aimShootStow"
           }
         }
       ]

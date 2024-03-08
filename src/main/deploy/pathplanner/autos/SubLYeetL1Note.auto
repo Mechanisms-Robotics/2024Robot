@@ -2,19 +2,25 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 0.5,
-      "y": 7.0
+      "x": 0.65,
+      "y": 6.65
     },
-    "rotation": 0
+    "rotation": 60.0
   },
   "command": {
     "type": "sequential",
     "data": {
       "commands": [
         {
+          "type": "named",
+          "data": {
+            "name": "aimShootStow"
+          }
+        },
+        {
           "type": "path",
           "data": {
-            "pathName": "YeetLeft"
+            "pathName": "SubLYeetL"
           }
         }
       ]

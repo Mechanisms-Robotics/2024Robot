@@ -2,10 +2,10 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 0.75,
-      "y": 6.75
+      "x": 1.25,
+      "y": 5.55
     },
-    "rotation": 60.0
+    "rotation": 0
   },
   "command": {
     "type": "sequential",
@@ -18,9 +18,15 @@
           }
         },
         {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.5
+          }
+        },
+        {
           "type": "path",
           "data": {
-            "pathName": "SubLNoteL"
+            "pathName": "SubCNoteC"
           }
         },
         {
