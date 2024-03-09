@@ -58,21 +58,21 @@ public class RobotContainer {
     NamedCommands.registerCommand("aimPodiumHighShootIntake",
             new AutoAimShootIntake(armWrist, gerald, false, false));
 
-    m_chooser.setDefaultOption("YeetRight", new PathPlannerAuto("YeetRight"));
-    m_chooser.addOption("YeetLeft", new PathPlannerAuto("YeetRight"));
-    m_chooser.addOption("TimedLeave", new TimedLeave(swerve));
+//    m_chooser.addOption("YeetRight", new PathPlannerAuto("YeetRight"));
+//    m_chooser.addOption("YeetLeft", new PathPlannerAuto("YeetRight"));
+//    m_chooser.addOption("TimedLeave", new TimedLeave(swerve));
     // ----------------2Note----------------
     m_chooser.addOption("SubRNoteR2Note", new PathPlannerAuto("SubRNoteR2Note"));
-    m_chooser.addOption("SubCNoteC2Note", new PathPlannerAuto("SubCNoteC2Note"));
+    m_chooser.setDefaultOption("SubCNoteC2Note", new PathPlannerAuto("SubCNoteC2Note"));
     m_chooser.addOption("SubLNoteL2Note", new PathPlannerAuto("SubLNoteL2Note"));
     // ----------------3Note----------------
-    m_chooser.addOption("SubCNoteCR3Note", new PathPlannerAuto("SubCNoteCR3Note"));
-    m_chooser.addOption("SubLNoteLC3Note", new PathPlannerAuto("SubLNoteLC3Note"));
+//    m_chooser.addOption("SubCNoteCR3Note", new PathPlannerAuto("SubCNoteCR3Note"));
+//    m_chooser.addOption("SubLNoteLC3Note", new PathPlannerAuto("SubLNoteLC3Note"));
     // ----------------4Note----------------
-    m_chooser.addOption("SubLNoteLCR4Note", new PathPlannerAuto("SubLNoteLCR4Note"));
+//    m_chooser.addOption("SubLNoteLCR4Note", new PathPlannerAuto("SubLNoteLCR4Note"));
     // ----------------Field----------------
-    m_chooser.addOption("SubRFieldRR1NoteGrab", new PathPlannerAuto("SubRFieldRR1NoteGrab"));
-    m_chooser.addOption("TuningL", new PathPlannerAuto("TuningL"));
+//    m_chooser.addOption("SubRFieldRR1NoteGrab", new PathPlannerAuto("SubRFieldRR1NoteGrab"));
+//    m_chooser.addOption("TuningL", new PathPlannerAuto("TuningL"));
 
     SmartDashboard.putData("Auto Chooser", m_chooser);
     configureDefaultCommands();

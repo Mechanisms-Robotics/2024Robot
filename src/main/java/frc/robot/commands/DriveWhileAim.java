@@ -46,9 +46,8 @@ public class DriveWhileAim extends Command {
     static {
         wristAimMap.put(00.00, 120.);
         wristAimMap.put(0.26, 112.5);
-        wristAimMap.put(0.30, 112.);
-        wristAimMap.put(0.36, 109.);
-        wristAimMap.put(0.43, 107.);
+        wristAimMap.put(0.36, 110.);
+        wristAimMap.put(0.45, 105.);
         wristAimMap.put(0.56, 105.);
         wristAimMap.put(0.67, 102.5);
         wristAimMap.put(0.875, 95.);
