@@ -19,7 +19,7 @@ public class Gerald extends SubsystemBase {
     private static final double kIdleVoltage = 4;
     private static final double kAmpFeedVoltage = 3;
     private static final double kIntakeDetectDelay = 0.0001;
-    private static final double kFeedDetectDelay = .75;
+    private static final double kFeedDetectDelay = .375;
     private static final Timer detectDelayTimer = new Timer();
     private final DigitalInput noteSensor = new DigitalInput(8);
     private final DigitalInput noteSensorConfirm = new DigitalInput(9);
