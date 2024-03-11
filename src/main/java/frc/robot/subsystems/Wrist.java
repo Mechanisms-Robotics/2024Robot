@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
+import com.mechlib.hardware.BrushlessMotorController;
 import com.mechlib.hardware.CANCoder;
 import com.mechlib.hardware.TalonFX;
 import com.mechlib.subsystems.SingleJointSubystem;
@@ -19,8 +20,7 @@ public class Wrist extends SingleJointSubystem {
     private static final double kMotorRatio = 125.0 * kSensorRatio;
     private static final double kStartRotations = 0.29027778;
     // wrist magnet offset
-    private static final double kMagnetOffset = (kSensorRatio * kStartRotations) - 0.518799;
-    private final TalonFX WristMotor = new TalonFX(17, new CANCoder(17, kMagnetOffset, AbsoluteSensorRangeValue.Unsigned_0To1, SensorDirectionValue.CounterClockwise_Positive));
+    private final TalonFX WristMotor = new TalonFX(17);
     private final Pigeon2 gyro = new Pigeon2(18);
     private static final double kTolerance = Math.toRadians(0.5);
     private static final Rotation2d kStowed = Rotation2d.fromDegrees(90);
@@ -140,7 +140,8 @@ public class Wrist extends SingleJointSubystem {
      */
     @Override
     protected Rotation2d getAngle() {
-        return gyro.getRotation2d();
+        // TODO: figure out if the gyro should be inverted or not
+        return Rotation2d.fromDegrees(gyro.getYaw().getValueAsDouble());
     }
 
     /**
@@ -154,7 +155,21 @@ public class Wrist extends SingleJointSubystem {
         SmartDashboard.putNumber("[wrist] desired angle", getDesiredAngle().getDegrees());
         if (getAngle().getDegrees() < 0) disabled = true;
         if (disabled) return;
-        super.periodic();
+        // Check if current state is closed loop
+        if (state == SingleJointSubsystemState.CLOSED_LOOP) {
+            // Loop over every motor
+            for (BrushlessMotorController motor : motors) {
+                // Run periodic PIDF code
+                motor.periodicPPIDF(
+                        getAngle().getRadians(),
+                        motor.getVelocity(),
+                        feedforwardController.calculate(
+                                motor.getSetpoint(),
+                                motor.getVelocitySetpoint()
+                        )
+                );
+            }
+        }
         wristAdjustment = adjustmentAmount.getSelected();
     }
 }
