@@ -20,7 +20,10 @@ public class Gerald extends SubsystemBase {
     private static final double kAmpFeedVoltage = 3;
     private static final double kIntakeDetectDelay = 0.0001;
     private static final double kFeedDetectDelay = 1;
+    // TODO: tune the spinup rpm
     private static final double kSpinupRPM = 1000;
+    // TODO: tune the amp spinup rpm
+    private static final double kAmpSpinupRPM = 500;
     private static final Timer detectDelayTimer = new Timer();
     private final DigitalInput noteSensor = new DigitalInput(8);
     private final DigitalInput noteSensorConfirm = new DigitalInput(9);
@@ -131,11 +134,18 @@ public class Gerald extends SubsystemBase {
     }
 
     /**
+     * Returns true if the state is in PreparingShoot and the shooter is spunup.
+     * Also returns true if the state is in PreparingiAmp and the shooter is spunup for amping.
+     * The RPM for spunup is different for amp and shooter (kSpinupRPM, kAmpSpinupRPM).
      *
-     * @return
+     * @return true if it is spunup, else false
      */
     public boolean spunUp() {
-        return shooterMotor.getVelocity() > kSpinupRPM;
+        if (state == State.PreparingShoot)
+            return Math.abs(shooterMotor.getVelocity()) > kSpinupRPM;
+        if (state == State.PreparingAmp)
+            return Math.abs(shooterMotor.getVelocity()) > kAmpSpinupRPM;
+        return false;
     }
 
     /**
