@@ -20,6 +20,7 @@ public class Gerald extends SubsystemBase {
     private static final double kAmpFeedVoltage = 3;
     private static final double kIntakeDetectDelay = 0.0001;
     private static final double kFeedDetectDelay = 1;
+    private static final double kSpinupRPM = 1000;
     private static final Timer detectDelayTimer = new Timer();
     private final DigitalInput noteSensor = new DigitalInput(8);
     private final DigitalInput noteSensorConfirm = new DigitalInput(9);
@@ -48,6 +49,15 @@ public class Gerald extends SubsystemBase {
 
     private State state = State.Idling;
 
+    /**
+     * Returns the state of gerald
+     *
+     * @return state of gerald
+     */
+    public State getState() {
+        return state;
+    }
+
     public Gerald() {
         // set gerald motors to brake mode
         intakeMotor.brakeMode();
@@ -64,6 +74,7 @@ public class Gerald extends SubsystemBase {
         intakeMotor.setCurrentLimit(40);
         ampMotor.setCurrentLimit(40);
         shooterMotor.setCurrentLimit(40);
+        shooterMotor.setVelocityUnitsFunction((Double rps) -> rps / 60);
     }
 
     /**
@@ -117,6 +128,14 @@ public class Gerald extends SubsystemBase {
             ampMotor.setVoltage(kShooterVoltage);
             state = State.PreparingShoot;
         }
+    }
+
+    /**
+     *
+     * @return
+     */
+    public boolean spunUp() {
+        return shooterMotor.getVelocity() > kSpinupRPM;
     }
 
     /**

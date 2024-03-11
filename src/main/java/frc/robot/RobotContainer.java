@@ -27,6 +27,7 @@ public class RobotContainer {
   public final Wrist wrist = new Wrist();
   public final ArmWrist armWrist = new ArmWrist();
   public final LimeLight limeLight = new LimeLight();
+  public final LED led = new LED();
 
   private final CommandXboxController xboxController = new CommandXboxController(0);
   private final CommandXboxController xboxController2 = new CommandXboxController(1);
@@ -193,6 +194,7 @@ public class RobotContainer {
             2*Math.PI,
             true
     ));
+    led.setDefaultCommand(new LEDCommand(led, gerald, limeLight::getData, armWrist));
   }
 
   public Command getAutonomousCommand() { return m_chooser.getSelected(); }
