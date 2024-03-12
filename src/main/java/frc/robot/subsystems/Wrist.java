@@ -24,7 +24,7 @@ public class Wrist extends SingleJointSubystem {
     private final Pigeon2 gyro = new Pigeon2(18);
     private Translation2d gravityVector = new Translation2d();
     // TODO: find the gravity offset of the gyro
-    private static final Rotation2d gravityOffset = Rotation2d.fromDegrees(0);
+    private static final Rotation2d gravityOffset = Rotation2d.fromDegrees(90 - (-96.5)); // 186.5
     private final Supplier<Double> swervePitch;
     private final Supplier<Double> swerveRoll;
     private static final double kAllowableTip = 5;
@@ -56,16 +56,18 @@ public class Wrist extends SingleJointSubystem {
         setPositionUnitsFunction((rotations) -> MechUnits.rotationsToRadians(rotations, kSensorRatio));
         setVelocityUnitsFunction((rotations) -> MechUnits.rotationsToRadians(rotations, kSensorRatio));
         setLimits(kReverseLimit, kForwardLimit, kMotorRatio);
-        setFeedforwardGains(0.15, 0, 0.0, 0.0);
-        setPPIDGains(0.6, 0.0, 0.0);
+//        setFeedforwardGains(0.15, 0, 0.0, 0.0);
+//        setPPIDGains(0.6, 0.0, 0.0);
+        setFeedforwardGains(0.0, 0, 0.0, 0.0);
+        setPPIDGains(0.0, 0.0, 0.0);
         setPPIDConstraints(Math.PI/4, Math.PI/2);
         setTolerance(kTolerance);
+        coastMode();
 
         adjustmentAmount.addOption("^", -1./2.);
         adjustmentAmount.setDefaultOption("None", 0.);
         adjustmentAmount.addOption("v", 1./2.);
         SmartDashboard.putData("Shot Adjustment", adjustmentAmount);
-        initAngle();
     }
 
     /**
@@ -155,18 +157,9 @@ public class Wrist extends SingleJointSubystem {
     @Override
     protected Rotation2d getAngle() {
         // TODO: figure out if the gyro should be inverted or not
-        return Rotation2d.fromDegrees(gyro.getYaw().getValueAsDouble());
+        return gravityVector.getAngle().rotateBy(gravityOffset);
     }
 
-    /**
-     * Set the angle of the gyro based off of the gravity offset
-     */
-    private void initAngle() {
-        gravityVector = new Translation2d(gyro.getGravityVectorX().getValueAsDouble(),
-                                                        gyro.getGravityVectorY().getValueAsDouble());
-        gyro.setYaw(gravityVector.getAngle().rotateBy(gravityOffset).getDegrees());
-    }
- 
     /**
      * Periodically output the data (right and left arm position) to SmartDashBoard. Do not run the arms if the robot
      * is disabled. Runs the PIDFs if the robot is in closed loop.
@@ -179,6 +172,7 @@ public class Wrist extends SingleJointSubystem {
         gravityVector = new Translation2d(gyro.getGravityVectorX().getValueAsDouble(),
                 gyro.getGravityVectorY().getValueAsDouble());
         SmartDashboard.putNumber("[Wrist] gravity angle", gravityVector.getAngle().getDegrees());
+        SmartDashboard.putNumber("[Wrist] pitch", gyro.getPitch().getValueAsDouble());
 //
 //        if (getAngle().getDegrees() < 0) disabled = true; // if the angle of the arm is negative, disable it
 //        if (Math.abs(swerveRoll.get()) > kAllowableTip || Math.abs(swervePitch.get()) > kAllowableTip) {

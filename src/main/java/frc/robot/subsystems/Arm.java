@@ -8,6 +8,7 @@ import com.mechlib.subsystems.SingleJointSubystem;
 import com.mechlib.util.MechUnits;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
@@ -33,8 +34,11 @@ public class Arm extends SingleJointSubystem {
     private static final double kMotorRatio = 60 * 64.0/16.0;
     private boolean homed = false;
     // TODO: tune the home version
-    private static final double homeVoltage = 0.5;
+    private static final double homeVoltage = 0.25;
     private static final Rotation2d homedPosition = Rotation2d.fromDegrees(94.77);
+    private static final double kHomeTime = 1;
+    private final Timer homeTimer = new Timer();
+    private boolean isHoming = false;
     private static final Rotation2d kShuttle = Rotation2d.fromDegrees(60);
     private static final Rotation2d kForwardLimit = Rotation2d.fromDegrees(94);
     private static final Rotation2d kReverseLimit = Rotation2d.fromDegrees(2);
@@ -46,16 +50,17 @@ public class Arm extends SingleJointSubystem {
         addMotor(leftArmMotor, true);
         addMotor(rightArmMotor, false);
         setCurrentLimit(40.0);
-        setVoltageCompensation(10.0);
+        setVoltageCompensation(.5);
         setState(SingleJointSubsystemState.CLOSED_LOOP);
         setPositionUnitsFunction((rotations) -> MechUnits.rotationsToRadians(rotations, kMotorRatio));
         setVelocityUnitsFunction((rotations) -> MechUnits.rotationsToRadians(rotations, kMotorRatio));
-        setLimits(kReverseLimit, kForwardLimit, kMotorRatio);
-        setFeedforwardGains(0.15, 0, 0.0, 0.0);
-        setPPIDGains(1.0, 0.0, 0.0);
+        setFeedforwardGains(0.0, 0, 0.0, 0.0);
+        setPPIDGains(0.0, 0.0, 0.0);
+//        setFeedforwardGains(0.15, 0, 0.0, 0.0);
+//        setPPIDGains(1.0, 0.0, 0.0);
         setPPIDConstraints(Math.PI, 4*Math.PI);
         setTolerance(kTolerance);
-        SmartDashboard.putBoolean("[arm] disabled", disabled);
+        SmartDashboard.putBoolean("[Arm] disabled", disabled);
     }
 
     /**
@@ -77,9 +82,17 @@ public class Arm extends SingleJointSubystem {
      */
     public void home() {
         if (homed) return;
-        // starts moving the arm back to the hard stop
-        leftArmMotor.setVoltage(homeVoltage);
-        rightArmMotor.setVoltage(homeVoltage);
+        if(!isHoming) {
+            setLimits(Rotation2d.fromDegrees(-1000), Rotation2d.fromDegrees(1000), kMotorRatio);
+            // starts moving the arm back to the hard stop
+            leftArmMotor.setVoltage(homeVoltage);
+            rightArmMotor.setVoltage(homeVoltage);
+            homeTimer.restart();
+            isHoming = true;
+            return;
+        } else if (!homeTimer.hasElapsed(kHomeTime)) {
+            return;
+        }
         /* If the motors have stoped (velocity of the motors is within tolerance) set the motor positions to the
            position of the home position, set the voltages to 0 and homed to true */
         // TODO: tune the velocity tolerance
@@ -91,8 +104,9 @@ public class Arm extends SingleJointSubystem {
                     homedPosition.getRadians(), kMotorRatio));
             leftArmMotor.setVoltage(0);
             rightArmMotor.setVoltage(0);
+//            setLimits(kReverseLimit, kForwardLimit, kMotorRatio);
             homed = true;
-            disabled = false;
+            disabled = true; // TODO: make it false
         }
     }
 
