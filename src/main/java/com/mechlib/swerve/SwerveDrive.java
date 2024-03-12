@@ -664,6 +664,15 @@ public class SwerveDrive extends SubsystemBase {
     blModule.setSteerVoltage(voltageMeasure.baseUnitMagnitude());
   }
 
+  public double getPitch() {
+    return gyro.getPitch().getValueAsDouble();
+  }
+
+  public double getRoll() {
+    return gyro.getRoll().getValueAsDouble();
+  }
+
+
   @Override
   public void periodic() {
     // Update pose estimator

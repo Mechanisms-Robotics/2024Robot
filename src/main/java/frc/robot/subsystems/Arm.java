@@ -200,7 +200,7 @@ public class Arm extends SingleJointSubystem {
         SmartDashboard.putNumber("[Arm] desired angle", getDesiredAngle().getDegrees());
         SmartDashboard.putBoolean("[Arm] homed", homed);
         // if disabled, do not run any processes on the arm
-        if (Math.abs(leftArmMotor.getRawPosition() -rightArmMotor.getRawPosition()) > kAllowableDifference)
+        if (Math.abs(leftArmMotor.getRawPosition() - rightArmMotor.getRawPosition()) > kAllowableDifference)
             disable();
         if (disabled || !homed) return;
         super.periodic();
