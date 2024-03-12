@@ -137,8 +137,8 @@ public class RobotContainer {
             new SubwooferHighPosition(armWrist)
     );
 
-    xboxController2.leftStick().onTrue(
-            new UnDisable(arm)
+    xboxController2.leftStick().whileTrue(
+            new Home(arm)
     );
     // -----------------Right-----------------
     xboxController2.rightTrigger().onTrue(
