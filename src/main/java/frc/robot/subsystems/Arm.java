@@ -58,23 +58,31 @@ public class Arm extends SingleJointSubystem {
         SmartDashboard.putBoolean("[arm] disabled", disabled);
     }
 
+    /**
+     * Returns true if the arm has been homed.
+     * When the arm disables, the homed is set to false.
+     *
+     * @return true if homed, else false
+     */
     public boolean homed() {
         return homed;
     }
 
     /**
      * Home the arm, zeroing the position of the arms.
-     * This process moves the arm back until the arms stop moving.
+     * This process moves the arm back until it hits the hard stop (i.e. the arms stops moving).
      * When the arm stops moving, it sets the motor positions to the homed position.
      * This is used to un-disable the arm, because the arm needs to be homed before it can be un-disabled because
      * when it does disable it is usually because a chain slipped.
      */
     public void home() {
         if (homed) return;
+        // starts moving the arm back to the hard stop
         leftArmMotor.setVoltage(homeVoltage);
         rightArmMotor.setVoltage(homeVoltage);
         /* If the motors have stoped (velocity of the motors is within tolerance) set the motor positions to the
            position of the home position, set the voltages to 0 and homed to true */
+        // TODO: tune the velocity tolerance
         if (MathUtil.isNear(0, leftArmMotor.getVelocity(), 0.01)
             && MathUtil.isNear(0, rightArmMotor.getVelocity(), 0.01)) {
             leftArmMotor.setInternalSensorPosition(MechUnits.radiansToRotations(

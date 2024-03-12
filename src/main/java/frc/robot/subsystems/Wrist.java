@@ -107,18 +107,22 @@ public class Wrist extends SingleJointSubystem {
         pivotTo(kAmp);
     }
 
+    /**
+     * Pivots the wrist to the prepare climb position.
+     * This position puts the hooks right above the chain so when the arm and wrist go down, it pulls against the chain.
+     */
     public void prepClimb() {
         pivotTo(kPrepClimb);
     }
 
+    /**
+     * Pivots the wrist down to the climb position, pulling on the chain to lift the robot
+     */
     public void climb() {
         pivotTo(kClimb);
     }
 
-    /**
-     * Pivot to the shuttle position (kShuttle)
-     *
-     */
+    /** Pivot to the shuttle position (kShuttle) */
     public void shuttle() {
         pivotTo(kShuttle);
     }
@@ -150,10 +154,10 @@ public class Wrist extends SingleJointSubystem {
      */
     @Override
     public void periodic() {
-        SmartDashboard.putNumber("[wrist] Wrist position", WristMotor.getRawPosition());
-        SmartDashboard.putNumber("[wrist] current angle", getAngle().getDegrees());
-        SmartDashboard.putNumber("[wrist] desired angle", getDesiredAngle().getDegrees());
-        if (getAngle().getDegrees() < 0) disabled = true;
+        SmartDashboard.putNumber("[Wrist] Wrist position", WristMotor.getRawPosition());
+        SmartDashboard.putNumber("[Wrist] current angle", getAngle().getDegrees());
+        SmartDashboard.putNumber("[Wrist] desired angle", getDesiredAngle().getDegrees());
+        if (getAngle().getDegrees() < 0) disabled = true; // if the angle of the arm is negative, disable it
         if (disabled) return;
         // Check if current state is closed loop
         if (state == SingleJointSubsystemState.CLOSED_LOOP) {
