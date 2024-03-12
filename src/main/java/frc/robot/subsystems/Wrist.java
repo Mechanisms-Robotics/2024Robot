@@ -179,28 +179,28 @@ public class Wrist extends SingleJointSubystem {
         gravityVector = new Translation2d(gyro.getGravityVectorX().getValueAsDouble(),
                 gyro.getGravityVectorY().getValueAsDouble());
         SmartDashboard.putNumber("[Wrist] gravity angle", gravityVector.getAngle().getDegrees());
-
-        if (getAngle().getDegrees() < 0) disabled = true; // if the angle of the arm is negative, disable it
-        if (Math.abs(swerveRoll.get()) > kAllowableTip || Math.abs(swervePitch.get()) > kAllowableTip) {
-            wristMotor.stop();
-            return;
-        }
-        if (disabled) return;
-        // Check if current state is closed loop
-        if (state == SingleJointSubsystemState.CLOSED_LOOP) {
-            // Loop over every motor
-            for (BrushlessMotorController motor : motors) {
-                // Run periodic PIDF code
-                motor.periodicPPIDF(
-                        getAngle().getRadians(),
-                        motor.getVelocity(),
-                        feedforwardController.calculate(
-                                motor.getSetpoint(),
-                                motor.getVelocitySetpoint()
-                        )
-                );
-            }
-        }
-        wristAdjustment = adjustmentAmount.getSelected();
+//
+//        if (getAngle().getDegrees() < 0) disabled = true; // if the angle of the arm is negative, disable it
+//        if (Math.abs(swerveRoll.get()) > kAllowableTip || Math.abs(swervePitch.get()) > kAllowableTip) {
+//            wristMotor.stop();
+//            return;
+//        }
+//        if (disabled) return;
+//        // Check if current state is closed loop
+//        if (state == SingleJointSubsystemState.CLOSED_LOOP) {
+//            // Loop over every motor
+//            for (BrushlessMotorController motor : motors) {
+//                // Run periodic PIDF code
+//                motor.periodicPPIDF(
+//                        getAngle().getRadians(),
+//                        motor.getVelocity(),
+//                        feedforwardController.calculate(
+//                                motor.getSetpoint(),
+//                                motor.getVelocitySetpoint()
+//                        )
+//                );
+//            }
+//        }
+//        wristAdjustment = adjustmentAmount.getSelected();
     }
 }

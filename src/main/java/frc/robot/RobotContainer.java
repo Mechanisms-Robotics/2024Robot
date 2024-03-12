@@ -22,10 +22,10 @@ public class RobotContainer {
   private final SendableChooser<Command> routineChooser = new SendableChooser<>();
   private final SendableChooser<Boolean> quasistaticChooser = new SendableChooser<>();
   public final Swerve swerve = new Swerve();
-  public final Arm arm = new Arm();
   public final Gerald gerald = new Gerald();
-  public final Wrist wrist = new Wrist();
-  public final ArmWrist armWrist = new ArmWrist();
+  public final Arm arm = new Arm();
+  public final Wrist wrist = new Wrist(swerve::getPitch, swerve::getRoll);
+  public final ArmWrist armWrist = new ArmWrist(arm, wrist);
   public final LimeLight limeLight = new LimeLight();
 
   private final CommandXboxController xboxController = new CommandXboxController(0);
