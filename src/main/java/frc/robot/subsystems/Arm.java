@@ -6,9 +6,7 @@ import com.mechlib.hardware.CANCoder;
 import com.mechlib.hardware.TalonFX;
 import com.mechlib.subsystems.SingleJointSubystem;
 import com.mechlib.util.MechUnits;
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
@@ -17,10 +15,19 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class Arm extends SingleJointSubystem {
     // true if the arm runs in open loop, false if it runs in closed loop
     private static final boolean kOpenLoop = true;
+    // rotations as detected by the CanCoder at the start position if there was no offset
+    private static final double kIdealStartRotation = 1.0533;
+    // left arm motor magnet offset (acquired in Phoenix Tuner X)
+    private static final double kLeftMagnetOffset = kIdealStartRotation - 0.463379;
+    // right arm motor magnet offset
+    private static final double kRightMagnetOffset = kIdealStartRotation - 0.478760;
     // right arm TalonFX motor and it's can coder
-    private final TalonFX rightArmMotor = new TalonFX(13);
+    private final TalonFX rightArmMotor = new TalonFX(13, new CANCoder(13, kRightMagnetOffset, AbsoluteSensorRangeValue.Unsigned_0To1, SensorDirectionValue.Clockwise_Positive));
     // left arm TalonFX motor with it's can coder
-    private final TalonFX leftArmMotor = new TalonFX(12);
+    private final TalonFX leftArmMotor = new TalonFX(12, new CANCoder(12, kLeftMagnetOffset, AbsoluteSensorRangeValue.Unsigned_0To1, SensorDirectionValue.CounterClockwise_Positive));
+    // feed forward controller for the arm
+    /* PID controller for the right and left arm, which will always have the same values they are different to account
+       for different mechanical structures, such as belt tensioning */
     private static final double kTolerance = Math.toRadians(2);
     private static final Rotation2d kStowed = Rotation2d.fromDegrees(60);
     private static final Rotation2d kIntaking = Rotation2d.fromDegrees(2);
@@ -31,14 +38,8 @@ public class Arm extends SingleJointSubystem {
     private static final Rotation2d kAmp = Rotation2d.fromDegrees(94);
     private static final Rotation2d kPrepClimb = Rotation2d.fromDegrees(90);
     private static final Rotation2d kClimb = Rotation2d.fromDegrees(40);
-    private static final double kMotorRatio = 60 * 64.0/16.0;
-    private boolean homed = false;
-    // TODO: tune the home version
-    private static final double homeVoltage = 0.25;
-    private static final Rotation2d homedPosition = Rotation2d.fromDegrees(94.77);
-    private static final double kHomeTime = 1;
-    private final Timer homeTimer = new Timer();
-    private boolean isHoming = false;
+    private static final double kSensorRatio = 64.0/16.0;
+    private static final double kMotorRatio = 60 * kSensorRatio;
     private static final Rotation2d kShuttle = Rotation2d.fromDegrees(60);
     private static final Rotation2d kForwardLimit = Rotation2d.fromDegrees(94);
     private static final Rotation2d kReverseLimit = Rotation2d.fromDegrees(2);
@@ -50,64 +51,16 @@ public class Arm extends SingleJointSubystem {
         addMotor(leftArmMotor, true);
         addMotor(rightArmMotor, false);
         setCurrentLimit(40.0);
-        setVoltageCompensation(.5);
+        setVoltageCompensation(10.0);
         setState(SingleJointSubsystemState.CLOSED_LOOP);
-        setPositionUnitsFunction((rotations) -> MechUnits.rotationsToRadians(rotations, kMotorRatio));
-        setVelocityUnitsFunction((rotations) -> MechUnits.rotationsToRadians(rotations, kMotorRatio));
-        setFeedforwardGains(0.0, 0, 0.0, 0.0);
-        setPPIDGains(0.0, 0.0, 0.0);
-//        setFeedforwardGains(0.15, 0, 0.0, 0.0);
-//        setPPIDGains(1.0, 0.0, 0.0);
-        setPPIDConstraints(Math.PI, 4*Math.PI);
+        setPositionUnitsFunction((rotations) -> MechUnits.rotationsToRadians(rotations, kSensorRatio));
+        setVelocityUnitsFunction((rotations) -> MechUnits.rotationsToRadians(rotations, kSensorRatio));
+        setLimits(kReverseLimit, kForwardLimit, kMotorRatio);
+        setFeedforwardGains(0.15, 0, 0.0, 0.0);
+        setPPIDGains(1.0, 0.0, 0.0);
+        setPPIDConstraints(Math.PI/2, 4*Math.PI);
         setTolerance(kTolerance);
-        SmartDashboard.putBoolean("[Arm] disabled", disabled);
-    }
-
-    /**
-     * Returns true if the arm has been homed.
-     * When the arm disables, the homed is set to false.
-     *
-     * @return true if homed, else false
-     */
-    public boolean homed() {
-        return homed;
-    }
-
-    /**
-     * Home the arm, zeroing the position of the arms.
-     * This process moves the arm back until it hits the hard stop (i.e. the arms stops moving).
-     * When the arm stops moving, it sets the motor positions to the homed position.
-     * This is used to un-disable the arm, because the arm needs to be homed before it can be un-disabled because
-     * when it does disable it is usually because a chain slipped.
-     */
-    public void home() {
-        if (homed) return;
-        if(!isHoming) {
-            setLimits(Rotation2d.fromDegrees(-1000), Rotation2d.fromDegrees(1000), kMotorRatio);
-            // starts moving the arm back to the hard stop
-            leftArmMotor.setVoltage(homeVoltage);
-            rightArmMotor.setVoltage(homeVoltage);
-            homeTimer.restart();
-            isHoming = true;
-            return;
-        } else if (!homeTimer.hasElapsed(kHomeTime)) {
-            return;
-        }
-        /* If the motors have stoped (velocity of the motors is within tolerance) set the motor positions to the
-           position of the home position, set the voltages to 0 and homed to true */
-        // TODO: tune the velocity tolerance
-        if (MathUtil.isNear(0, leftArmMotor.getVelocity(), 0.01)
-            && MathUtil.isNear(0, rightArmMotor.getVelocity(), 0.01)) {
-            leftArmMotor.setInternalSensorPosition(MechUnits.radiansToRotations(
-                    homedPosition.getRadians(), kMotorRatio));
-            rightArmMotor.setInternalSensorPosition(MechUnits.radiansToRotations(
-                    homedPosition.getRadians(), kMotorRatio));
-            leftArmMotor.setVoltage(0);
-            rightArmMotor.setVoltage(0);
-//            setLimits(kReverseLimit, kForwardLimit, kMotorRatio);
-            homed = true;
-            disabled = true; // TODO: make it false
-        }
+        SmartDashboard.putBoolean("[arm] disabled", disabled);
     }
 
     /**
@@ -189,8 +142,11 @@ public class Arm extends SingleJointSubystem {
     public void disable() {
         stop();
         disabled = true;
-        homed = false; // since it was disabled, the chain probably skipped it should be re-homed
-        SmartDashboard.putBoolean("[Arm] disabled", disabled);
+        SmartDashboard.putBoolean("[arm] disabled", disabled);
+    }
+
+    public void unDisable() {
+        disabled = false;
     }
 
     /**
@@ -208,16 +164,14 @@ public class Arm extends SingleJointSubystem {
      */
     @Override
     public void periodic() {
-        disabled = true; // TODO: un-disable arm when ready
-        SmartDashboard.putNumber("[Arm] Left position", leftArmMotor.getRawPosition());
-        SmartDashboard.putNumber("[Arm] Right position", rightArmMotor.getRawPosition());
-        SmartDashboard.putNumber("[Arm] current angle", getAngle().getDegrees());
-        SmartDashboard.putNumber("[Arm] desired angle", getDesiredAngle().getDegrees());
-        SmartDashboard.putBoolean("[Arm] homed", homed);
+        SmartDashboard.putNumber("[arm] Left position", leftArmMotor.getRawPosition());
+        SmartDashboard.putNumber("[arm] Right position", rightArmMotor.getRawPosition());
+        SmartDashboard.putNumber("[arm] current angle", getAngle().getDegrees());
+        SmartDashboard.putNumber("[arm] desired angle", getDesiredAngle().getDegrees());
         // if disabled, do not run any processes on the arm
-        if (Math.abs(leftArmMotor.getRawPosition() - rightArmMotor.getRawPosition()) > kAllowableDifference)
+        if (Math.abs(leftArmMotor.getRawPosition() -rightArmMotor.getRawPosition()) > kAllowableDifference)
             disable();
-        if (disabled || !homed) return;
+        if (disabled) return;
         super.periodic();
     }
 }

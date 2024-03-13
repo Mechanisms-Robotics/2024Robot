@@ -17,7 +17,7 @@ public class Home extends Command {
 
     @Override
     public void execute() {
-        arm.home();
+//        arm.home();
     }
 
     @Override

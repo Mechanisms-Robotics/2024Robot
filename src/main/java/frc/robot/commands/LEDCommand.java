@@ -41,6 +41,7 @@ public class LEDCommand extends Command {
                     led.blue();
                 } else { led.red(); }
             } else { led.blue(); }
-        } else { led.red();
+        } else { led.red(); }
     }
 }
+

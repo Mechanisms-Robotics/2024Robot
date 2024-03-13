@@ -190,8 +190,8 @@ public class RobotContainer {
             0.1,
             0.5,
             0.25,
-            Math.PI,
-            2*Math.PI,
+            Math.PI/2,
+            Math.PI*1,
             true
     ));
     led.setDefaultCommand(new LEDCommand(led, gerald, limeLight::getData, armWrist));
