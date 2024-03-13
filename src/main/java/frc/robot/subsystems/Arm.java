@@ -13,14 +13,12 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * The arm that Gerald is attached to. It is directly connected to the swerve.
  */
 public class Arm extends SingleJointSubystem {
-    // true if the arm runs in open loop, false if it runs in closed loop
-    private static final boolean kOpenLoop = true;
     // rotations as detected by the CanCoder at the start position if there was no offset
     private static final double kIdealStartRotation = 1.0533;
     // left arm motor magnet offset (acquired in Phoenix Tuner X)
-    private static final double kLeftMagnetOffset = kIdealStartRotation - 0.463379;
+    private static final double kLeftMagnetOffset = kIdealStartRotation - 0.470215;
     // right arm motor magnet offset
-    private static final double kRightMagnetOffset = kIdealStartRotation - 0.478760;
+    private static final double kRightMagnetOffset = kIdealStartRotation - 0.474609;
     // right arm TalonFX motor and it's can coder
     private final TalonFX rightArmMotor = new TalonFX(13, new CANCoder(13, kRightMagnetOffset, AbsoluteSensorRangeValue.Unsigned_0To1, SensorDirectionValue.Clockwise_Positive));
     // left arm TalonFX motor with it's can coder
@@ -30,7 +28,7 @@ public class Arm extends SingleJointSubystem {
        for different mechanical structures, such as belt tensioning */
     private static final double kTolerance = Math.toRadians(2);
     private static final Rotation2d kStowed = Rotation2d.fromDegrees(60);
-    private static final Rotation2d kIntaking = Rotation2d.fromDegrees(2);
+    private static final Rotation2d kIntaking = Rotation2d.fromDegrees(3);
     private static final Rotation2d kSubwooferHigh = Rotation2d.fromDegrees(94);
     private static final Rotation2d kSubwooferLow = Rotation2d.fromDegrees(15);
     private static final Rotation2d kPodiumHigh = kSubwooferHigh;
@@ -152,7 +150,7 @@ public class Arm extends SingleJointSubystem {
     /**
      * Sets the arm rotation to a given angle
      *
-     * @param rotation
+     * @param rotation rotation to pivot to
      */
     public void aim(Rotation2d rotation) {
         pivotTo(rotation);
