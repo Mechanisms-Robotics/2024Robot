@@ -1,14 +1,16 @@
 package frc.robot.subsystems;
 
-import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
-import com.ctre.phoenix6.signals.SensorDirectionValue;
-import com.mechlib.hardware.CANCoder;
+import com.ctre.phoenix6.hardware.Pigeon2;
+import com.mechlib.hardware.BrushlessMotorController;
 import com.mechlib.hardware.TalonFX;
 import com.mechlib.subsystems.SingleJointSubystem;
 import com.mechlib.util.MechUnits;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
+import java.util.function.Supplier;
 
 /**
  * Controls the motor that pivots Gerald
@@ -18,8 +20,14 @@ public class Wrist extends SingleJointSubystem {
     private static final double kMotorRatio = 125.0 * kSensorRatio;
     private static final double kStartRotations = 0.29027778;
     // wrist magnet offset
-    private static final double kMagnetOffset = (kSensorRatio * kStartRotations) - 0.518799;
-    private final TalonFX WristMotor = new TalonFX(17, new CANCoder(17, kMagnetOffset, AbsoluteSensorRangeValue.Unsigned_0To1, SensorDirectionValue.CounterClockwise_Positive));
+    private final TalonFX wristMotor = new TalonFX(17);
+    private final Pigeon2 gyro = new Pigeon2(18);
+    private Translation2d gravityVector = new Translation2d();
+    // TODO: find the gravity offset of the gyro
+    private static final Rotation2d gravityOffset = Rotation2d.fromDegrees(90 - (-96.5)); // 186.5
+    private final Supplier<Double> swervePitch;
+    private final Supplier<Double> swerveRoll;
+    private static final double kAllowableTip = 5;
     private static final double kTolerance = Math.toRadians(0.5);
     private static final Rotation2d kStowed = Rotation2d.fromDegrees(90);
     private static final Rotation2d kIntaking = Rotation2d.fromDegrees(87.5);
@@ -37,18 +45,24 @@ public class Wrist extends SingleJointSubystem {
     private double wristAdjustment = 0;
     private final SendableChooser<Double> adjustmentAmount = new SendableChooser<>();
 
-    public Wrist() {
-        addMotor(WristMotor, true);
+    public Wrist(Supplier<Double> swervePitch, Supplier<Double> swerveRoll) {
+        this.swervePitch = swervePitch;
+        this.swerveRoll = swerveRoll;
+        
+        addMotor(wristMotor, true);
         setCurrentLimit(40.0);
         setVoltageCompensation(10.0);
         setState(SingleJointSubsystemState.CLOSED_LOOP);
         setPositionUnitsFunction((rotations) -> MechUnits.rotationsToRadians(rotations, kSensorRatio));
         setVelocityUnitsFunction((rotations) -> MechUnits.rotationsToRadians(rotations, kSensorRatio));
         setLimits(kReverseLimit, kForwardLimit, kMotorRatio);
-        setFeedforwardGains(0.15, 0, 0.0, 0.0);
-        setPPIDGains(0.6, 0.0, 0.0);
+//        setFeedforwardGains(0.15, 0, 0.0, 0.0);
+//        setPPIDGains(0.6, 0.0, 0.0);
+        setFeedforwardGains(0.0, 0, 0.0, 0.0);
+        setPPIDGains(0.0, 0.0, 0.0);
         setPPIDConstraints(Math.PI/4, Math.PI/2);
         setTolerance(kTolerance);
+        coastMode();
 
         adjustmentAmount.addOption("^", -1./2.);
         adjustmentAmount.setDefaultOption("None", 0.);
@@ -105,18 +119,22 @@ public class Wrist extends SingleJointSubystem {
         pivotTo(kAmp);
     }
 
+    /**
+     * Pivots the wrist to the prepare climb position.
+     * This position puts the hooks right above the chain so when the arm and wrist go down, it pulls against the chain.
+     */
     public void prepClimb() {
         pivotTo(kPrepClimb);
     }
 
+    /**
+     * Pivots the wrist down to the climb position, pulling on the chain to lift the robot
+     */
     public void climb() {
         pivotTo(kClimb);
     }
 
-    /**
-     * Pivot to the shuttle position (kShuttle)
-     *
-     */
+    /** Pivot to the shuttle position (kShuttle) */
     public void shuttle() {
         pivotTo(kShuttle);
     }
@@ -131,18 +149,53 @@ public class Wrist extends SingleJointSubystem {
     }
 
     /**
+     * Returns the angle of the arm.
+     * Overrides the angle from CANCoder based → gyro based.
+     *
+     * @return angle of the wrist
+     */
+    @Override
+    protected Rotation2d getAngle() {
+        // TODO: figure out if the gyro should be inverted or not
+        return gravityVector.getAngle().rotateBy(gravityOffset);
+    }
+
+    /**
      * Periodically output the data (right and left arm position) to SmartDashBoard. Do not run the arms if the robot
      * is disabled. Runs the PIDFs if the robot is in closed loop.
      */
     @Override
     public void periodic() {
-        disabled = true;
-        SmartDashboard.putNumber("[wrist] Wrist position", WristMotor.getRawPosition());
-        SmartDashboard.putNumber("[wrist] current angle", getAngle().getDegrees());
-        SmartDashboard.putNumber("[wrist] desired angle", getDesiredAngle().getDegrees());
-        if (getAngle().getDegrees() < 0) disabled = true;
-        if (disabled) return;
-        super.periodic();
-        wristAdjustment = adjustmentAmount.getSelected();
+        disabled = true; // TODO: un-disable wrist when ready
+        SmartDashboard.putNumber("[Wrist] position", wristMotor.getRawPosition());
+        SmartDashboard.putNumber("[Wrist] current angle", getAngle().getDegrees());
+        SmartDashboard.putNumber("[Wrist] desired angle", getDesiredAngle().getDegrees());
+        gravityVector = new Translation2d(gyro.getGravityVectorX().getValueAsDouble(),
+                gyro.getGravityVectorY().getValueAsDouble());
+        SmartDashboard.putNumber("[Wrist] gravity angle", gravityVector.getAngle().getDegrees());
+        SmartDashboard.putNumber("[Wrist] pitch", gyro.getPitch().getValueAsDouble());
+//
+//        if (getAngle().getDegrees() < 0) disabled = true; // if the angle of the arm is negative, disable it
+//        if (Math.abs(swerveRoll.get()) > kAllowableTip || Math.abs(swervePitch.get()) > kAllowableTip) {
+//            wristMotor.stop();
+//            return;
+//        }
+//        if (disabled) return;
+//        // Check if current state is closed loop
+//        if (state == SingleJointSubsystemState.CLOSED_LOOP) {
+//            // Loop over every motor
+//            for (BrushlessMotorController motor : motors) {
+//                // Run periodic PIDF code
+//                motor.periodicPPIDF(
+//                        getAngle().getRadians(),
+//                        motor.getVelocity(),
+//                        feedforwardController.calculate(
+//                                motor.getSetpoint(),
+//                                motor.getVelocitySetpoint()
+//                        )
+//                );
+//            }
+//        }
+//        wristAdjustment = adjustmentAmount.getSelected();
     }
 }

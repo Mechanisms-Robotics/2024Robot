@@ -15,6 +15,7 @@ public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
   private RobotContainer m_robotContainer;
+  private boolean autoScheduled = false;
 
   @Override
   public void robotInit() {
@@ -45,14 +46,20 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
-   m_autonomousCommand = m_robotContainer.getAutonomousCommand();
-    if (m_autonomousCommand != null) {
-      m_autonomousCommand.schedule();
-    }
+
   }
 
   @Override
-  public void autonomousPeriodic() {}
+  public void autonomousPeriodic() {
+    if (!m_robotContainer.arm.homed()) {
+      m_robotContainer.arm.home();
+      return;
+    }
+    if (autoScheduled) return;
+    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+    if (m_autonomousCommand != null) m_autonomousCommand.schedule();
+    autoScheduled = true;
+  }
 
   @Override
   public void autonomousExit() {}
@@ -81,6 +88,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void testPeriodic() {
+    m_robotContainer.arm.home();
   }
 
   @Override

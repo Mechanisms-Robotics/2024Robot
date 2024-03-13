@@ -8,8 +8,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  * Controls the arm and the wrist as one subsystem because the states are the same.
  */
 public class ArmWrist extends SubsystemBase {
-    private static final Arm arm = new Arm();
-    private static final Wrist wrist = new Wrist();
+    private final Arm arm;
+    private final Wrist wrist;
     private boolean safe = false;
 
     public enum State {
@@ -28,6 +28,11 @@ public class ArmWrist extends SubsystemBase {
         return state;
     }
     private boolean lowMode = false;
+
+    public ArmWrist(Arm arm, Wrist wrist) {
+        this.arm = arm;
+        this.wrist = wrist;
+    }
 
     /**
      * Set the arm and wrist to the stow position.
