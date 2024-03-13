@@ -136,6 +136,7 @@ public class Wrist extends SingleJointSubystem {
      */
     @Override
     public void periodic() {
+        disabled = true;
         SmartDashboard.putNumber("[wrist] Wrist position", WristMotor.getRawPosition());
         SmartDashboard.putNumber("[wrist] current angle", getAngle().getDegrees());
         SmartDashboard.putNumber("[wrist] desired angle", getDesiredAngle().getDegrees());

@@ -1,5 +1,6 @@
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.ArmWrist;
 import frc.robot.subsystems.Gerald;
@@ -24,21 +25,22 @@ public class LEDCommand extends Command {
 
     @Override
     public void execute() {
-        led.off(); // default off
-        if (gerald.getState() == Gerald.State.Intaking)
+        SmartDashboard.putString("[LED] color", led.getLEDData().color());
+        if (gerald.getState() == Gerald.State.Intaking) {
             led.yellow();
-        if (gerald.noteDetected() && gerald.getState() == Gerald.State.Idling)
+            return;
+        }
+        if (gerald.noteDetected() && gerald.getState() == Gerald.State.Idling) {
             led.green();
+            return;
+        }
         if (gerald.spunUp()) {
             if (armWrist.getState() == ArmWrist.State.ShootingPodium
                     || armWrist.getState() == ArmWrist.State.Aiming) {
-                if (limeLightData.get().aimed()) led.blue();
-                else led.red();
-            } else {
-                led.blue();
-            }
-        } else {
-            led.red();
-        }
+                if (limeLightData.get().aimed()) {
+                    led.blue();
+                } else { led.red(); }
+            } else { led.blue(); }
+        } else { led.red();
     }
 }

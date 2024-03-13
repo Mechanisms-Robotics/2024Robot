@@ -102,7 +102,7 @@ public class RobotContainer {
             new ToggleSpinupShoot(gerald)
     );
 
-    xboxController.rightTrigger().onTrue(
+    xboxController.rightTrigger().whileTrue(
             new FeedNote(gerald)
     );
 
@@ -188,8 +188,8 @@ public class RobotContainer {
             () -> -xboxController.getLeftX(),
             () -> -xboxController.getRightX(),
             0.1,
-            4,
-            5,
+            0.5,
+            0.25,
             Math.PI,
             2*Math.PI,
             true

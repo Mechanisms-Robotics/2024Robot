@@ -5,9 +5,9 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class LED extends SubsystemBase {
-    private static final DigitalOutput red = new DigitalOutput(0);
-    private static final DigitalOutput blue = new DigitalOutput(1);
-    private static final DigitalOutput green = new DigitalOutput(2);
+    private static final DigitalOutput red = new DigitalOutput(1);
+    private static final DigitalOutput blue = new DigitalOutput(2);
+    private static final DigitalOutput green = new DigitalOutput(0);
     private static final DigitalOutput yellow = new DigitalOutput(3);
     public record LEDData(
             boolean red,
@@ -44,9 +44,9 @@ public class LED extends SubsystemBase {
 
     /** Set the light to green */
     public void green() {
-        green.set(false); // turn green on
+        green.set(true); // turn green on
         // turn all other lights off
-        red.set(true);
+        red.set(false);
         blue.set(false);
         yellow.set(false);
     }
