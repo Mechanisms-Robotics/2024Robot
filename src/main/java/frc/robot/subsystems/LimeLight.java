@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -27,7 +28,8 @@ public class LimeLight extends SubsystemBase {
     public record LimeLightData(
             double yaw,
             double area,
-            boolean hasTarget
+            boolean hasTarget,
+            boolean aimed
     ) {}
 
     /**
@@ -37,7 +39,9 @@ public class LimeLight extends SubsystemBase {
      * @return data of the LimeLight: yaw, area, and hasTarget
      */
     public LimeLightData getData() {
-        return new LimeLightData(yaw, area, area!=0);
+        // TODO: tune the tolerance of the yaw for aimed
+        return new LimeLightData(yaw, area, area!=0,
+                                 MathUtil.isNear(0, yaw, 5));
     }
 
     @Override

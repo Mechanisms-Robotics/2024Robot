@@ -12,14 +12,18 @@ import frc.util6328.Alert.AlertType;
  * The box of wheels that intakes, shoots, and amps the notes.
  */
 public class Gerald extends SubsystemBase {
-    private static final double kIntakeVoltage = 2; // volts
+    private static final double kIntakeVoltage = 5; // volts
     private static final double kOuttakeVoltage = -3; // volts
     private static final double kShooterVoltage = 8; // volts
     private static final double kAmpVoltage = 7; // volts
     private static final double kIdleVoltage = 4;
     private static final double kAmpFeedVoltage = 3;
-    private static final double kIntakeDetectDelay = 0.0001;
-    private static final double kFeedDetectDelay = 0;
+    private static final double kIntakeDetectDelay = 0.001;
+    // TODO: tune the spinup rpm
+    private static final double kSpinupRPM = 1000;
+    // TODO: tune the amp spinup rpm
+    private static final double kAmpSpinupRPM = 3450;
+    private static final double kFeedDetectDelay = 1;
     private static final Timer detectDelayTimer = new Timer();
     private final DigitalInput noteSensor = new DigitalInput(8);
     private final DigitalInput noteSensorConfirm = new DigitalInput(9);
@@ -48,6 +52,15 @@ public class Gerald extends SubsystemBase {
 
     private State state = State.Idling;
 
+    /**
+     * Returns the state of gerald
+     *
+     * @return state of gerald
+     */
+    public State getState() {
+        return state;
+    }
+
     public Gerald() {
         // set gerald motors to brake mode
         intakeMotor.brakeMode();
@@ -64,6 +77,7 @@ public class Gerald extends SubsystemBase {
         intakeMotor.setCurrentLimit(40);
         ampMotor.setCurrentLimit(40);
         shooterMotor.setCurrentLimit(40);
+        shooterMotor.setVelocityUnitsFunction((Double rps) -> rps * 60);
     }
 
     /**
@@ -117,6 +131,21 @@ public class Gerald extends SubsystemBase {
             ampMotor.setVoltage(kShooterVoltage);
             state = State.PreparingShoot;
         }
+    }
+
+    /**
+     * Returns true if the state is in PreparingShoot and the shooter is spunup.
+     * Also returns true if the state is in PreparingiAmp and the shooter is spunup for amping.
+     * The RPM for spunup is different for amp and shooter (kSpinupRPM, kAmpSpinupRPM).
+     *
+     * @return true if it is spunup, else false
+     */
+    public boolean spunUp() {
+        if (state == State.PreparingShoot)
+            return Math.abs(shooterMotor.getVelocity()) > kSpinupRPM;
+        if (state == State.PreparingAmp)
+            return Math.abs(shooterMotor.getVelocity()) > kAmpSpinupRPM;
+        return false;
     }
 
     /**
@@ -204,6 +233,8 @@ public class Gerald extends SubsystemBase {
     public void periodic() {
         SmartDashboard.putBoolean("Note Sensor", noteDetected()); // show on advantage scope
         SmartDashboard.putString("[Gerald] state", state.toString());
+        SmartDashboard.putBoolean("[Gerald] spun up", spunUp());
+        SmartDashboard.putNumber("[Gerald] shooter RPM", shooterMotor.getVelocity());
         switch (state) {
             case Idling -> idle();
             case Feeding -> feed();

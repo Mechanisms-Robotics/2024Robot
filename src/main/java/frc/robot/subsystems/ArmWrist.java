@@ -12,7 +12,7 @@ public class ArmWrist extends SubsystemBase {
     private static final Wrist wrist = new Wrist();
     private boolean safe = false;
 
-    private enum State {
+    public enum State {
         Stowed,
         Intaking,
         Amping,
@@ -24,6 +24,9 @@ public class ArmWrist extends SubsystemBase {
         Climb
     }
     private State state;
+    public State getState() {
+        return state;
+    }
     private boolean lowMode = false;
 
     /**

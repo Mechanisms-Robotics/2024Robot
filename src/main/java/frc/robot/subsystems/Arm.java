@@ -164,6 +164,7 @@ public class Arm extends SingleJointSubystem {
      */
     @Override
     public void periodic() {
+        disabled = true;
         SmartDashboard.putNumber("[arm] Left position", leftArmMotor.getRawPosition());
         SmartDashboard.putNumber("[arm] Right position", rightArmMotor.getRawPosition());
         SmartDashboard.putNumber("[arm] current angle", getAngle().getDegrees());
