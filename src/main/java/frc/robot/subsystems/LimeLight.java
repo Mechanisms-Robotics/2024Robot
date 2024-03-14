@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -15,6 +16,7 @@ public class LimeLight extends SubsystemBase {
     private int aprilTagID = 7;
     private double yaw = 0;
     private double area = 0;
+    private Transform3d fieldToCamera = new Transform3d();
 
     /**
      * Data of the LimeLight
@@ -27,7 +29,8 @@ public class LimeLight extends SubsystemBase {
     public record LimeLightData(
             double yaw,
             double area,
-            boolean hasTarget
+            boolean hasTarget,
+            Transform3d fieldToCamera
     ) {}
 
     /**
@@ -37,7 +40,7 @@ public class LimeLight extends SubsystemBase {
      * @return data of the LimeLight: yaw, area, and hasTarget
      */
     public LimeLightData getData() {
-        return new LimeLightData(yaw, area, area!=0);
+        return new LimeLightData(yaw, area, area!=0, fieldToCamera);
     }
 
     @Override
@@ -52,7 +55,13 @@ public class LimeLight extends SubsystemBase {
         } else { System.out.println("The Alliance was no found"); }
         SmartDashboard.putNumber("[Lime Light] Target ID", aprilTagID);
 
+
+        // get the data from the camera
         PhotonPipelineResult result = camera.getLatestResult();
+        // if the april tag result is present, reset the fieldToCamera Transfrom3D
+        if (result.getMultiTagResult().estimatedPose.isPresent)
+            fieldToCamera = result.getMultiTagResult().estimatedPose.best;
+
         boolean hasTarget = result.hasTargets();
         SmartDashboard.putBoolean("[Lime Light] Has Target", hasTarget);
         // if any of the targets is the correct AprilTag, set the yaw and area
