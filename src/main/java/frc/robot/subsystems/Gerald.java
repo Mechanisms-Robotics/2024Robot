@@ -37,11 +37,17 @@ public class Gerald extends SubsystemBase {
 
 
     public enum State {
+        /** Puts the intake motor in brake mode and spins the shooter and amp motors */
         Idling,
+        /** Continues the intake motor to feed the note into the shooter */
         Feeding,
+        /** Spins the intake motor to pick up a note */
         Intaking,
+        /** Spins up the shooter and amp motor in the same direction for amping the note */
         PreparingAmp,
+        /** Spins up the shooter and amp motor in opposite directions for shooting the note */
         PreparingShoot,
+        /** Spins the intake in reverse to outtake the note */
         Outtaking
     }
 

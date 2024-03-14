@@ -13,14 +13,26 @@ public class ArmWrist extends SubsystemBase {
     private boolean safe = false;
 
     private enum State {
+        /** Holds the arm up as a safe default position */
         Stowed,
+        /** Lowers the arm and the wrist to the ground to pick up a note */
         Intaking,
+        /** Raises the arm and points the shooter down to roll the note into the amp */
         Amping,
+        /** Raises or lowers the arm to the subwoofer position for shooting right at the subwoofer */
         ShootingSubwoofer,
+        /** Raises the arm for the shooting podium position */
         ShootingPodium,
+        /** Aiming, neither shooting and the podium nor the subwoofer, using vision to tilt the wrist for aiming */
         Aiming,
+        /**
+         * Raises the arm and points the wrist at the ground at a slight angle for shuttleing the note to the
+         * other side
+         */
         Shuttleing,
+        /** Raises the arm and wrist just high enough for the hooks to go over the chain */
         PrepClimb,
+        /** Brings the arm and the wrist down to pull on the chain and bring the robot up */
         Climb
     }
     private State state;
