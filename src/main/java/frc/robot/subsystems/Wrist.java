@@ -31,7 +31,7 @@ public class Wrist extends SingleJointSubystem {
     private static final double kAllowableTip = 5;
     private static final double kTolerance = Math.toRadians(0.5);
     private static final Rotation2d kStowed = Rotation2d.fromDegrees(90);
-    private static final Rotation2d kIntaking = Rotation2d.fromDegrees(95);
+    private static final Rotation2d kIntaking = Rotation2d.fromDegrees(90);
     private static final Rotation2d kSubwooferHigh = Rotation2d.fromDegrees(92.5);
     private static final Rotation2d kSubwooferLow = Rotation2d.fromDegrees(97.5);
     private static final Rotation2d kPodiumHigh = Rotation2d.fromDegrees(117.5);
@@ -41,9 +41,10 @@ public class Wrist extends SingleJointSubystem {
     private static final Rotation2d kClimb = Rotation2d.fromDegrees(110);
     private static final Rotation2d kShuttle = Rotation2d.fromDegrees(140);
     private static final Rotation2d kForwardLimit = Rotation2d.fromDegrees(140);
-    private static final Rotation2d kReverseLimit = Rotation2d.fromDegrees(85);
+    private static final Rotation2d kReverseLimit = Rotation2d.fromDegrees(80);
     private boolean disabled = false;
     private double wristAdjustment = 0;
+    /** Shot adjustment for the wrist, used in SmartDashboard */
     private final SendableChooser<Double> adjustmentAmount = new SendableChooser<>();
 
 
@@ -66,9 +67,13 @@ public class Wrist extends SingleJointSubystem {
         setTolerance(kTolerance);
         pivotTo(Rotation2d.fromDegrees(90));
 
-        adjustmentAmount.addOption("^", -1./2.);
+        adjustmentAmount.addOption("↟", -7.5);
+        adjustmentAmount.addOption("↑", -2.5);
+        adjustmentAmount.addOption("↿", -1.);
         adjustmentAmount.setDefaultOption("None", 0.);
-        adjustmentAmount.addOption("v", 1./2.);
+        adjustmentAmount.addOption("v", 2.5);
+        adjustmentAmount.addOption("vv", 5.); // ↿↑↟
+        adjustmentAmount.addOption("vvv", 7.5);
         SmartDashboard.putData("Shot Adjustment", adjustmentAmount);
         gravityVector = new Translation2d(gyro.getGravityVectorX().getValueAsDouble(),
                 gyro.getGravityVectorZ().getValueAsDouble());
@@ -172,6 +177,7 @@ public class Wrist extends SingleJointSubystem {
      */
     @Override
     public void periodic() {
+        disabled = true; // TODO: un-disable the wrist
         SmartDashboard.putNumber("[Wrist] position", wristMotor.getRawPosition());
         SmartDashboard.putNumber("[Wrist] current angle", getAngle().getDegrees());
         SmartDashboard.putNumber("[Wrist] desired angle", getDesiredAngle().getDegrees());

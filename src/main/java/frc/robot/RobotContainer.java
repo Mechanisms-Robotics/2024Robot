@@ -73,7 +73,8 @@ public class RobotContainer {
 //    m_chooser.addOption("SubLNoteLCR4Note", new PathPlannerAuto("SubLNoteLCR4Note"));
     // ----------------Field----------------
 //    m_chooser.addOption("SubRFieldRR1NoteGrab", new PathPlannerAuto("SubRFieldRR1NoteGrab"));
-//    m_chooser.addOption("TuningL", new PathPlannerAuto("TuningL"));
+    m_chooser.addOption("TuningL", new PathPlannerAuto("TuningL"));
+    m_chooser.addOption("TuningC", new PathPlannerAuto("TuningC"));
 
     SmartDashboard.putData("Auto Chooser", m_chooser);
     configureDefaultCommands();

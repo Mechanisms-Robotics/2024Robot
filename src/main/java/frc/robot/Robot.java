@@ -50,6 +50,7 @@ public class Robot extends TimedRobot {
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
+      m_robotContainer.swerve.driveClosedLoop();
     }
   }
 
@@ -57,7 +58,9 @@ public class Robot extends TimedRobot {
   public void autonomousPeriodic() {}
 
   @Override
-  public void autonomousExit() {}
+  public void autonomousExit() {
+    m_robotContainer.swerve.drive(0, 0, 0);
+  }
 
   @Override
   public void teleopInit() {
