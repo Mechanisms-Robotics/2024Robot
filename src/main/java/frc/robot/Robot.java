@@ -23,6 +23,7 @@ public class Robot extends TimedRobot {
     CameraServer.startAutomaticCapture();
     if (Robot.isSimulation())
       m_robotContainer.swerve.driveClosedLoop();
+    m_robotContainer.wrist.stow();
   }
 
   @Override

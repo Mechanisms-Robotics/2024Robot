@@ -31,17 +31,17 @@ public class Wrist extends SingleJointSubystem {
     private static final double kAllowableTip = 5;
     private static final double kTolerance = Math.toRadians(0.5);
     private static final Rotation2d kStowed = Rotation2d.fromDegrees(90);
-    private static final Rotation2d kIntaking = Rotation2d.fromDegrees(87.5);
-    private static final Rotation2d kSubwooferHigh = Rotation2d.fromDegrees(90);
-    private static final Rotation2d kSubwooferLow = Rotation2d.fromDegrees(95);
-    private static final Rotation2d kPodiumHigh = Rotation2d.fromDegrees(115);
+    private static final Rotation2d kIntaking = Rotation2d.fromDegrees(95);
+    private static final Rotation2d kSubwooferHigh = Rotation2d.fromDegrees(92.5);
+    private static final Rotation2d kSubwooferLow = Rotation2d.fromDegrees(97.5);
+    private static final Rotation2d kPodiumHigh = Rotation2d.fromDegrees(117.5);
     private static final Rotation2d kPodiumLow = kPodiumHigh;
     private static final Rotation2d kAmp = Rotation2d.fromDegrees(90);
     private static final Rotation2d kPrepClimb = Rotation2d.fromDegrees(110);
     private static final Rotation2d kClimb = Rotation2d.fromDegrees(110);
-    private static final Rotation2d kShuttle = Rotation2d.fromDegrees(130);
-    private static final Rotation2d kForwardLimit = Rotation2d.fromDegrees(1000);
-    private static final Rotation2d kReverseLimit = Rotation2d.fromDegrees(-1000);
+    private static final Rotation2d kShuttle = Rotation2d.fromDegrees(140);
+    private static final Rotation2d kForwardLimit = Rotation2d.fromDegrees(140);
+    private static final Rotation2d kReverseLimit = Rotation2d.fromDegrees(85);
     private boolean disabled = false;
     private double wristAdjustment = 0;
     private final SendableChooser<Double> adjustmentAmount = new SendableChooser<>();
@@ -64,7 +64,6 @@ public class Wrist extends SingleJointSubystem {
         setPPIDGains(0.6, 0.0, 0.0);
         setPPIDConstraints(Math.PI/4, Math.PI/2);
         setTolerance(kTolerance);
-        coastMode();
         pivotTo(Rotation2d.fromDegrees(90));
 
         adjustmentAmount.addOption("^", -1./2.);
@@ -184,6 +183,10 @@ public class Wrist extends SingleJointSubystem {
 
         if (getAngle().getDegrees() < 0) disabled = true; // if the angle of the arm is negative, disable it
         if (Math.abs(swerveRoll.get()) > kAllowableTip || Math.abs(swervePitch.get()) > kAllowableTip) {
+            wristMotor.stop();
+            return;
+        }
+        if (wristMotor.getSetpoint() > kForwardLimit.getRadians() || wristMotor.getSetpoint() < kReverseLimit.getRadians()) {
             wristMotor.stop();
             return;
         }

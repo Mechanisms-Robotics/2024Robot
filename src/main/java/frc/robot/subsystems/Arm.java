@@ -56,7 +56,7 @@ public class Arm extends SingleJointSubystem {
         setLimits(kReverseLimit, kForwardLimit, kMotorRatio);
         setFeedforwardGains(0.15, 0, 0.0, 0.0);
         setPPIDGains(1.0, 0.0, 0.0);
-        setPPIDConstraints(Math.PI/2, 4*Math.PI);
+        setPPIDConstraints(Math.PI, 4*Math.PI);
         setTolerance(kTolerance);
         SmartDashboard.putBoolean("[arm] disabled", disabled);
     }

@@ -12,21 +12,21 @@ import frc.util6328.Alert.AlertType;
  * The box of wheels that intakes, shoots, and amps the notes.
  */
 public class Gerald extends SubsystemBase {
-    private static final double kIntakeVoltage = 5; // volts
+    private static final double kIntakeVoltage = 8; // volts
     private static final double kOuttakeVoltage = -3; // volts
     private static final double kShooterVoltage = 8; // volts
     private static final double kAmpVoltage = 7; // volts
-    private static final double kIdleVoltage = 4;
-    private static final double kAmpFeedVoltage = 3;
-    private static final double kIntakeDetectDelay = 0.001;
+    private static final double kIdleVoltage = 4; // volts
+    private static final double kAmpFeedVoltage = 3; // volts
+    private static final double kIntakeDetectDelay = 0.001; // seconds
     // TODO: tune the spinup rpm
-    private static final double kSpinupRPM = 1000;
+    private static final double kSpinupRPM = 1000; // RPM
     // TODO: tune the amp spinup rpm
-    private static final double kAmpSpinupRPM = 3450;
-    private static final double kFeedDetectDelay = 1;
+    private static final double kAmpSpinupRPM = 3450; // RPM
+    private static final double kFeedDetectDelay = 1; // seconds
     private static final Timer detectDelayTimer = new Timer();
-    private final DigitalInput noteSensor = new DigitalInput(8);
-    private final DigitalInput noteSensorConfirm = new DigitalInput(9);
+    private final DigitalInput noteSensor = new DigitalInput(9);
+    private final DigitalInput noteSensorConfirm = new DigitalInput(8);
     private final Alert unexpectedNote =
             new Alert("an unexpected note was detected in gerald after feeding it to the shooter",
                     AlertType.ERROR);
@@ -231,10 +231,20 @@ public class Gerald extends SubsystemBase {
 
     @Override
     public void periodic() {
-        SmartDashboard.putBoolean("Note Sensor", noteDetected()); // show on advantage scope
         SmartDashboard.putString("[Gerald] state", state.toString());
         SmartDashboard.putBoolean("[Gerald] spun up", spunUp());
         SmartDashboard.putNumber("[Gerald] shooter RPM", shooterMotor.getVelocity());
+        SmartDashboard.putBoolean("[Note Sensor] both", noteDetected()); // show on advantage scope
+        SmartDashboard.putBoolean("[Note Sensor] 1", !noteSensor.get());
+        SmartDashboard.putBoolean("[Note Sensor] 2", !noteSensorConfirm.get());
+
+//        // if there is a note detected, set the intake motor to coast mode, otherwise set the intake to brake mode
+//        if (!noteDetected()) intakeMotor.coastMode();
+//        else intakeMotor.brakeMode();
+        // if only the first sensor is detected, low the intake voltage
+        if (!noteSensor.get() && noteSensorConfirm.get())
+            intakeMotor.setVoltage(kIntakeVoltage/2);
+
         switch (state) {
             case Idling -> idle();
             case Feeding -> feed();
