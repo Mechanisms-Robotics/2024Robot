@@ -14,7 +14,7 @@ import frc.robot.subsystems.Swerve;
  * Used for autos to group the spinup shoot and intake for making autos.
  */
 public class AutoAimShootIntake extends SequentialCommandGroup {
-    private static final double kShootWaitTime = 1.;
+    private static final double kShootWaitTime = 2.;
     private static final double kFeedTime = .5;
 
     /**

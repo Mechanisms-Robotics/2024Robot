@@ -12,7 +12,7 @@ import frc.util6328.Alert.AlertType;
  * The box of wheels that intakes, shoots, and amps the notes.
  */
 public class Gerald extends SubsystemBase {
-    private static final double kIntakeVoltage = 6; // volts
+    private static final double kIntakeVoltage = 8; // volts
     private static final double kOuttakeVoltage = -3; // volts
     private static final double kShooterVoltage = 8; // volts
     private static final double kAmpVoltage = 7; // volts
@@ -224,7 +224,7 @@ public class Gerald extends SubsystemBase {
      * @return if the note sensor detected anything
      */
     public boolean noteDetected() {
-        return !noteSensor.get()&&!noteSensorConfirm.get();
+        return !noteSensor.get();
     }
 
     @Override
@@ -240,8 +240,8 @@ public class Gerald extends SubsystemBase {
 //        if (!noteDetected()) intakeMotor.coastMode();
 //        else intakeMotor.brakeMode();
         // if only the first sensor is detected, low the intake voltage
-        if (!noteSensor.get() && noteSensorConfirm.get())
-            intakeMotor.setVoltage(kIntakeVoltage/2);
+//        if (!noteSensor.get() && noteSensorConfirm.get())
+//            intakeMotor.setVoltage(kIntakeVoltage/2);
 
         switch (state) {
             case Idling -> idle();
