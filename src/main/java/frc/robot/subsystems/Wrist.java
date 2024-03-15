@@ -23,8 +23,8 @@ public class Wrist extends SingleJointSubystem {
     private final TalonFX wristMotor = new TalonFX(17);
     private final Pigeon2 gyro = new Pigeon2(18);
     private Translation2d gravityVector = new Translation2d();
-    // TODO: find the gravity offset of the gyro
-    private static final Rotation2d gravityOffset = Rotation2d.fromDegrees(0); // 175
+    // the gravity of the gyro when the wrist is in the zero position
+    private static final Rotation2d gravityOffset = Rotation2d.fromDegrees(90);
     private Rotation2d bootGravityAngle = new Rotation2d();
     private final Supplier<Double> swervePitch;
     private final Supplier<Double> swerveRoll;
@@ -66,6 +66,7 @@ public class Wrist extends SingleJointSubystem {
         setPPIDConstraints(Math.PI/4, Math.PI/2);
         setTolerance(kTolerance);
         pivotTo(Rotation2d.fromDegrees(90));
+        wristMotor.coastMode();
 
         adjustmentAmount.addOption("^^^", -7.5);
         adjustmentAmount.addOption("^^", -2.5);
@@ -75,8 +76,6 @@ public class Wrist extends SingleJointSubystem {
         adjustmentAmount.addOption("vv", 2.5);
         adjustmentAmount.addOption("vvv", 7.5);
         SmartDashboard.putData("Shot Adjustment", adjustmentAmount);
-        gravityVector = new Translation2d(gyro.getGravityVectorX().getValueAsDouble(),
-                gyro.getGravityVectorZ().getValueAsDouble());
         bootGravityAngle = new Rotation2d(Math.atan2(gyro.getGravityVectorZ().getValueAsDouble(),
                                  gyro.getGravityVectorX().getValueAsDouble()));
     }
@@ -167,8 +166,9 @@ public class Wrist extends SingleJointSubystem {
      */
     @Override
     protected Rotation2d getAngle() {
-        // TODO: figure out if the gyro should be inverted or not
-        return Rotation2d.fromDegrees(gyro.getPitch().getValueAsDouble()).unaryMinus().rotateBy(bootGravityAngle);
+        gravityVector = new Translation2d(gyro.getGravityVectorZ().getValueAsDouble(),
+                gyro.getGravityVectorX().getValueAsDouble());
+        return gravityOffset.rotateBy(gravityVector.getAngle());
     }
 
     /**
