@@ -394,7 +394,7 @@ public class SwerveDrive extends SubsystemBase {
   public void setPose(Pose2d pose) {
     // Reset pose
     poseEstimator.resetPosition(getHeading(), getModulePositions(), pose);
-    gyro.setYaw(pose.getRotation().getDegrees());
+//    gyro.setYaw(pose.getRotation().getDegrees());
 
     // Reset simulated heading
     if (Robot.isSimulation()) {
