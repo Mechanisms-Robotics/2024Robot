@@ -40,28 +40,10 @@
           "data": {
             "waitTime": 1.0
           }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "aimC"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 1.0
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "shoot"
-          }
         }
       ]
     }
   },
-  "folder": "2Note",
+  "folder": "1Note",
   "choreoAuto": false
 }

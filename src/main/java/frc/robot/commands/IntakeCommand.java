@@ -2,6 +2,7 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import frc.robot.subsystems.ArmWrist;
 import frc.robot.subsystems.Gerald;
 
@@ -26,6 +27,6 @@ public class IntakeCommand extends ParallelCommandGroup {
      * @param gerald instance of gerald
      */
     public IntakeCommand(ArmWrist armWrist, Gerald gerald) {
-        addCommands(new IntakePosition(armWrist), new IntakeCommand(gerald));
+        addCommands(new IntakePosition(armWrist), new IntakeCommand(gerald), new PrintCommand("Running Intake"));
     }
 }
