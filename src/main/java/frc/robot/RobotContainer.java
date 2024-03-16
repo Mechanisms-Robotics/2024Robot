@@ -99,6 +99,10 @@ public class RobotContainer {
             new ToggleSpinupAmp(gerald)
     );
 
+    xboxController.leftStick().onTrue(
+            new ZeroGyro(swerve)
+    );
+
     // -----------------Right-----------------
     xboxController.rightBumper().onTrue(
             new ToggleSpinupShoot(gerald)
@@ -125,10 +129,6 @@ public class RobotContainer {
     );
     xboxController.b().onTrue(
             new SubwooferLowPosition(armWrist)
-    );
-
-    xboxController.start().onTrue(
-            new ZeroGyro(swerve)
     );
 
     ////////////////////
