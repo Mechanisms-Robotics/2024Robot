@@ -16,6 +16,7 @@ import frc.robot.commands.*;
 import frc.robot.commands.autos.AutoAimShootIntake;
 import frc.robot.commands.autos.AutoAimShootStow;
 import frc.robot.commands.autos.TimedLeave;
+import frc.robot.commands.autos.TimedShootLeave;
 import frc.robot.subsystems.*;
 
 public class RobotContainer {
@@ -63,6 +64,7 @@ public class RobotContainer {
 //    m_chooser.addOption("YeetRight", new PathPlannerAuto("YeetRight"));
 //    m_chooser.addOption("YeetLeft", new PathPlannerAuto("YeetRight"));
 //    m_chooser.addOption("TimedLeave", new TimedLeave(swerve));
+    m_chooser.addOption("TimedShootLeave", new TimedShootLeave(swerve, gerald, armWrist));
     // ----------------2Note----------------
     m_chooser.addOption("SubRNoteR2Note", new PathPlannerAuto("SubRNoteR2Note"));
     m_chooser.setDefaultOption("SubCNoteC2Note", new PathPlannerAuto("SubCNoteC2Note"));
