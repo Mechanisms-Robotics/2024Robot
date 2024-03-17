@@ -16,7 +16,7 @@ public class Gerald extends SubsystemBase {
     private static final double kIntakeVoltage = 4; // volts
     private static final double kOuttakeVoltage = -3; // volts
     private static final double kShooterVoltage = 8; // volts
-    private static final double kAmpVoltage = 7; // volts
+    private static final double kAmpVoltage = 5; // volts
     private static final double kIdleVoltage = 4; // volts
     private static final double kAmpFeedVoltage = 3; // volts
     private static final double kIntakeDetectDelay = 0.001; // seconds
