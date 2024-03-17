@@ -42,9 +42,21 @@
           }
         },
         {
+          "type": "path",
+          "data": {
+            "pathName": "SubCNoteC"
+          }
+        },
+        {
           "type": "named",
           "data": {
             "name": "aimC"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "spinup"
           }
         },
         {

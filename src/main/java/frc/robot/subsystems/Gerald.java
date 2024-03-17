@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import com.mechlib.hardware.TalonFX;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -83,7 +84,8 @@ public class Gerald extends SubsystemBase {
      */
     public void intake() {
         if (state != State.Intaking) {
-            intakeMotor.setVoltage(kIntakeVoltage);
+            if (DriverStation.isAutonomous()) intakeMotor.setVoltage(2);
+            else intakeMotor.setVoltage(kIntakeVoltage);
             state = State.Intaking;
         }
         // if the note was just detected on this cycle
