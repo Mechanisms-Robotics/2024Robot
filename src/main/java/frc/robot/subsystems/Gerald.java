@@ -20,7 +20,7 @@ public class Gerald extends SubsystemBase {
     private static final double kIdleVoltage = 4; // volts
     private static final double kAmpFeedVoltage = 3; // volts
     private static final double kIntakeDetectDelay = 0.001; // seconds
-    private static final double kSpinupRPM = 5000; // RPM
+    private static final double kSpinupRPM = 4000; // RPM
     private static final double kAmpSpinupRPM = 3450; // RPM
     private static final double kFeedDetectDelay = 1; // seconds
     private static final Timer detectDelayTimer = new Timer();
