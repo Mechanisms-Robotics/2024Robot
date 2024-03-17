@@ -8,8 +8,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.55,
-        "y": 5.55
+        "x": 2.5467859166487563,
+        "y": 5.569733885621617
       },
       "isLocked": false,
       "linkedName": null
@@ -20,7 +20,7 @@
         "y": 5.55
       },
       "prevControl": {
-        "x": 2.186870664053398,
+        "x": 2.0196215392430785,
         "y": 5.55
       },
       "nextControl": null,
@@ -31,9 +31,9 @@
   "rotationTargets": [],
   "constraintZones": [
     {
-      "name": "0.5",
-      "minWaypointRelativePos": 0.75,
-      "maxWaypointRelativePos": 1.0,
+      "name": "New Constraints Zone",
+      "minWaypointRelativePos": 1.0,
+      "maxWaypointRelativePos": 0.5,
       "constraints": {
         "maxVelocity": 0.5,
         "maxAcceleration": 4.5,
@@ -45,7 +45,7 @@
   "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 2.0,
-    "maxAcceleration": 2.0,
+    "maxAcceleration": 4.5,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0
   },

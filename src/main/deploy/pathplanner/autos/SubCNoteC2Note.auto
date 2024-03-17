@@ -44,7 +44,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "SubCNoteC"
+            "pathName": "NoteCSubC"
           }
         },
         {
@@ -62,7 +62,7 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 1.0
+            "waitTime": 2.0
           }
         },
         {

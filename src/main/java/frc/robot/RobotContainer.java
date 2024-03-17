@@ -112,14 +112,13 @@ public class RobotContainer {
             new OuttakeCommand(gerald)
     ).onFalse(new Idle(gerald));
 
+    // ----------------x, y, a, b----------------
     xboxController.x().onTrue(
             new SubwooferHighPosition(armWrist)
     );
-
     xboxController.y().onTrue(
             new PodiumHighPosition(armWrist)
     );
-
     xboxController.a().onTrue(
             new IntakePosition(armWrist)
     );
@@ -127,7 +126,12 @@ public class RobotContainer {
             new SubwooferLowPosition(armWrist)
     );
 
+    // ----------------other----------------
     xboxController.button(13).onTrue( // big button
+            new ZeroGyro(swerve)
+    );
+
+    xboxController.start().onTrue( // start
             new ZeroGyro(swerve)
     );
 
@@ -139,7 +143,6 @@ public class RobotContainer {
     xboxController2.leftTrigger().onTrue(
             new SubwooferLowPosition(armWrist)
     );
-
     xboxController2.leftBumper().onTrue(
             new SubwooferHighPosition(armWrist)
     );
@@ -151,33 +154,30 @@ public class RobotContainer {
     xboxController2.rightTrigger().onTrue(
             new PodiumLowPosition(armWrist)
     );
-
     xboxController2.rightBumper().onTrue(
             new PodiumHighPosition(armWrist)
     );
-
     xboxController2.rightStick().whileTrue(
             new Climb(armWrist)
     );
 
+    // ----------------x, y, a, b----------------
     xboxController2.x().whileTrue( // square on ps4
             new DriveWhileAim(swerve, limeLight, armWrist,
                     () -> -xboxController.getLeftY(),
                     () -> -xboxController.getLeftX(),
                     () -> -xboxController.getRightX())
     );
-
     xboxController2.y().onTrue(
             new DisableArm(arm)
     );
-
     xboxController2.a().onTrue(
             new IntakePosition(armWrist)
     );
     xboxController2.b().onTrue(
             new ShuttleNote(armWrist)
     );
-
+    // ----------------D-Pad----------------
     xboxController2.povDown().onTrue(
             new StowPosition(armWrist)
     );
