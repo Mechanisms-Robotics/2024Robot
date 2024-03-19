@@ -7,16 +7,15 @@ import frc.robot.subsystems.ArmWrist;
 import frc.robot.subsystems.Gerald;
 import frc.robot.subsystems.Swerve;
 
+/** Shoots subwoofer high, and does a timed leave */
 public class TimedShootLeave extends SequentialCommandGroup {
     public TimedShootLeave(Swerve swerve, Gerald gerald, ArmWrist armWrist) {
         addCommands(
                 new HighSubwooferShoot(armWrist),
-                new WaitCommand(0.5),
                 new PrepareShoot(gerald),
-                new WaitCommand(1),
+                new WaitCommand(2),
                 new InstantCommand(gerald::feed),
                 new WaitCommand(1),
-                new InstantCommand(gerald::idle),
                 new InstantCommand(gerald::idle),
                 new InstantCommand(armWrist::stow),
                 new TimedLeave(swerve).withTimeout(2)

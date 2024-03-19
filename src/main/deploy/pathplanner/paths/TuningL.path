@@ -31,7 +31,7 @@
   "rotationTargets": [],
   "constraintZones": [
     {
-      "name": "New Constraints Zone",
+      "name": "Slow",
       "minWaypointRelativePos": 0,
       "maxWaypointRelativePos": 1.0,
       "constraints": {

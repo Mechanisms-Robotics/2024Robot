@@ -15,6 +15,7 @@ public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
   private RobotContainer m_robotContainer;
+  // TODO: add homing
 
   @Override
   public void robotInit() {
@@ -22,6 +23,7 @@ public class Robot extends TimedRobot {
     CameraServer.startAutomaticCapture();
     if (Robot.isSimulation())
       m_robotContainer.swerve.driveClosedLoop();
+    m_robotContainer.wrist.stow();
   }
 
   @Override
@@ -45,9 +47,10 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
-   m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
+      m_robotContainer.swerve.driveClosedLoop();
     }
   }
 
@@ -55,7 +58,9 @@ public class Robot extends TimedRobot {
   public void autonomousPeriodic() {}
 
   @Override
-  public void autonomousExit() {}
+  public void autonomousExit() {
+    m_robotContainer.swerve.drive(0, 0, 0);
+  }
 
   @Override
   public void teleopInit() {

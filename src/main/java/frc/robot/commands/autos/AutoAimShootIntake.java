@@ -1,6 +1,7 @@
 package frc.robot.commands.autos;
 
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.commands.*;
@@ -14,7 +15,7 @@ import frc.robot.subsystems.Swerve;
  * Used for autos to group the spinup shoot and intake for making autos.
  */
 public class AutoAimShootIntake extends SequentialCommandGroup {
-    private static final double kShootWaitTime = 1.;
+    private static final double kShootWaitTime = 2.;
     private static final double kFeedTime = .5;
 
     /**
@@ -55,9 +56,11 @@ public class AutoAimShootIntake extends SequentialCommandGroup {
                             new PodiumHighPosition(armWrist), // if subWoofer: false && lowMode: false
                             () -> lowMode),
                 () -> subWoofer),
+                new PrintCommand("After Aiming"),
                 new WaitCommand(kShootWaitTime), // waits for the spin up and aim
                 new FeedNote(gerald), // feeds the note into the shooter
                 new WaitCommand(kFeedTime), // waits for the note to exit the shooter
+                new PrintCommand("After Waiting"),
                 new IntakeCommand(armWrist, gerald)); // puts intake down and spins up the intake
     }
 }

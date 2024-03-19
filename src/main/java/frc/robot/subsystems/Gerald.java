@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import com.mechlib.hardware.TalonFX;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -12,17 +13,19 @@ import frc.util6328.Alert.AlertType;
  * The box of wheels that intakes, shoots, and amps the notes.
  */
 public class Gerald extends SubsystemBase {
-    private static final double kIntakeVoltage = 2; // volts
+    private static final double kIntakeVoltage = 4; // volts
     private static final double kOuttakeVoltage = -3; // volts
     private static final double kShooterVoltage = 8; // volts
-    private static final double kAmpVoltage = 7; // volts
-    private static final double kIdleVoltage = 4;
-    private static final double kAmpFeedVoltage = 3;
-    private static final double kIntakeDetectDelay = 0.0001;
-    private static final double kFeedDetectDelay = 0;
+    private static final double kAmpVoltage = 5; // volts
+    private static final double kIdleVoltage = 4; // volts
+    private static final double kAmpFeedVoltage = 3; // volts
+    private static final double kIntakeDetectDelay = 0.001; // seconds
+    private static final double kSpinupRPM = 4000; // RPM
+    private static final double kAmpSpinupRPM = 3450; // RPM
+    private static final double kFeedDetectDelay = 1; // seconds
     private static final Timer detectDelayTimer = new Timer();
-    private final DigitalInput noteSensor = new DigitalInput(8);
-    private final DigitalInput noteSensorConfirm = new DigitalInput(9);
+    private final DigitalInput noteSensor = new DigitalInput(9);
+    private final DigitalInput noteSensorConfirm = new DigitalInput(8);
     private final Alert unexpectedNote =
             new Alert("an unexpected note was detected in gerald after feeding it to the shooter",
                     AlertType.ERROR);
@@ -54,6 +57,15 @@ public class Gerald extends SubsystemBase {
 
     private State state = State.Idling;
 
+    /**
+     * Returns the state of gerald
+     *
+     * @return state of gerald
+     */
+    public State getState() {
+        return state;
+    }
+
     public Gerald() {
         // set gerald motors to brake mode
         intakeMotor.brakeMode();
@@ -70,6 +82,7 @@ public class Gerald extends SubsystemBase {
         intakeMotor.setCurrentLimit(40);
         ampMotor.setCurrentLimit(40);
         shooterMotor.setCurrentLimit(40);
+        shooterMotor.setVelocityUnitsFunction((Double rps) -> rps * 60);
     }
 
     /**
@@ -77,7 +90,8 @@ public class Gerald extends SubsystemBase {
      */
     public void intake() {
         if (state != State.Intaking) {
-            intakeMotor.setVoltage(kIntakeVoltage);
+            if (DriverStation.isAutonomous()) intakeMotor.setVoltage(2);
+            else intakeMotor.setVoltage(kIntakeVoltage);
             state = State.Intaking;
         }
         // if the note was just detected on this cycle
@@ -123,6 +137,21 @@ public class Gerald extends SubsystemBase {
             ampMotor.setVoltage(kShooterVoltage);
             state = State.PreparingShoot;
         }
+    }
+
+    /**
+     * Returns true if the state is in PreparingShoot and the shooter is spunup.
+     * Also returns true if the state is in PreparingiAmp and the shooter is spunup for amping.
+     * The RPM for spunup is different for amp and shooter (kSpinupRPM, kAmpSpinupRPM).
+     *
+     * @return true if it is spunup, else false
+     */
+    public boolean spunUp() {
+        if (state == State.PreparingShoot)
+            return Math.abs(shooterMotor.getVelocity()) > kSpinupRPM;
+        if (state == State.PreparingAmp)
+            return Math.abs(shooterMotor.getVelocity()) > kAmpSpinupRPM;
+        return false;
     }
 
     /**
@@ -203,13 +232,25 @@ public class Gerald extends SubsystemBase {
      * @return if the note sensor detected anything
      */
     public boolean noteDetected() {
-        return !noteSensor.get()&&!noteSensorConfirm.get();
+        return !noteSensor.get();
     }
 
     @Override
     public void periodic() {
-        SmartDashboard.putBoolean("Note Sensor", noteDetected()); // show on advantage scope
         SmartDashboard.putString("[Gerald] state", state.toString());
+        SmartDashboard.putBoolean("[Gerald] spun up", spunUp());
+        SmartDashboard.putNumber("[Gerald] shooter RPM", shooterMotor.getVelocity());
+        SmartDashboard.putBoolean("[Note Sensor] both", noteDetected()); // show on advantage scope
+        SmartDashboard.putBoolean("[Note Sensor] 1", !noteSensor.get());
+        SmartDashboard.putBoolean("[Note Sensor] 2", !noteSensorConfirm.get());
+
+//        // if there is a note detected, set the intake motor to coast mode, otherwise set the intake to brake mode
+//        if (!noteDetected()) intakeMotor.coastMode();
+//        else intakeMotor.brakeMode();
+        // if only the first sensor is detected, low the intake voltage
+//        if (!noteSensor.get() && noteSensorConfirm.get())
+//            intakeMotor.setVoltage(kIntakeVoltage/2);
+
         switch (state) {
             case Idling -> idle();
             case Feeding -> feed();

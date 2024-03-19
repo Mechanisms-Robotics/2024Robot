@@ -268,8 +268,8 @@ public class SwerveDrive extends SubsystemBase {
       this::getSpeeds,
       this::autoDrive,
       new HolonomicPathFollowerConfig(
-        new PIDConstants(0.2, 0, 0),
-        new PIDConstants(0.2, 0, 0),
+        new PIDConstants(1.6, 0, 0),
+        new PIDConstants(1.5, 0, 0),
 
         4.25,
         0.5388,
@@ -394,6 +394,7 @@ public class SwerveDrive extends SubsystemBase {
   public void setPose(Pose2d pose) {
     // Reset pose
     poseEstimator.resetPosition(getHeading(), getModulePositions(), pose);
+//    gyro.setYaw(pose.getRotation().getDegrees());
 
     // Reset simulated heading
     if (Robot.isSimulation()) {
@@ -663,6 +664,15 @@ public class SwerveDrive extends SubsystemBase {
     brModule.setSteerVoltage(voltageMeasure.baseUnitMagnitude());
     blModule.setSteerVoltage(voltageMeasure.baseUnitMagnitude());
   }
+
+  public double getPitch() {
+    return gyro.getPitch().getValueAsDouble();
+  }
+
+  public double getRoll() {
+    return gyro.getRoll().getValueAsDouble();
+  }
+
 
   @Override
   public void periodic() {
