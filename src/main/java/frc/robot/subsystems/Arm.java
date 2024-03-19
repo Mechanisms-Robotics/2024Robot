@@ -21,11 +21,11 @@ public class Arm extends SingleJointSubystem {
     private static final double kRightMagnetOffset = kIdealStartRotation - 0.464600;
     // right arm TalonFX motor and it's can coder
     private final TalonFX rightArmMotor = new TalonFX(13, new CANCoder(13, kRightMagnetOffset, AbsoluteSensorRangeValue.Unsigned_0To1, SensorDirectionValue.Clockwise_Positive));
-    // left arm TalonFX motor with it's can coder
+    // left arm TalonFX motor with its can coder
     private final TalonFX leftArmMotor = new TalonFX(12, new CANCoder(12, kLeftMagnetOffset, AbsoluteSensorRangeValue.Unsigned_0To1, SensorDirectionValue.CounterClockwise_Positive));
     // feed forward controller for the arm
     /* PID controller for the right and left arm, which will always have the same values they are different to account
-       for different mechanical structures, such as belt tensioning */
+       for different mechanical structures, such as belt tightening */
     private static final double kTolerance = Math.toRadians(2);
     private static final Rotation2d kStowed = Rotation2d.fromDegrees(60);
     private static final Rotation2d kIntaking = Rotation2d.fromDegrees(3.5);
@@ -135,12 +135,11 @@ public class Arm extends SingleJointSubystem {
     }
 
     /**
-     * Stops voltage and disables all processes on the arm (PID etc)
+     * Stops voltage and disables all processes on the arm (PID etc.)
      */
     public void disable() {
         stop();
         disabled = true;
-        SmartDashboard.putBoolean("[arm] disabled", disabled);
     }
 
     public void unDisable() {
@@ -162,10 +161,11 @@ public class Arm extends SingleJointSubystem {
      */
     @Override
     public void periodic() {
-        SmartDashboard.putNumber("[arm] Left position", leftArmMotor.getRawPosition());
-        SmartDashboard.putNumber("[arm] Right position", rightArmMotor.getRawPosition());
-        SmartDashboard.putNumber("[arm] current angle", getAngle().getDegrees());
-        SmartDashboard.putNumber("[arm] desired angle", getDesiredAngle().getDegrees());
+        SmartDashboard.putNumber("[Arm] Left position", leftArmMotor.getRawPosition());
+        SmartDashboard.putNumber("[Arm] Right position", rightArmMotor.getRawPosition());
+        SmartDashboard.putNumber("[Arm] current angle", getAngle().getDegrees());
+        SmartDashboard.putNumber("[Arm] desired angle", getDesiredAngle().getDegrees());
+        SmartDashboard.putBoolean("[Arm] disabled", disabled);
         // if disabled, do not run any processes on the arm
         if (Math.abs(leftArmMotor.getRawPosition() -rightArmMotor.getRawPosition()) > kAllowableDifference)
             disable();
