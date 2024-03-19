@@ -14,7 +14,8 @@ import frc.util6328.Alert.AlertType;
  */
 public class Gerald extends SubsystemBase {
     private static final double kIntakeVoltage = 4; // volts
-    private static final double kOuttakeVoltage = -3; // volts
+    // it needs to be able to outtake two notes at once, so it is max
+    private static final double kOuttakeVoltage = -12; // volts
     private static final double kShooterVoltage = 8; // volts
     private static final double kAmpVoltage = 5; // volts
     private static final double kIdleVoltage = 4; // volts
