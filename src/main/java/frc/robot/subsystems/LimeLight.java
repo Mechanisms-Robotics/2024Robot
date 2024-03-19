@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -8,8 +9,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.photonvision.PhotonCamera;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
-
-import java.util.List;
 
 public class LimeLight extends SubsystemBase {
     private final PhotonCamera camera = new PhotonCamera("LimeLight");
@@ -30,6 +29,7 @@ public class LimeLight extends SubsystemBase {
             double yaw,
             double area,
             boolean hasTarget,
+            boolean aimed,
             Transform3d fieldToCamera
     ) {}
 
@@ -40,7 +40,8 @@ public class LimeLight extends SubsystemBase {
      * @return data of the LimeLight: yaw, area, and hasTarget
      */
     public LimeLightData getData() {
-        return new LimeLightData(yaw, area, area!=0, fieldToCamera);
+        return new LimeLightData(yaw, area, area!=0,
+                                 MathUtil.isNear(0, yaw, 5), fieldToCamera);
     }
 
     @Override
