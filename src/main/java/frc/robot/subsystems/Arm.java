@@ -27,7 +27,7 @@ public class Arm extends SingleJointSubystem {
     /* PID controller for the right and left arm, which will always have the same values they are different to account
        for different mechanical structures, such as belt tightening */
     private static final double kTolerance = Math.toRadians(2);
-    private static final Rotation2d kStowed = Rotation2d.fromDegrees(60);
+    private static final Rotation2d kStowed = Rotation2d.fromDegrees(25);
     private static final Rotation2d kIntaking = Rotation2d.fromDegrees(3.5);
     private static final Rotation2d kSubwooferHigh = Rotation2d.fromDegrees(94);
     private static final Rotation2d kSubwooferLow = Rotation2d.fromDegrees(15);

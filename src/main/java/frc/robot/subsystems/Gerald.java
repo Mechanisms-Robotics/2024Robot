@@ -13,8 +13,8 @@ import frc.util6328.Alert.AlertType;
  * The box of wheels that intakes, shoots, and amps the notes.
  */
 public class Gerald extends SubsystemBase {
-    private static final double kIntakeVoltage = 4; // volts
-    private static final double kOuttakeVoltage = -3; // volts
+    private static final double kIntakeVoltage = 10; // volts
+    private static final double kOuttakeVoltage = -12; // volts
     private static final double kShooterVoltage = 8; // volts
     private static final double kAmpVoltage = 5; // volts
     private static final double kIdleVoltage = 4; // volts
@@ -24,8 +24,8 @@ public class Gerald extends SubsystemBase {
     private static final double kAmpSpinupRPM = 3450; // RPM
     private static final double kFeedDetectDelay = 1; // seconds
     private static final Timer detectDelayTimer = new Timer();
-    private final DigitalInput noteSensor = new DigitalInput(9);
-    private final DigitalInput noteSensorConfirm = new DigitalInput(8);
+    private final DigitalInput noteSensor = new DigitalInput(8);
+    private final DigitalInput noteSensorConfirm = new DigitalInput(9);
     private final Alert unexpectedNote =
             new Alert("an unexpected note was detected in gerald after feeding it to the shooter",
                     AlertType.ERROR);
@@ -244,12 +244,11 @@ public class Gerald extends SubsystemBase {
         SmartDashboard.putBoolean("[Note Sensor] 1", !noteSensor.get());
         SmartDashboard.putBoolean("[Note Sensor] 2", !noteSensorConfirm.get());
 
-//        // if there is a note detected, set the intake motor to coast mode, otherwise set the intake to brake mode
-//        if (!noteDetected()) intakeMotor.coastMode();
-//        else intakeMotor.brakeMode();
         // if only the first sensor is detected, low the intake voltage
-//        if (!noteSensor.get() && noteSensorConfirm.get())
-//            intakeMotor.setVoltage(kIntakeVoltage/2);
+        if (!noteSensor.get() && noteSensorConfirm.get())
+            intakeMotor.setVoltage(kIntakeVoltage/8);
+        if (!noteSensor.get() && !noteSensorConfirm.get())
+            intakeMotor.setVoltage(0);
 
         switch (state) {
             case Idling -> idle();
