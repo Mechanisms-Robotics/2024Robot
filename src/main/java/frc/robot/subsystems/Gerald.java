@@ -13,7 +13,7 @@ import frc.util6328.Alert.AlertType;
  * The box of wheels that intakes, shoots, and amps the notes.
  */
 public class Gerald extends SubsystemBase {
-    private static final double kIntakeVoltage = 10; // volts
+    private static final double kIntakeVoltage = 7; // volts
     private static final double kOuttakeVoltage = -12; // volts
     private static final double kShooterVoltage = 8; // volts
     private static final double kAmpVoltage = 8; // volts
@@ -94,7 +94,7 @@ public class Gerald extends SubsystemBase {
             else intakeMotor.setVoltage(kIntakeVoltage);
             state = State.Intaking;
         }
-        // if the note was just detected on this cycle
+        // if the note was just detected on this cycle, start the timer
         if (noteDetected() && !lastDetected) {
             detectDelayTimer.restart();
             lastDetected = true;
@@ -245,8 +245,8 @@ public class Gerald extends SubsystemBase {
         SmartDashboard.putBoolean("[Note Sensor] 2", !noteSensorConfirm.get());
 
         // if only the first sensor is detected, low the intake voltage
-        if (!noteSensor.get() && noteSensorConfirm.get() && state == State.Intaking)
-            intakeMotor.setVoltage(0);
+//        if (!noteSensor.get() && noteSensorConfirm.get() && state == State.Intaking)
+//            intakeMotor.setVoltage(0);
 //        if (!noteSensor.get() && !noteSensorConfirm.get() && state == State.Intaking)
 //            intakeMotor.setVoltage(0);
 
