@@ -232,7 +232,7 @@ public class Gerald extends SubsystemBase {
      * @return if the note sensor detected anything
      */
     public boolean noteDetected() {
-        return !noteSensor.get() || !noteSensor2.get();
+        return !noteSensor.get();
     }
 
     @Override
