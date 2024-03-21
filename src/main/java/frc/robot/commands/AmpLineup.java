@@ -3,8 +3,6 @@ package frc.robot.commands;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -20,10 +18,9 @@ import java.util.function.Supplier;
  * Decreased the drive speed to kMaxVelocity and overrides the turning.
  * The wrist aims to account for distance using and interpolated tree map.
  */
-public class DriveWhileAim extends Command {
+public class AmpLineup extends Command {
     private final Swerve swerve;
     private final LimeLight limeLight;
-    private final ArmWrist armWrist;
     private static final double kMaxVelocity = 1;
     private static final double kMaxAcceleration = 1;
     private static final double kMaxOmega = Math.PI / 8;
@@ -35,24 +32,6 @@ public class DriveWhileAim extends Command {
     private final Supplier<Double> yVal;
     private final Supplier<Double> rVal;
     private static final double kDeadBand = 0.1;
-    private static final Rotation2d desiredArmRotation = Rotation2d.fromDegrees(15);
-    /**
-     * Wrist angle look up table ,
-     * key: apriltag area (the percentage of the camera the april tag takes up which corresponds to distance),
-     * values: wrist angle
-     */
-    private static final InterpolatingDoubleTreeMap wristAimMap = new InterpolatingDoubleTreeMap();
-    // create the wristAimMap interpolating treemap
-    static {
-        wristAimMap.put(00.00, 120.);
-        wristAimMap.put(0.26, 112.5);
-        wristAimMap.put(0.36, 110.);
-        wristAimMap.put(0.45, 105.);
-        wristAimMap.put(0.56, 105.);
-        wristAimMap.put(0.67, 102.5);
-        wristAimMap.put(0.875, 95.);
-        wristAimMap.put(100., 95.);
-    }
     private static final ProfiledPIDController controller = new ProfiledPIDController(.1, 0, 0, new Constraints(kMaxOmega, kMaxOmegaAcceleration));
 
     /**
@@ -60,21 +39,19 @@ public class DriveWhileAim extends Command {
      *
      * @param swerve instance of swerve, needed for turning toward the target and driving
      * @param limeLight instance of limelight, needed for finding the aprilTag
-     * @param armWrist instance of the armWrist, needed for pivoting the wrist to account for distance
      *
      * @param xVal x drive component
      * @param yVal y drive component
      * @param rVal rotational drive component, used when there is no target found
      */
-    public DriveWhileAim(Swerve swerve, LimeLight limeLight, ArmWrist armWrist,
-                         Supplier<Double> xVal, Supplier<Double> yVal, Supplier<Double> rVal) {
+    public AmpLineup(Swerve swerve, LimeLight limeLight,
+                     Supplier<Double> xVal, Supplier<Double> yVal, Supplier<Double> rVal) {
         this.swerve = swerve;
         this.limeLight = limeLight;
-        this.armWrist = armWrist;
         this.xVal = xVal;
         this.yVal = yVal;
         this.rVal = rVal;
-        addRequirements(swerve, limeLight, armWrist);
+        addRequirements(swerve, limeLight);
     }
 
     /**
@@ -84,8 +61,8 @@ public class DriveWhileAim extends Command {
      * @param limeLight instance of limelight, needed for finding the aprilTag
      * @param armWrist instance of the armWrist, needed for pivoting the wrist to account for distance
      */
-    public DriveWhileAim(Swerve swerve, LimeLight limeLight, ArmWrist armWrist) {
-        this(swerve, limeLight, armWrist, ()->0., ()->0., ()->0.);
+    public AmpLineup(Swerve swerve, LimeLight limeLight, ArmWrist armWrist) {
+        this(swerve, limeLight, ()->0., ()->0., ()->0.);
     }
 
 
@@ -103,18 +80,25 @@ public class DriveWhileAim extends Command {
 
     @Override
     public void execute() {
-        double vx = xLimiter.calculate(deadBand(xVal.get()) * kMaxVelocity);
-        double vy = yLimiter.calculate(deadBand(yVal.get()) * kMaxVelocity);
+        double vx;
+        double vy;
         double vomega;
-        Tag.data sub = limeLight.getData().subTag().getData();
+        Tag.data amp = limeLight.getData().ampTag().getData();
 
-        if (!sub.hasTarget()) vomega = omegaLimiter.calculate(deadBand(rVal.get()) * kMaxOmega);
-        else {
-            vomega = controller.calculate(sub.yaw(), 0);
-            Rotation2d desiredWristRotation = Rotation2d.fromDegrees(wristAimMap.get(sub.area()));
-            armWrist.aim(desiredArmRotation, desiredWristRotation);
+        if (!amp.hasTarget()){
+            vomega = omegaLimiter.calculate(deadBand(rVal.get()) * kMaxOmega);
+            vx = xLimiter.calculate(deadBand(xVal.get()) * kMaxVelocity);
+            vy = yLimiter.calculate(deadBand(yVal.get()) * kMaxVelocity);
+        } else {
+            vomega = controller.calculate(amp.yaw(), 0);
+            if (amp.aimed()) {
+                vx = 1;
+            } else {
+                vx = xLimiter.calculate(deadBand(xVal.get()) * kMaxVelocity);
+            }
+            vy = yLimiter.calculate(deadBand(yVal.get()) * kMaxVelocity);
         }
-        SmartDashboard.putNumber("[Drive While Aim] omega", vomega);
+        SmartDashboard.putNumber("[Amp Lineup] omega", vomega);
         swerve.drive(vx, vy, vomega);
     }
 }
