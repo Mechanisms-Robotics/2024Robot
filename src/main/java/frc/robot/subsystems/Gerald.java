@@ -25,7 +25,7 @@ public class Gerald extends SubsystemBase {
     private static final double kFeedDetectDelay = 1; // seconds
     private static final Timer detectDelayTimer = new Timer();
     private final DigitalInput noteSensor = new DigitalInput(8);
-    private final DigitalInput noteSensorConfirm = new DigitalInput(9);
+    private final DigitalInput noteSensor2 = new DigitalInput(9);
     private final Alert unexpectedNote =
             new Alert("an unexpected note was detected in gerald after feeding it to the shooter",
                     AlertType.ERROR);
@@ -227,12 +227,12 @@ public class Gerald extends SubsystemBase {
 
     /**
      * Returns a boolean of whether the note sensors detected anything.
-     * Both sensors have to detect something in order for it to return true.
+     * Either sensor needs to detect for it to return true.
      *
      * @return if the note sensor detected anything
      */
     public boolean noteDetected() {
-        return !noteSensor.get();
+        return !noteSensor.get() || !noteSensor2.get();
     }
 
     @Override
@@ -242,12 +242,12 @@ public class Gerald extends SubsystemBase {
         SmartDashboard.putNumber("[Gerald] shooter RPM", shooterMotor.getVelocity());
         SmartDashboard.putBoolean("[Note Sensor] both", noteDetected()); // show on advantage scope
         SmartDashboard.putBoolean("[Note Sensor] 1", !noteSensor.get());
-        SmartDashboard.putBoolean("[Note Sensor] 2", !noteSensorConfirm.get());
+        SmartDashboard.putBoolean("[Note Sensor] 2", !noteSensor2.get());
 
         // if only the first sensor is detected, low the intake voltage
-//        if (!noteSensor.get() && noteSensorConfirm.get() && state == State.Intaking)
+//        if (!noteSensor.get() && noteSensor2.get() && state == State.Intaking)
 //            intakeMotor.setVoltage(0);
-//        if (!noteSensor.get() && !noteSensorConfirm.get() && state == State.Intaking)
+//        if (!noteSensor.get() && !noteSensor2.get() && state == State.Intaking)
 //            intakeMotor.setVoltage(0);
 
         switch (state) {
