@@ -246,9 +246,9 @@ public class Gerald extends SubsystemBase {
 
         // if only the first sensor is detected, low the intake voltage
         if (!noteSensor.get() && noteSensorConfirm.get() && state == State.Intaking)
-            intakeMotor.setVoltage(kIntakeVoltage/8);
-        if (!noteSensor.get() && !noteSensorConfirm.get() && state == State.Intaking)
             intakeMotor.setVoltage(0);
+//        if (!noteSensor.get() && !noteSensorConfirm.get() && state == State.Intaking)
+//            intakeMotor.setVoltage(0);
 
         switch (state) {
             case Idling -> idle();
