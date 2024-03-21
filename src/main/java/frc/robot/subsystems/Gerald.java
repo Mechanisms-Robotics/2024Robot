@@ -16,7 +16,7 @@ public class Gerald extends SubsystemBase {
     private static final double kIntakeVoltage = 10; // volts
     private static final double kOuttakeVoltage = -12; // volts
     private static final double kShooterVoltage = 8; // volts
-    private static final double kAmpVoltage = 5; // volts
+    private static final double kAmpVoltage = 8; // volts
     private static final double kIdleVoltage = 4; // volts
     private static final double kAmpFeedVoltage = 3; // volts
     private static final double kIntakeDetectDelay = 0.001; // seconds
@@ -245,9 +245,9 @@ public class Gerald extends SubsystemBase {
         SmartDashboard.putBoolean("[Note Sensor] 2", !noteSensorConfirm.get());
 
         // if only the first sensor is detected, low the intake voltage
-        if (!noteSensor.get() && noteSensorConfirm.get())
+        if (!noteSensor.get() && noteSensorConfirm.get() && state == State.Intaking)
             intakeMotor.setVoltage(kIntakeVoltage/8);
-        if (!noteSensor.get() && !noteSensorConfirm.get())
+        if (!noteSensor.get() && !noteSensorConfirm.get() && state == State.Intaking)
             intakeMotor.setVoltage(0);
 
         switch (state) {
