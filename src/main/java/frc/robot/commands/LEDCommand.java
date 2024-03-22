@@ -34,13 +34,18 @@ public class LEDCommand extends Command {
             led.green();
             return;
         }
+        // if the shooter is spun up
         if (gerald.spunUp()) {
+            // if the states is podium or aiming
             if (armWrist.getState() == ArmWrist.State.ShootingPodium
                     || armWrist.getState() == ArmWrist.State.Aiming) {
+                // if it is aimed set it to blue else red
                 if (limeLightData.get().aimed()) {
                     led.blue();
                 } else { led.red(); }
+            // if it is not podium or aiming, set the light to blue
             } else { led.blue(); }
+        // if the shooter is not spun up, set the led to red
         } else { led.red(); }
     }
 }

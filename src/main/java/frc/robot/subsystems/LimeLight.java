@@ -39,7 +39,7 @@ public class LimeLight extends SubsystemBase {
      */
     public LimeLightData getData() {
         return new LimeLightData(yaw, area, area!=0,
-                                 MathUtil.isNear(0, yaw, 5));
+                                 MathUtil.isNear(0, yaw, 5) && area!=0);
     }
 
     @Override
