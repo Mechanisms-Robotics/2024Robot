@@ -198,10 +198,10 @@ public class RobotContainer {
             () -> -xboxController.getLeftX(),
             () -> -xboxController.getRightX(),
             0.1,
-            4,
-            8,
-            Math.PI*1,
-            Math.PI*2,
+            5,
+            8, // note in use
+            Math.PI*8,
+            Math.PI*4, // not in use
             true
     ));
     led.setDefaultCommand(new LEDCommand(led, gerald, limeLight::getData, armWrist));

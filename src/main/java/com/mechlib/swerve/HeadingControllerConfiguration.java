@@ -7,6 +7,7 @@ import frc.robot.Robot;
  *
  * Contains all the configuration parameters for a SwerveDrive heading controller
  */
+// TODO: tune the heading controller configuration so that it does not over stablize when the robot turns fast
 public class HeadingControllerConfiguration {
   // Default HeadingControllerConfiguration
   public static final HeadingControllerConfiguration DEFAULT = new HeadingControllerConfiguration(
