@@ -5,6 +5,7 @@ import com.mechlib.hardware.BrushlessMotorController;
 import com.mechlib.hardware.TalonFX;
 import com.mechlib.subsystems.SingleJointSubystem;
 import com.mechlib.util.MechUnits;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -62,7 +63,7 @@ public class Wrist extends SingleJointSubystem {
 //        setFeedforwardGains(0.15, 0, 0.0, 0.0);
 //        setPPIDGains(0.6, 0.0, 0.0);
         setFeedforwardGains(0.15, 0, 0.0, 0.0);
-        setPPIDGains(0.6, 0.0, 0.0);
+        setPPIDGains(0.6, 0.0, 0.01);
         setPPIDConstraints(Math.PI/4, Math.PI/2);
         setTolerance(kTolerance);
         pivotTo(Rotation2d.fromDegrees(90));
@@ -159,6 +160,15 @@ public class Wrist extends SingleJointSubystem {
     }
 
     /**
+     * Returns true if the wrist is at the desired angle
+     *
+     * @return true if the wrist is at the desired angle else false
+     */
+    public boolean aimed() {
+        return MathUtil.isNear(getDesiredAngle().getDegrees(), getAngle().getDegrees(), kTolerance + 5);
+    }
+
+    /**
      * Returns the angle of the arm.
      * Overrides the angle from CANCoder based → gyro based.
      *
@@ -180,6 +190,7 @@ public class Wrist extends SingleJointSubystem {
         SmartDashboard.putNumber("[Wrist] position", wristMotor.getRawPosition());
         SmartDashboard.putNumber("[Wrist] current angle", getAngle().getDegrees());
         SmartDashboard.putNumber("[Wrist] desired angle", getDesiredAngle().getDegrees());
+        SmartDashboard.putBoolean("[Wrist] aimed", aimed());
         SmartDashboard.putNumber("[Wrist] gravity angle", bootGravityAngle.getDegrees());
         SmartDashboard.putNumber("[Wrist] pitch", gyro.getPitch().getValueAsDouble());
         SmartDashboard.putNumber("[Wrist] roll", gyro.getRoll().getValueAsDouble());

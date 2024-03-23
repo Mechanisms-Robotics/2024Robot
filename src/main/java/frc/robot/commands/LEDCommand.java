@@ -42,7 +42,7 @@ public class LEDCommand extends Command {
             // if the states is podium or aiming and the shooter is spun-up, set the light to blue
             if ((armWrist.getState() == ArmWrist.State.ShootingPodium
                     || armWrist.getState() == ArmWrist.State.Aiming)
-                    && limeLightData.get().aimed()) {
+                    && limeLightData.get().aimed() && armWrist.aimed()) {
                     led.blue();
             }
         }

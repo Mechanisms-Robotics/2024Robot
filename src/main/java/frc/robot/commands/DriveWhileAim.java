@@ -35,7 +35,7 @@ public class DriveWhileAim extends Command {
     private final Supplier<Double> yVal;
     private final Supplier<Double> rVal;
     private static final double kDeadBand = 0.1;
-    private static final Rotation2d desiredArmRotation = Rotation2d.fromDegrees(15);
+    private static final Rotation2d desiredArmRotation = Rotation2d.fromDegrees(25);
     /**
      * Wrist angle look up table ,
      * key: apriltag area (the percentage of the camera the april tag takes up which corresponds to distance),
@@ -44,14 +44,10 @@ public class DriveWhileAim extends Command {
     private static final InterpolatingDoubleTreeMap wristAimMap = new InterpolatingDoubleTreeMap();
     // create the wristAimMap interpolating treemap
     static {
-        wristAimMap.put(00.00, 120.);
-        wristAimMap.put(0.26, 112.5);
-        wristAimMap.put(0.36, 110.);
-        wristAimMap.put(0.45, 105.);
-        wristAimMap.put(0.56, 105.);
-        wristAimMap.put(0.67, 102.5);
-        wristAimMap.put(0.875, 95.);
-        wristAimMap.put(100., 95.);
+        wristAimMap.put(00.00, 109.5);
+        wristAimMap.put(0.38, 109.5);
+        wristAimMap.put(0.21, 114.5);
+        wristAimMap.put(100.0, 114.5);
     }
     private static final ProfiledPIDController controller = new ProfiledPIDController(.1, 0, 0, new Constraints(kMaxOmega, kMaxOmegaAcceleration));
 
