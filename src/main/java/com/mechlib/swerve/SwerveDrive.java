@@ -269,7 +269,7 @@ public class SwerveDrive extends SubsystemBase {
       this::autoDrive,
       new HolonomicPathFollowerConfig(
         new PIDConstants(1.6, 0, 0),
-        new PIDConstants(1.5, 0, 0),
+        new PIDConstants(2, 0, 0),
 
         4.25,
         0.5388,
