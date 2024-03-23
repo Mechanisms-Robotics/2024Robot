@@ -30,7 +30,7 @@ public class Wrist extends SingleJointSubystem {
     private final Supplier<Double> swervePitch;
     private final Supplier<Double> swerveRoll;
     private static final double kAllowableTip = 5;
-    private static final double kTolerance = Math.toRadians(0.5);
+    private static final double kTolerance = Math.toRadians(0.25);
     private static final Rotation2d kStowed = Rotation2d.fromDegrees(90);
     private static final Rotation2d kIntaking = Rotation2d.fromDegrees(87.5);
     private static final Rotation2d kSubwooferHigh = Rotation2d.fromDegrees(92.5);
@@ -165,7 +165,7 @@ public class Wrist extends SingleJointSubystem {
      * @return true if the wrist is at the desired angle else false
      */
     public boolean aimed() {
-        return MathUtil.isNear(getDesiredAngle().getDegrees(), getAngle().getDegrees(), kTolerance + 5);
+        return MathUtil.isNear(getDesiredAngle().getDegrees(), getAngle().getDegrees(), kTolerance + 2);
     }
 
     /**
