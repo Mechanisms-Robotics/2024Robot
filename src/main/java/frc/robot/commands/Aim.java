@@ -7,6 +7,7 @@ import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Wrist;
 
 public class Aim extends ParallelCommandGroup {
+    // TODO: make this function set the state of the arm and wrist
     public Aim (Arm arm, Wrist wrist, double armAngle, double wristAngle) {
         addCommands(
                 new InstantCommand(() -> arm.aim(Rotation2d.fromDegrees(armAngle))),

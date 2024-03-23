@@ -1,0 +1,43 @@
+{
+  "version": 1.0,
+  "startingPose": {
+    "position": {
+      "x": 1.3337957445145674,
+      "y": 5.535354916863679
+    },
+    "rotation": 0
+  },
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "aimSubwooferHighShootIntake"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 1.0
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "intake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "SubCNoteL"
+          }
+        }
+      ]
+    }
+  },
+  "folder": "1Note",
+  "choreoAuto": false
+}
