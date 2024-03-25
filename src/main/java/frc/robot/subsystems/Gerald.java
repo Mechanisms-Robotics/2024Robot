@@ -240,6 +240,7 @@ public class Gerald extends SubsystemBase {
         SmartDashboard.putString("[Gerald] state", state.toString());
         SmartDashboard.putBoolean("[Gerald] spun up", spunUp());
         SmartDashboard.putNumber("[Gerald] shooter RPM", shooterMotor.getVelocity());
+        SmartDashboard.putNumber("[Gerald] amp motor RPM", ampMotor.getVelocity());
         SmartDashboard.putBoolean("[Note Sensor] both", noteDetected()); // show on advantage scope
         SmartDashboard.putBoolean("[Note Sensor] 1", !noteSensor.get());
         SmartDashboard.putBoolean("[Note Sensor] 2", !noteSensor2.get());
