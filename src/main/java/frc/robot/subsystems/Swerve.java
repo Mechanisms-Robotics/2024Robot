@@ -95,7 +95,7 @@ public class Swerve extends SwerveDrive {
                 BL_MODULE_LOCATION,
 
                 GYRO_ID,
-                HeadingControllerConfiguration.DEFAULT
+                HeadingControllerConfiguration.GOBLIN
         );
     }
 }

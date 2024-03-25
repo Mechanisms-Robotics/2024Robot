@@ -19,6 +19,16 @@ public class HeadingControllerConfiguration {
     2 * Math.PI
   );
 
+  // HeadingControllerConfiguration tuned on goblin
+  public static final HeadingControllerConfiguration GOBLIN = new HeadingControllerConfiguration(
+          2.5, 0, 0.01,
+          Math.toRadians(5.0),
+          Robot.isReal() ? 0 : 0.0, 0, 0,
+          Math.toRadians(5.0),
+          8*Math.PI,
+          8*Math.PI
+  );
+
   public final double stabilizeKP; // Stabilization P gain
   public final double stabilizeKI; // Stabilization I gain
   public final double stabilizeKD; // Stabilization D gain
