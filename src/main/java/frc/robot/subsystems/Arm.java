@@ -1,13 +1,11 @@
 package frc.robot.subsystems;
 
-import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
-import com.ctre.phoenix6.signals.SensorDirectionValue;
-import com.mechlib.hardware.CANCoder;
 import com.mechlib.hardware.TalonFX;
 import com.mechlib.subsystems.SingleJointSubystem;
 import com.mechlib.util.MechUnits;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
@@ -21,9 +19,9 @@ public class Arm extends SingleJointSubystem {
     // right arm motor magnet offset
     private static final double kRightMagnetOffset = kIdealStartRotation - 0.427734;
     // right arm TalonFX motor and it's can coder
-    private final TalonFX rightArmMotor = new TalonFX(13, new CANCoder(13, kRightMagnetOffset, AbsoluteSensorRangeValue.Unsigned_0To1, SensorDirectionValue.Clockwise_Positive));
+    private final TalonFX rightArmMotor = new TalonFX(13);
     // left arm TalonFX motor with its can coder
-    private final TalonFX leftArmMotor = new TalonFX(12, new CANCoder(12, kLeftMagnetOffset, AbsoluteSensorRangeValue.Unsigned_0To1, SensorDirectionValue.CounterClockwise_Positive));
+    private final TalonFX leftArmMotor = new TalonFX(12);
     // feed forward controller for the arm
     /* PID controller for the right and left arm, which will always have the same values they are different to account
        for different mechanical structures, such as belt tightening */
@@ -39,6 +37,13 @@ public class Arm extends SingleJointSubystem {
     private static final Rotation2d kClimb = Rotation2d.fromDegrees(40);
     private static final double kSensorRatio = 64.0/16.0;
     private static final double kMotorRatio = 60 * kSensorRatio;
+    private boolean homed = false;
+    // TODO: tune the home voltage
+    private static final double homeVoltage = 0.5;
+    private static final Rotation2d homedPosition = Rotation2d.fromDegrees(94.77);
+    private static final double kHomeTime = 1;
+    private final Timer homeTimer = new Timer();
+    private boolean isHoming = false;
     private static final Rotation2d kShuttle = Rotation2d.fromDegrees(60);
     private static final Rotation2d kForwardLimit = Rotation2d.fromDegrees(94);
     private static final Rotation2d kReverseLimit = Rotation2d.fromDegrees(2);
@@ -50,16 +55,62 @@ public class Arm extends SingleJointSubystem {
         addMotor(leftArmMotor, true);
         addMotor(rightArmMotor, false);
         setCurrentLimit(40.0);
-        setVoltageCompensation(10.0);
+        setVoltageCompensation(0.5);
         setState(SingleJointSubsystemState.CLOSED_LOOP);
-        setPositionUnitsFunction((rotations) -> MechUnits.rotationsToRadians(rotations, kSensorRatio));
-        setVelocityUnitsFunction((rotations) -> MechUnits.rotationsToRadians(rotations, kSensorRatio));
-        setLimits(kReverseLimit, kForwardLimit, kMotorRatio);
-        setFeedforwardGains(0.15, 0, 0.0, 0.0);
-        setPPIDGains(1.0, 0.0, 0.0);
+        setPositionUnitsFunction((rotations) -> MechUnits.rotationsToRadians(rotations, kMotorRatio));
+        setVelocityUnitsFunction((rotations) -> MechUnits.rotationsToRadians(rotations, kMotorRatio));
+        setFeedforwardGains(0.0, 0, 0.0, 0.0);
+        setPPIDGains(0.0, 0.0, 0.0);
+//        setFeedforwardGains(0.15, 0, 0.0, 0.0);
+//        setPPIDGains(1.0, 0.0, 0.0);
         setPPIDConstraints(Math.PI, 4*Math.PI);
         setTolerance(kTolerance);
-        SmartDashboard.putBoolean("[arm] disabled", disabled);
+        SmartDashboard.putBoolean("[Arm] disabled", disabled);
+    }
+
+    /**
+     * Returns true if the arm has been homed.
+     * When the arm disables, the homed is set to false.
+     *
+     * @return true if homed
+     */
+    public boolean homed() {
+        return homed;
+    }
+
+    /**
+     * Home the arm, zeroing the position of the arms.
+     * This process moves the arm back until the arms stop moving.
+     * When the arm stops moving, it sets the motor positions to the homed position.
+     * This is used to un-disable the arm, because the arm needs to be homed before it can be un-disabled because
+     * when it does disable it is usually because a chain slipped.
+     */
+    public void home() {
+        if (homed) return;
+        if(!isHoming) {
+            setLimits(Rotation2d.fromDegrees(-1000), Rotation2d.fromDegrees(1000), kMotorRatio);
+            // starts moving the arm back to the hard stop
+            leftArmMotor.setVoltage(homeVoltage);
+            rightArmMotor.setVoltage(homeVoltage);
+            homeTimer.restart();
+            isHoming = true;
+            return;
+        } else if (!homeTimer.hasElapsed(kHomeTime)) {
+            return;
+        }
+        /* If the motors have stoped (velocity of the motors is within tolerance) set the motor positions to the
+           position of the home position, set the voltages to 0 and homed to true */
+        if (MathUtil.isNear(0, leftArmMotor.getVelocity(), 0.01)
+                && MathUtil.isNear(0, rightArmMotor.getVelocity(), 0.01)) {
+            leftArmMotor.setInternalSensorPosition(MechUnits.radiansToRotations(
+                    homedPosition.getRadians(), kMotorRatio));
+            rightArmMotor.setInternalSensorPosition(MechUnits.radiansToRotations(
+                    homedPosition.getRadians(), kMotorRatio));
+            leftArmMotor.setVoltage(0);
+            rightArmMotor.setVoltage(0);
+            homed = true;
+            disabled = false;
+        }
     }
 
     /**
@@ -140,6 +191,7 @@ public class Arm extends SingleJointSubystem {
      */
     public void disable() {
         stop();
+        homed = false;
         disabled = true;
     }
 
@@ -175,7 +227,7 @@ public class Arm extends SingleJointSubystem {
         // if disabled, do not run any processes on the arm
         if (Math.abs(leftArmMotor.getRawPosition() -rightArmMotor.getRawPosition()) > kAllowableDifference)
             disable();
-        if (disabled) return;
+        if (disabled || !homed) return;
         super.periodic();
     }
 }
