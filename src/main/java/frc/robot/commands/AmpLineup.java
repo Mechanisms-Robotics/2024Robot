@@ -5,9 +5,7 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.ArmWrist;
 import frc.robot.subsystems.LimeLight;
 import frc.robot.subsystems.LimeLight.Tag;
 import frc.robot.subsystems.Swerve;
@@ -24,8 +22,6 @@ public class AmpLineup extends Command {
     private final LimeLight limeLight;
     private static final double kMaxVelocity = 1;
     private static final double kMaxAcceleration = 1;
-    private static final double kMaxOmega = Math.PI / 8;
-    private static final double kMaxOmegaAcceleration = Math.PI / 4;
     private static final SlewRateLimiter xLimiter = new SlewRateLimiter(kMaxAcceleration);
     private static final SlewRateLimiter yLimiter = new SlewRateLimiter(kMaxAcceleration);
     // TODO: make shu the rite cuh
@@ -46,27 +42,14 @@ public class AmpLineup extends Command {
      *
      * @param xVal x drive component
      * @param yVal y drive component
-     * @param rVal rotational drive component, used when there is no target found
      */
     public AmpLineup(Swerve swerve, LimeLight limeLight,
-                     Supplier<Double> xVal, Supplier<Double> yVal, Supplier<Double> rVal) {
+                     Supplier<Double> xVal, Supplier<Double> yVal) {
         this.swerve = swerve;
         this.limeLight = limeLight;
         this.xVal = xVal;
         this.yVal = yVal;
-        this.rVal = rVal;
         addRequirements(swerve, limeLight);
-    }
-
-    /**
-     * Initializes the swerve, limelight and armWrist and passes in 0 as joystick values
-     *
-     * @param swerve instance of swerve, needed for turning toward the target and driving
-     * @param limeLight instance of limelight, needed for finding the aprilTag
-     * @param armWrist instance of the armWrist, needed for pivoting the wrist to account for distance
-     */
-    public AmpLineup(Swerve swerve, LimeLight limeLight, ArmWrist armWrist) {
-        this(swerve, limeLight, ()->0., ()->0., ()->0.);
     }
 
 
