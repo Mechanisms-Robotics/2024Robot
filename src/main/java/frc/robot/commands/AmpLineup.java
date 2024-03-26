@@ -3,6 +3,7 @@ package frc.robot.commands;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -27,12 +28,15 @@ public class AmpLineup extends Command {
     private static final double kMaxOmegaAcceleration = Math.PI / 4;
     private static final SlewRateLimiter xLimiter = new SlewRateLimiter(kMaxAcceleration);
     private static final SlewRateLimiter yLimiter = new SlewRateLimiter(kMaxAcceleration);
-    private static final SlewRateLimiter omegaLimiter = new SlewRateLimiter(kMaxOmegaAcceleration);
+    // TODO: make shu the rite cuh
+    private static final Rotation2d kAmpHeading = Rotation2d.fromDegrees(-90);
+    // TODO: make it lower hu
+    private static final double kTolerance = 5;
     private final Supplier<Double> xVal;
     private final Supplier<Double> yVal;
-    private final Supplier<Double> rVal;
     private static final double kDeadBand = 0.1;
-    private static final ProfiledPIDController controller = new ProfiledPIDController(.1, 0, 0, new Constraints(kMaxOmega, kMaxOmegaAcceleration));
+    // TODO: tune PID controller
+    private static final ProfiledPIDController strafeController = new ProfiledPIDController(.1, 0, 0, new Constraints(kMaxVelocity, kMaxAcceleration));
 
     /**
      * Initializes the swerve, limelight and armWrist and gets x, y and rotational joystick values
@@ -80,25 +84,17 @@ public class AmpLineup extends Command {
 
     @Override
     public void execute() {
-        double vx;
-        double vy;
-        double vomega;
+        double vx = xLimiter.calculate(deadBand(xVal.get()) * kMaxVelocity);
+        double vy = yLimiter.calculate(deadBand(yVal.get()) * kMaxVelocity);
         Tag.data amp = limeLight.getData().ampTag().getData();
 
-        if (!amp.hasTarget()){
-            vomega = omegaLimiter.calculate(deadBand(rVal.get()) * kMaxOmega);
-            vx = xLimiter.calculate(deadBand(xVal.get()) * kMaxVelocity);
-            vy = yLimiter.calculate(deadBand(yVal.get()) * kMaxVelocity);
-        } else {
-            vomega = controller.calculate(amp.yaw(), 0);
-            if (amp.aimed()) {
-                vx = 1;
-            } else {
-                vx = xLimiter.calculate(deadBand(xVal.get()) * kMaxVelocity);
-            }
-            vy = yLimiter.calculate(deadBand(yVal.get()) * kMaxVelocity);
+        swerve.lockHeading(kAmpHeading);
+        if (!MathUtil.isNear(kAmpHeading.getDegrees(), swerve.getHeading().getDegrees(), kTolerance)
+            || !amp.hasTarget()) {
+            swerve.drive(vx, vy, 0);
+            return;
         }
-        SmartDashboard.putNumber("[Amp Lineup] omega", vomega);
-        swerve.drive(vx, vy, vomega);
+        vx = strafeController.calculate(amp.yaw(), 0);
+        swerve.drive(vx, vy, 0);
     }
 }
