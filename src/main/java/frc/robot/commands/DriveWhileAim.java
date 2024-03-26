@@ -107,8 +107,9 @@ public class DriveWhileAim extends Command {
         double vy = yLimiter.calculate(deadBand(yVal.get()) * kMaxVelocity);
         double vomega;
         Tag.data sub = limeLight.getData().subTag();
+        sub.yaw();
 
-        if (!sub.hasTarget()) vomega = omegaLimiter.calculate(deadBand(rVal.get()) * kMaxOmega);
+        if (!sub.detected()) vomega = omegaLimiter.calculate(deadBand(rVal.get()) * kMaxOmega);
         else {
             vomega = controller.calculate(sub.yaw(), 0);
             Rotation2d desiredWristRotation = Rotation2d.fromDegrees(wristAimMap.get(sub.area()));

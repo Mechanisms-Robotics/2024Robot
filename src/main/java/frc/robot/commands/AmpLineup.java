@@ -73,7 +73,7 @@ public class AmpLineup extends Command {
 
         swerve.lockHeading(kAmpHeading);
         if (!MathUtil.isNear(kAmpHeading.getDegrees(), swerve.getHeading().getDegrees(), kTolerance)
-            || !amp.hasTarget()) {
+            || !amp.detected()) {
             swerve.drive(vx, vy, 0);
             return;
         }

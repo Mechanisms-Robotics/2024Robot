@@ -47,8 +47,12 @@ public class LimeLight extends SubsystemBase {
             AprilTagFieldLayout aprilTagFieldLayout
     ) {}
 
-    public class Tag {
+    /**
+     * Holds the data of a single AprilTag and handles the updating of the data.
+     */
+    public static class Tag {
         int aprilTagID;
+        /** 1 */
         double yaw;
         double area;
         boolean lastUpdated = false;
@@ -90,13 +94,30 @@ public class LimeLight extends SubsystemBase {
             area = 0;
             lastUpdated = false;
         }
+
+        /**
+         * Data of the AprilTag
+         *
+         * @param aprilTagID ID of the AprilTag, automatically sets the correct ID for the alliance in the constructor.
+         * @param yaw Yaw of the angle made by the center of the camera and the center of the AprilTag.
+         * Used for finding how close the robot is to pointing at the AprilTag.
+         * @param area Area of the AprilTag, the percent of camera screen the AprilTag takes up.
+         * @param detected True if the AprilTag is detected
+         * @param aimed True if the camera is pointed at the AprilTag within a tolerance
+         */
         public record data(
                 int aprilTagID,
                 double yaw,
                 double area,
-                boolean hasTarget,
+                boolean detected,
                 boolean aimed
         ) {}
+
+        /**
+         * Returns AprilTag data record
+         *
+         * @return AprilTag data record
+         */
         public data getData() {
             return new data(aprilTagID, yaw, area, area!=0, MathUtil.isNear(0, yaw, 5));
         }
