@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import com.mechlib.hardware.TalonFX;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
@@ -15,8 +16,6 @@ import frc.util6328.Alert.AlertType;
 public class Gerald extends SubsystemBase {
     private static final double kIntakeVoltage = 10; // volts
     private static final double kOuttakeVoltage = -12; // volts
-    private static final double kShooterVoltage = 12; // volts
-    private static final double kAmpVoltage = 8; // volts
     private static final double kIdleVoltage = 4; // volts
     private static final double kAmpFeedVoltage = 10; // volts
     private static final double kIntakeDetectDelay = 0.001; // seconds
@@ -30,6 +29,7 @@ public class Gerald extends SubsystemBase {
             new Alert("an unexpected note was detected in gerald after feeding it to the shooter",
                     AlertType.ERROR);
     private boolean lastDetected = false;
+    private static final PIDController shooterController = new PIDController(0.5, 0.0, 0.0);
 
     // naming is based off of the unique function
     private final TalonFX intakeMotor = new TalonFX(14);
@@ -37,6 +37,7 @@ public class Gerald extends SubsystemBase {
     private final TalonFX ampMotor = new TalonFX(15);
     // only shoots
     private final TalonFX shooterMotor = new TalonFX(16);
+    private boolean amping = true;
 
 
     public enum State {
@@ -133,10 +134,11 @@ public class Gerald extends SubsystemBase {
      */
     public void prepareShoot() {
         if (state != State.PreparingShoot) {
-            shooterMotor.setVoltage(kShooterVoltage);
-            ampMotor.setVoltage(kShooterVoltage);
+            shooterController.setSetpoint(kSpinupRPM);
             state = State.PreparingShoot;
         }
+        shooterMotor.setVoltage(shooterController.calculate(shooterMotor.getVelocity()));
+        ampMotor.setVoltage(shooterController.calculate(ampMotor.getVelocity()));
     }
 
     /**
@@ -148,9 +150,11 @@ public class Gerald extends SubsystemBase {
      */
     public boolean spunUp() {
         if (state == State.PreparingShoot)
-            return Math.abs(shooterMotor.getVelocity()) > kSpinupRPM;
+            return Math.abs(shooterMotor.getVelocity()) > kSpinupRPM
+                    && Math.abs(ampMotor.getVelocity()) > kSpinupRPM;
         if (state == State.PreparingAmp)
-            return Math.abs(shooterMotor.getVelocity()) > kAmpSpinupRPM;
+            return Math.abs(shooterMotor.getVelocity()) > kAmpSpinupRPM
+                    && Math.abs(ampMotor.getVelocity()) > kAmpSpinupRPM;
         return false;
     }
 
@@ -160,10 +164,11 @@ public class Gerald extends SubsystemBase {
     public void prepareAmp () {
         if (state != State.PreparingAmp) {
             // spins in the same direction as they are inverted and the amp motor is negative
-            shooterMotor.setVoltage(kAmpVoltage);
-            ampMotor.setVoltage(-kAmpVoltage);
+            shooterMotor.setSetpoint(kAmpSpinupRPM);
             state = State.PreparingAmp;
         }
+        shooterMotor.setVoltage(shooterController.calculate(shooterMotor.getVelocity()));
+        ampMotor.setVoltage(-shooterController.calculate(ampMotor.getVelocity()));
     }
 
     /**
@@ -209,6 +214,14 @@ public class Gerald extends SubsystemBase {
             detectDelayTimer.stop();
             detectDelayTimer.reset();
         }
+        // continue to run the shooter and amp motors
+        if (amping) {
+            shooterMotor.setVoltage(shooterController.calculate(shooterMotor.getVelocity()));
+            ampMotor.setVoltage(-shooterController.calculate(ampMotor.getVelocity()));
+        } else {
+            shooterMotor.setVoltage(shooterController.calculate(shooterMotor.getVelocity()));
+            ampMotor.setVoltage(shooterController.calculate(ampMotor.getVelocity()));
+        }
     }
 
     /**
@@ -241,6 +254,7 @@ public class Gerald extends SubsystemBase {
         SmartDashboard.putBoolean("[Gerald] spun up", spunUp());
         SmartDashboard.putNumber("[Gerald] shooter RPM", shooterMotor.getVelocity());
         SmartDashboard.putNumber("[Gerald] amp motor RPM", ampMotor.getVelocity());
+        SmartDashboard.putNumber("[Gerald] desired RPM", shooterController.getSetpoint());
         SmartDashboard.putBoolean("[Note Sensor] both", noteDetected()); // show on advantage scope
         SmartDashboard.putBoolean("[Note Sensor] 1", !noteSensor.get());
         SmartDashboard.putBoolean("[Note Sensor] 2", !noteSensor2.get());
