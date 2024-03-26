@@ -8,6 +8,7 @@ import com.mechlib.subsystems.SingleJointSubystem;
 import com.mechlib.util.MechUnits;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -15,17 +16,10 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * The arm that Gerald is attached to. It is directly connected to the swerve.
  */
 public class Arm extends SingleJointSubystem {
-    // rotations as detected by the CanCoder at the start position if there was no offset
-    private static final double kIdealStartRotation = 1.0533;
-    // left arm motor magnet offset (acquired in Phoenix Tuner X)
-    private static final double kLeftMagnetOffset = kIdealStartRotation - 0.395996;
-    // right arm motor magnet offset
-    private static final double kRightMagnetOffset = kIdealStartRotation - 0.364502;
     // right arm TalonFX motor and it's can coder
-    private final TalonFX rightArmMotor = new TalonFX(13, new CANCoder(13, kRightMagnetOffset, AbsoluteSensorRangeValue.Unsigned_0To1, SensorDirectionValue.Clockwise_Positive));
-    // left arm TalonFX motor with its can coder
-    private final TalonFX leftArmMotor = new TalonFX(12, new CANCoder(12, kLeftMagnetOffset, AbsoluteSensorRangeValue.Unsigned_0To1, SensorDirectionValue.CounterClockwise_Positive));
-
+    private final TalonFX rightArmMotor = new TalonFX(13);
+    // left arm TalonFX motor with it's can coder
+    private final TalonFX leftArmMotor = new TalonFX(12);
     // feed forward controller for the arm
     /* PID controller for the right and left arm, which will always have the same values they are different to account
        for different mechanical structures, such as belt tightening */
@@ -42,12 +36,11 @@ public class Arm extends SingleJointSubystem {
     private static final double kSensorRatio = 64.0/16.0;
     private static final double kMotorRatio = 60 * kSensorRatio;
     // Homing
+    DigitalInput homeSensor = new DigitalInput(6);
     private boolean homed = false;
     // TODO: tune the home voltage
-    private static final double homeVoltage = 0.2;
+    private static final double homeVoltage = 0.4;
     private static final Rotation2d homedPosition = Rotation2d.fromDegrees(94.77);
-    private static final double kHomeTime = 1;
-    private final Timer homeTimer = new Timer();
     private boolean isHoming = false;
     private static final Rotation2d kShuttle = Rotation2d.fromDegrees(60);
     private static final Rotation2d kForwardLimit = Rotation2d.fromDegrees(94);
@@ -61,7 +54,7 @@ public class Arm extends SingleJointSubystem {
         addMotor(rightArmMotor, false);
         setCurrentLimit(40.0);
         // TODO: get rid of this
-        setVoltageCompensation(0.2);
+        setVoltageCompensation(0.4);
         setState(SingleJointSubsystemState.CLOSED_LOOP);
         setPositionUnitsFunction((rotations) -> MechUnits.rotationsToRadians(rotations, kMotorRatio));
         setVelocityUnitsFunction((rotations) -> MechUnits.rotationsToRadians(rotations, kMotorRatio));
@@ -98,16 +91,12 @@ public class Arm extends SingleJointSubystem {
             // starts moving the arm back to the hard stop
             leftArmMotor.setVoltage(homeVoltage);
             rightArmMotor.setVoltage(homeVoltage);
-            homeTimer.restart();
             isHoming = true;
-            return;
-        } else if (!homeTimer.hasElapsed(kHomeTime)) {
             return;
         }
         /* If the motors have stoped (velocity of the motors is within tolerance) set the motor positions to the
            position of the home position, set the voltages to 0 and homed to true */
-        if (MathUtil.isNear(0, leftArmMotor.getVelocity(), 0.01)
-                && MathUtil.isNear(0, rightArmMotor.getVelocity(), 0.01)) {
+        if (getHomeSensor()) {
             leftArmMotor.setInternalSensorPosition(MechUnits.radiansToRotations(
                     homedPosition.getRadians(), kMotorRatio));
             rightArmMotor.setInternalSensorPosition(MechUnits.radiansToRotations(
@@ -116,6 +105,8 @@ public class Arm extends SingleJointSubystem {
             rightArmMotor.setVoltage(0);
             homed = true;
             disabled = false;
+            isHoming = false;
+            pivotTo(getAngle());
         }
     }
 
@@ -206,6 +197,15 @@ public class Arm extends SingleJointSubystem {
     }
 
     /**
+     * Returns true if the sensor on the backstop home sensor has been triggered
+     *
+     * @return true if the sensor on the backstop home sensor has been triggered
+     */
+    public boolean getHomeSensor() {
+        return !homeSensor.get();
+    }
+
+    /**
      * Sets the arm rotation to a given angle
      *
      * @param rotation rotation to pivot to
@@ -232,6 +232,8 @@ public class Arm extends SingleJointSubystem {
         SmartDashboard.putBoolean("[Arm] disabled", disabled);
         SmartDashboard.putBoolean("[Arm] is homing", isHoming);
         SmartDashboard.putBoolean("[Arm] homed", homed);
+        SmartDashboard.putBoolean("[Arm] Home Sensor", getHomeSensor());
+
         // if disabled, do not run any processes on the arm
         if (Math.abs(leftArmMotor.getRawPosition() -rightArmMotor.getRawPosition()) > kAllowableDifference)
             disable();
