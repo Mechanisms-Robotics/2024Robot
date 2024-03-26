@@ -40,8 +40,8 @@ public class LimeLight extends SubsystemBase {
      */
 
     public record LimeLightData(
-            Tag subTag,
-            Tag ampTag,
+            Tag.data subTag,
+            Tag.data ampTag,
             ArrayList<Pose3d> robotPositions,
             Transform3d fieldToCamera,
             AprilTagFieldLayout aprilTagFieldLayout
@@ -109,7 +109,7 @@ public class LimeLight extends SubsystemBase {
      * @return data of the LimeLight: yaw, area, and hasTarget
      */
     public LimeLightData getData() {
-        return new LimeLightData(subTag, ampTag, robotPositions, fieldToCamera, aprilTagFieldLayout);
+        return new LimeLightData(subTag.getData(), ampTag.getData(), robotPositions, fieldToCamera, aprilTagFieldLayout);
     }
 
     @Override

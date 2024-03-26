@@ -69,7 +69,7 @@ public class AmpLineup extends Command {
     public void execute() {
         double vx = xLimiter.calculate(deadBand(xVal.get()) * kMaxVelocity);
         double vy = yLimiter.calculate(deadBand(yVal.get()) * kMaxVelocity);
-        Tag.data amp = limeLight.getData().ampTag().getData();
+        Tag.data amp = limeLight.getData().ampTag();
 
         swerve.lockHeading(kAmpHeading);
         if (!MathUtil.isNear(kAmpHeading.getDegrees(), swerve.getHeading().getDegrees(), kTolerance)

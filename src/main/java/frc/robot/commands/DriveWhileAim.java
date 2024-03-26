@@ -106,7 +106,7 @@ public class DriveWhileAim extends Command {
         double vx = xLimiter.calculate(deadBand(xVal.get()) * kMaxVelocity);
         double vy = yLimiter.calculate(deadBand(yVal.get()) * kMaxVelocity);
         double vomega;
-        Tag.data sub = limeLight.getData().subTag().getData();
+        Tag.data sub = limeLight.getData().subTag();
 
         if (!sub.hasTarget()) vomega = omegaLimiter.calculate(deadBand(rVal.get()) * kMaxOmega);
         else {
