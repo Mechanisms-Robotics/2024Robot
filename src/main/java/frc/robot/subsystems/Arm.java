@@ -224,6 +224,7 @@ public class Arm extends SingleJointSubystem {
         SmartDashboard.putNumber("[Arm] desired angle", getDesiredAngle().getDegrees());
         SmartDashboard.putBoolean("[Arm] aimed", aimed());
         SmartDashboard.putBoolean("[Arm] disabled", disabled);
+        SmartDashboard.putBoolean("[Arm] is homing", isHoming);
         // if disabled, do not run any processes on the arm
         if (Math.abs(leftArmMotor.getRawPosition() -rightArmMotor.getRawPosition()) > kAllowableDifference)
             disable();
