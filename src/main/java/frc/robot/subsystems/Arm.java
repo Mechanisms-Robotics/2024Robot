@@ -1,5 +1,8 @@
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
+import com.ctre.phoenix6.signals.SensorDirectionValue;
+import com.mechlib.hardware.CANCoder;
 import com.mechlib.hardware.TalonFX;
 import com.mechlib.subsystems.SingleJointSubystem;
 import com.mechlib.util.MechUnits;
@@ -15,13 +18,14 @@ public class Arm extends SingleJointSubystem {
     // rotations as detected by the CanCoder at the start position if there was no offset
     private static final double kIdealStartRotation = 1.0533;
     // left arm motor magnet offset (acquired in Phoenix Tuner X)
-    private static final double kLeftMagnetOffset = kIdealStartRotation - 0.448486;
+    private static final double kLeftMagnetOffset = kIdealStartRotation - 0.395996;
     // right arm motor magnet offset
-    private static final double kRightMagnetOffset = kIdealStartRotation - 0.427734;
+    private static final double kRightMagnetOffset = kIdealStartRotation - 0.364502;
     // right arm TalonFX motor and it's can coder
-    private final TalonFX rightArmMotor = new TalonFX(13);
+    private final TalonFX rightArmMotor = new TalonFX(13, new CANCoder(13, kRightMagnetOffset, AbsoluteSensorRangeValue.Unsigned_0To1, SensorDirectionValue.Clockwise_Positive));
     // left arm TalonFX motor with its can coder
-    private final TalonFX leftArmMotor = new TalonFX(12);
+    private final TalonFX leftArmMotor = new TalonFX(12, new CANCoder(12, kLeftMagnetOffset, AbsoluteSensorRangeValue.Unsigned_0To1, SensorDirectionValue.CounterClockwise_Positive));
+
     // feed forward controller for the arm
     /* PID controller for the right and left arm, which will always have the same values they are different to account
        for different mechanical structures, such as belt tightening */
@@ -37,9 +41,10 @@ public class Arm extends SingleJointSubystem {
     private static final Rotation2d kClimb = Rotation2d.fromDegrees(40);
     private static final double kSensorRatio = 64.0/16.0;
     private static final double kMotorRatio = 60 * kSensorRatio;
+    // Homing
     private boolean homed = false;
     // TODO: tune the home voltage
-    private static final double homeVoltage = 0.5;
+    private static final double homeVoltage = 0.2;
     private static final Rotation2d homedPosition = Rotation2d.fromDegrees(94.77);
     private static final double kHomeTime = 1;
     private final Timer homeTimer = new Timer();
@@ -55,7 +60,8 @@ public class Arm extends SingleJointSubystem {
         addMotor(leftArmMotor, true);
         addMotor(rightArmMotor, false);
         setCurrentLimit(40.0);
-        setVoltageCompensation(0.5);
+        // TODO: get rid of this
+        setVoltageCompensation(0.2);
         setState(SingleJointSubsystemState.CLOSED_LOOP);
         setPositionUnitsFunction((rotations) -> MechUnits.rotationsToRadians(rotations, kMotorRatio));
         setVelocityUnitsFunction((rotations) -> MechUnits.rotationsToRadians(rotations, kMotorRatio));
@@ -225,6 +231,7 @@ public class Arm extends SingleJointSubystem {
         SmartDashboard.putBoolean("[Arm] aimed", aimed());
         SmartDashboard.putBoolean("[Arm] disabled", disabled);
         SmartDashboard.putBoolean("[Arm] is homing", isHoming);
+        SmartDashboard.putBoolean("[Arm] homed", homed);
         // if disabled, do not run any processes on the arm
         if (Math.abs(leftArmMotor.getRawPosition() -rightArmMotor.getRawPosition()) > kAllowableDifference)
             disable();
