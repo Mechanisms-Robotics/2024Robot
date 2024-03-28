@@ -21,7 +21,7 @@ public class HeadingControllerConfiguration {
 
   // HeadingControllerConfiguration tuned on goblin
   public static final HeadingControllerConfiguration GOBLIN = new HeadingControllerConfiguration(
-          2.5, 0, 0.01,
+          1.0, 0, 0.01,
           Math.toRadians(5.0),
           Robot.isReal() ? 0 : 0.0, 0, 0,
           Math.toRadians(5.0),

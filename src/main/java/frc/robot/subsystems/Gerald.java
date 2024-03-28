@@ -15,7 +15,7 @@ import frc.util6328.Alert.AlertType;
 public class Gerald extends SubsystemBase {
     private static final double kIntakeVoltage = 10; // volts
     private static final double kOuttakeVoltage = -12; // volts
-    private static final double kShooterVoltage = 12; // volts
+    private static final double kShooterVoltage = 10; // volts
     private static final double kAmpVoltage = 8; // volts
     private static final double kIdleVoltage = 4; // volts
     private static final double kAmpFeedVoltage = 10; // volts
@@ -83,6 +83,7 @@ public class Gerald extends SubsystemBase {
         ampMotor.setCurrentLimit(40);
         shooterMotor.setCurrentLimit(40);
         shooterMotor.setVelocityUnitsFunction((Double rps) -> rps * 60);
+        ampMotor.setVelocityUnitsFunction((Double rps) -> rps * 60);
     }
 
     /**
@@ -240,6 +241,7 @@ public class Gerald extends SubsystemBase {
         SmartDashboard.putString("[Gerald] state", state.toString());
         SmartDashboard.putBoolean("[Gerald] spun up", spunUp());
         SmartDashboard.putNumber("[Gerald] shooter RPM", shooterMotor.getVelocity());
+        SmartDashboard.putNumber("[Gerald] amp RPM", ampMotor.getVelocity());
         SmartDashboard.putBoolean("[Note Sensor] both", noteDetected()); // show on advantage scope
         SmartDashboard.putBoolean("[Note Sensor] 1", !noteSensor.get());
         SmartDashboard.putBoolean("[Note Sensor] 2", !noteSensor2.get());

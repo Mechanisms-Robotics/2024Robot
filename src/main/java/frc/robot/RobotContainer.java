@@ -200,7 +200,7 @@ public class RobotContainer {
             0.1,
             5,
             8, // note in use
-            Math.PI*8,
+            Math.PI*4,
             Math.PI*4, // not in use
             true
     ));
