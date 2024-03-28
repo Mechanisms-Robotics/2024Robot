@@ -62,8 +62,8 @@ public class Wrist extends SingleJointSubystem {
 //        setLimits(kReverseLimit, kForwardLimit, kMotorRatio);
 //        setFeedforwardGains(0.15, 0, 0.0, 0.0);
 //        setPPIDGains(0.6, 0.0, 0.0);
-        setFeedforwardGains(0.15, 0, 0.0, 0.0);
-        setPPIDGains(0.6, 0.0, 0.01);
+        setFeedforwardGains(0.2, 0, 0.0, 0.0);
+        setPPIDGains(0.8, 0.0, 0.1);
         setPPIDConstraints(Math.PI/4, Math.PI/2);
         setTolerance(kTolerance);
         pivotTo(Rotation2d.fromDegrees(90));
