@@ -5,7 +5,7 @@
       "x": 0.75,
       "y": 4.45
     },
-    "rotation": 0
+    "rotation": -56.42845203337518
   },
   "command": {
     "type": "sequential",
@@ -32,7 +32,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "SubCNoteC"
+            "pathName": "SubRFieldRR"
           }
         },
         {
@@ -48,9 +48,15 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "stow"
+          }
+        },
+        {
           "type": "path",
           "data": {
-            "pathName": "NoteCSubC"
+            "pathName": "FieldRRSubR"
           }
         },
         {
@@ -62,7 +68,7 @@
         {
           "type": "named",
           "data": {
-            "name": "aimC"
+            "name": "aimSubwooferHigh"
           }
         },
         {

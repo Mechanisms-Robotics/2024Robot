@@ -9,8 +9,6 @@ import org.photonvision.PhotonCamera;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
-import java.util.List;
-
 public class LimeLight extends SubsystemBase {
     private final PhotonCamera camera = new PhotonCamera("LimeLight");
     private int aprilTagID = 7;
@@ -23,6 +21,7 @@ public class LimeLight extends SubsystemBase {
      * @param yaw angle made by the center of the camera and the target
      * @param area % area that the target takes up on the camera, used for distance
      * @param hasTarget true if the camera sees an AprilTag otherwise false
+     * @param aimed true if the camera is pointed at the target
      */
 
     public record LimeLightData(
@@ -39,15 +38,15 @@ public class LimeLight extends SubsystemBase {
      * @return data of the LimeLight: yaw, area, and hasTarget
      */
     public LimeLightData getData() {
-        // TODO: tune the tolerance of the yaw for aimed
         return new LimeLightData(yaw, area, area!=0,
-                                 MathUtil.isNear(0, yaw, 5));
+                                 MathUtil.isNear(0, yaw, 5) && area!=0);
     }
 
     @Override
     public void periodic() {
         SmartDashboard.putNumber("[Lime Light] Target Yaw", yaw);
         SmartDashboard.putNumber("[Lime Light] Target Area", area);
+        SmartDashboard.putBoolean("[Lime Light] aimed", MathUtil.isNear(0, yaw, 5) && area!=0);
         // If the Alliance is Blue, look for AprilTag 7, otherwise (when it is red) look for AprilTag 4
         // If there is no alliance specified, print error
         if (DriverStation.getAlliance().isPresent()) {

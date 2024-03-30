@@ -13,19 +13,19 @@ import frc.util6328.Alert.AlertType;
  * The box of wheels that intakes, shoots, and amps the notes.
  */
 public class Gerald extends SubsystemBase {
-    private static final double kIntakeVoltage = 4; // volts
-    private static final double kOuttakeVoltage = -3; // volts
-    private static final double kShooterVoltage = 8; // volts
-    private static final double kAmpVoltage = 5; // volts
+    private static final double kIntakeVoltage = 10; // volts
+    private static final double kOuttakeVoltage = -12; // volts
+    private static final double kShooterVoltage = 10; // volts
+    private static final double kAmpVoltage = 8; // volts
     private static final double kIdleVoltage = 4; // volts
-    private static final double kAmpFeedVoltage = 3; // volts
+    private static final double kAmpFeedVoltage = 10; // volts
     private static final double kIntakeDetectDelay = 0.001; // seconds
     private static final double kSpinupRPM = 4000; // RPM
     private static final double kAmpSpinupRPM = 3450; // RPM
     private static final double kFeedDetectDelay = 1; // seconds
     private static final Timer detectDelayTimer = new Timer();
-    private final DigitalInput noteSensor = new DigitalInput(9);
-    private final DigitalInput noteSensorConfirm = new DigitalInput(8);
+    private final DigitalInput noteSensor = new DigitalInput(8);
+    private final DigitalInput noteSensor2 = new DigitalInput(9);
     private final Alert unexpectedNote =
             new Alert("an unexpected note was detected in gerald after feeding it to the shooter",
                     AlertType.ERROR);
@@ -83,6 +83,7 @@ public class Gerald extends SubsystemBase {
         ampMotor.setCurrentLimit(40);
         shooterMotor.setCurrentLimit(40);
         shooterMotor.setVelocityUnitsFunction((Double rps) -> rps * 60);
+        ampMotor.setVelocityUnitsFunction((Double rps) -> rps * 60);
     }
 
     /**
@@ -94,7 +95,7 @@ public class Gerald extends SubsystemBase {
             else intakeMotor.setVoltage(kIntakeVoltage);
             state = State.Intaking;
         }
-        // if the note was just detected on this cycle
+        // if the note was just detected on this cycle, start the timer
         if (noteDetected() && !lastDetected) {
             detectDelayTimer.restart();
             lastDetected = true;
@@ -227,12 +228,12 @@ public class Gerald extends SubsystemBase {
 
     /**
      * Returns a boolean of whether the note sensors detected anything.
-     * Both sensors have to detect something in order for it to return true.
+     * Either sensor needs to detect for it to return true.
      *
      * @return if the note sensor detected anything
      */
     public boolean noteDetected() {
-        return !noteSensor.get();
+        return !noteSensor.get() || !noteSensor2.get();
     }
 
     @Override
@@ -240,16 +241,16 @@ public class Gerald extends SubsystemBase {
         SmartDashboard.putString("[Gerald] state", state.toString());
         SmartDashboard.putBoolean("[Gerald] spun up", spunUp());
         SmartDashboard.putNumber("[Gerald] shooter RPM", shooterMotor.getVelocity());
+        SmartDashboard.putNumber("[Gerald] amp RPM", ampMotor.getVelocity());
         SmartDashboard.putBoolean("[Note Sensor] both", noteDetected()); // show on advantage scope
         SmartDashboard.putBoolean("[Note Sensor] 1", !noteSensor.get());
-        SmartDashboard.putBoolean("[Note Sensor] 2", !noteSensorConfirm.get());
+        SmartDashboard.putBoolean("[Note Sensor] 2", !noteSensor2.get());
 
-//        // if there is a note detected, set the intake motor to coast mode, otherwise set the intake to brake mode
-//        if (!noteDetected()) intakeMotor.coastMode();
-//        else intakeMotor.brakeMode();
         // if only the first sensor is detected, low the intake voltage
-//        if (!noteSensor.get() && noteSensorConfirm.get())
-//            intakeMotor.setVoltage(kIntakeVoltage/2);
+//        if (!noteSensor.get() && noteSensor2.get() && state == State.Intaking)
+//            intakeMotor.setVoltage(0);
+//        if (!noteSensor.get() && !noteSensor2.get() && state == State.Intaking)
+//            intakeMotor.setVoltage(0);
 
         switch (state) {
             case Idling -> idle();

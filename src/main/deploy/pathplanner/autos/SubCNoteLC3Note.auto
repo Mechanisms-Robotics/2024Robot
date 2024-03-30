@@ -2,8 +2,8 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 0.75,
-      "y": 4.45
+      "x": 1.25,
+      "y": 5.55
     },
     "rotation": 0
   },
@@ -62,7 +62,7 @@
         {
           "type": "named",
           "data": {
-            "name": "aimC"
+            "name": "aimSubwooferHigh"
           }
         },
         {
@@ -76,10 +76,52 @@
           "data": {
             "name": "shoot"
           }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 1.5
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "intake"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 1.0
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "SubCNoteL"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "spinup"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 1.0
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "aim"
+          }
         }
       ]
     }
   },
-  "folder": "2Note",
+  "folder": "3Note",
   "choreoAuto": false
 }

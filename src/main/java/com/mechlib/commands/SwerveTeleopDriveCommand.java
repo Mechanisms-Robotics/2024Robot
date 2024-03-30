@@ -109,9 +109,9 @@ public class SwerveTeleopDriveCommand extends Command {
   public void execute() {
     if (DriverStation.isAutonomous()) return;
     // Calculate velocities
-    double vx = vxLimiter.calculate(deadband(xSupplier.get()) * maxVelocity);
-    double vy = vyLimiter.calculate(deadband(ySupplier.get()) * maxVelocity);
-    double omega = omegaLimiter.calculate(deadband(rSupplier.get()) * maxAngularVelocity);
+    double vx = deadband(xSupplier.get()) * maxVelocity;
+    double vy = deadband(ySupplier.get()) * maxVelocity;
+    double omega = deadband(rSupplier.get()) * maxAngularVelocity;
 
     // Drive swerve at calculated velocities
     swerve.drive(vx, vy, omega);

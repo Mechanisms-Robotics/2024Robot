@@ -7,6 +7,7 @@ import frc.robot.Robot;
  *
  * Contains all the configuration parameters for a SwerveDrive heading controller
  */
+// TODO: tune the heading controller configuration so that it does not over stablize when the robot turns fast
 public class HeadingControllerConfiguration {
   // Default HeadingControllerConfiguration
   public static final HeadingControllerConfiguration DEFAULT = new HeadingControllerConfiguration(
@@ -16,6 +17,16 @@ public class HeadingControllerConfiguration {
     Math.toRadians(1.0),
     Math.PI,
     2 * Math.PI
+  );
+
+  // HeadingControllerConfiguration tuned on goblin
+  public static final HeadingControllerConfiguration GOBLIN = new HeadingControllerConfiguration(
+          1.0, 0, 0.01,
+          Math.toRadians(5.0),
+          Robot.isReal() ? 0 : 0.0, 0, 0,
+          Math.toRadians(5.0),
+          8*Math.PI,
+          8*Math.PI
   );
 
   public final double stabilizeKP; // Stabilization P gain

@@ -47,7 +47,9 @@ public class RobotContainer {
     NamedCommands.registerCommand("aimSubwooferHigh", new SubwooferHighPosition(armWrist));
     NamedCommands.registerCommand("aimShootStow", new AutoAimShootStow(armWrist, gerald, swerve, limeLight));
     NamedCommands.registerCommand("aimShootIntake", new AutoAimShootIntake(armWrist, gerald, swerve, limeLight));
-    NamedCommands.registerCommand("aimC", new Aim(arm, wrist, 94, 115));
+    NamedCommands.registerCommand("subHighAim", new SubwooferHighPosition(armWrist));
+    // TODO: make this function set the state of the arm and wrist
+    NamedCommands.registerCommand("aimC", new Aim(arm, wrist, 94, 92.5));
 
     NamedCommands.registerCommand("aimSubwooferLowShootIntake",
             new AutoAimShootIntake(armWrist, gerald, true, true));
@@ -65,13 +67,16 @@ public class RobotContainer {
 //    m_chooser.addOption("YeetLeft", new PathPlannerAuto("YeetRight"));
 //    m_chooser.addOption("TimedLeave", new TimedLeave(swerve));
     m_chooser.addOption("TimedShootLeave", new TimedShootLeave(swerve, gerald, armWrist));
+    m_chooser.addOption("SubCNoteL1NoteGrab", new PathPlannerAuto("SubCNoteL1NoteGrab"));
     // ----------------1Note----------------
     m_chooser.setDefaultOption("SubCNoteC1NoteGrab", new PathPlannerAuto("SubCNoteC1NoteGrab"));
     // ----------------2Note----------------
     m_chooser.addOption("SubRNoteR2Note", new PathPlannerAuto("SubRNoteR2Note"));
     m_chooser.addOption("SubCNoteC2Note", new PathPlannerAuto("SubCNoteC2Note"));
     m_chooser.addOption("SubLNoteL2Note", new PathPlannerAuto("SubLNoteL2Note"));
+    m_chooser.addOption("SubRFieldRR2Note", new PathPlannerAuto("SubRFieldRR2Note"));
     // ----------------3Note----------------
+    m_chooser.addOption("SubCNoteLC3Note", new PathPlannerAuto("SubCNoteLC3Note"));
 //    m_chooser.addOption("SubCNoteCR3Note", new PathPlannerAuto("SubCNoteCR3Note"));
 //    m_chooser.addOption("SubLNoteLC3Note", new PathPlannerAuto("SubLNoteLC3Note"));
     // ----------------4Note----------------
@@ -194,10 +199,10 @@ public class RobotContainer {
             () -> -xboxController.getLeftX(),
             () -> -xboxController.getRightX(),
             0.1,
-            4,
-            4.5,
-            Math.PI*1,
-            Math.PI*2,
+            5,
+            8, // note in use
+            Math.PI*4,
+            Math.PI*4, // not in use
             true
     ));
     led.setDefaultCommand(new LEDCommand(led, gerald, limeLight::getData, armWrist));

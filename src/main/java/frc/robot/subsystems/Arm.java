@@ -6,6 +6,7 @@ import com.mechlib.hardware.CANCoder;
 import com.mechlib.hardware.TalonFX;
 import com.mechlib.subsystems.SingleJointSubystem;
 import com.mechlib.util.MechUnits;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -16,9 +17,9 @@ public class Arm extends SingleJointSubystem {
     // rotations as detected by the CanCoder at the start position if there was no offset
     private static final double kIdealStartRotation = 1.0533;
     // left arm motor magnet offset (acquired in Phoenix Tuner X)
-    private static final double kLeftMagnetOffset = kIdealStartRotation - 0.493408;
+    private static final double kLeftMagnetOffset = kIdealStartRotation - 0.495605;
     // right arm motor magnet offset
-    private static final double kRightMagnetOffset = kIdealStartRotation - 0.464600;
+    private static final double kRightMagnetOffset = kIdealStartRotation - 0.520264;
     // right arm TalonFX motor and it's can coder
     private final TalonFX rightArmMotor = new TalonFX(13, new CANCoder(13, kRightMagnetOffset, AbsoluteSensorRangeValue.Unsigned_0To1, SensorDirectionValue.Clockwise_Positive));
     // left arm TalonFX motor with its can coder
@@ -27,8 +28,8 @@ public class Arm extends SingleJointSubystem {
     /* PID controller for the right and left arm, which will always have the same values they are different to account
        for different mechanical structures, such as belt tightening */
     private static final double kTolerance = Math.toRadians(2);
-    private static final Rotation2d kStowed = Rotation2d.fromDegrees(60);
-    private static final Rotation2d kIntaking = Rotation2d.fromDegrees(3.5);
+    private static final Rotation2d kStowed = Rotation2d.fromDegrees(25);
+    private static final Rotation2d kIntaking = Rotation2d.fromDegrees(4);
     private static final Rotation2d kSubwooferHigh = Rotation2d.fromDegrees(94);
     private static final Rotation2d kSubwooferLow = Rotation2d.fromDegrees(15);
     private static final Rotation2d kPodiumHigh = kSubwooferHigh;
@@ -155,6 +156,10 @@ public class Arm extends SingleJointSubystem {
         pivotTo(rotation);
     }
 
+    public boolean aimed() {
+        return MathUtil.isNear(getDesiredAngle().getDegrees(), getAngle().getDegrees(), kTolerance + 2);
+    }
+
     /**
      * Periodically output the data (right and left arm position) to SmartDashBoard. Do not run the arms if the robot
      * is disabled. Runs the PIDFs if the robot is in closed loop cuh.
@@ -165,6 +170,7 @@ public class Arm extends SingleJointSubystem {
         SmartDashboard.putNumber("[Arm] Right position", rightArmMotor.getRawPosition());
         SmartDashboard.putNumber("[Arm] current angle", getAngle().getDegrees());
         SmartDashboard.putNumber("[Arm] desired angle", getDesiredAngle().getDegrees());
+        SmartDashboard.putBoolean("[Arm] aimed", aimed());
         SmartDashboard.putBoolean("[Arm] disabled", disabled);
         // if disabled, do not run any processes on the arm
         if (Math.abs(leftArmMotor.getRawPosition() -rightArmMotor.getRawPosition()) > kAllowableDifference)

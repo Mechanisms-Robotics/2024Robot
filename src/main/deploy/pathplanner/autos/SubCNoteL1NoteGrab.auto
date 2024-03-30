@@ -2,8 +2,8 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 1.25,
-      "y": 5.55
+      "x": 1.3337957445145674,
+      "y": 5.535354916863679
     },
     "rotation": 0
   },
@@ -24,15 +24,15 @@
           }
         },
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "SubCNoteC"
+            "name": "intake"
           }
         },
         {
-          "type": "wait",
+          "type": "path",
           "data": {
-            "waitTime": 1.0
+            "pathName": "SubCNoteL"
           }
         }
       ]
