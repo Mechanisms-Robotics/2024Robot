@@ -18,7 +18,7 @@ import java.util.function.Supplier;
  */
 public class Wrist extends SingleJointSubystem {
     private static final double kSensorRatio = 38.0/16.0;
-    private static final double kMotorRatio = 125.0 * kSensorRatio;
+    private static final double kMotorRatio = 100.0 * kSensorRatio;
     private static final double kStartRotations = 0.29027778;
     // wrist magnet offset
     private final TalonFX wristMotor = new TalonFX(17);
@@ -63,7 +63,7 @@ public class Wrist extends SingleJointSubystem {
 //        setFeedforwardGains(0.15, 0, 0.0, 0.0);
 //        setPPIDGains(0.6, 0.0, 0.0);
         setFeedforwardGains(0.2, 0, 0.0, 0.0);
-        setPPIDGains(0.8, 0.0, 0.1);
+        setPPIDGains(1.0, 0.0, 0.0);
         setPPIDConstraints(Math.PI/4, Math.PI/2);
         setTolerance(kTolerance);
         pivotTo(Rotation2d.fromDegrees(90));

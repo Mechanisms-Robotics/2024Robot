@@ -2,10 +2,10 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 1.25,
-      "y": 5.55
+      "x": 0.75,
+      "y": 4.45
     },
-    "rotation": 0
+    "rotation": -56.42845203337518
   },
   "command": {
     "type": "sequential",
@@ -32,7 +32,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "SubCNoteC"
+            "pathName": "SubRFieldRR"
           }
         },
         {
@@ -48,9 +48,15 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "stow"
+          }
+        },
+        {
           "type": "path",
           "data": {
-            "pathName": "NoteCSubC"
+            "pathName": "FieldRRSubR"
           }
         },
         {
@@ -76,52 +82,10 @@
           "data": {
             "name": "shoot"
           }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 1.5
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "intake"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 1.0
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "SubCNoteL"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "spinup"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 1.0
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "aim"
-          }
         }
       ]
     }
   },
-  "folder": "3Note",
+  "folder": "2Note",
   "choreoAuto": false
 }

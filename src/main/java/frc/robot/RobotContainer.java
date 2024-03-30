@@ -74,6 +74,7 @@ public class RobotContainer {
     m_chooser.addOption("SubRNoteR2Note", new PathPlannerAuto("SubRNoteR2Note"));
     m_chooser.addOption("SubCNoteC2Note", new PathPlannerAuto("SubCNoteC2Note"));
     m_chooser.addOption("SubLNoteL2Note", new PathPlannerAuto("SubLNoteL2Note"));
+    m_chooser.addOption("SubRFieldRR2Note", new PathPlannerAuto("SubRFieldRR2Note"));
     // ----------------3Note----------------
     m_chooser.addOption("SubCNoteLC3Note", new PathPlannerAuto("SubCNoteLC3Note"));
 //    m_chooser.addOption("SubCNoteCR3Note", new PathPlannerAuto("SubCNoteCR3Note"));
