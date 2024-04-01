@@ -2,10 +2,10 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 1.25,
-      "y": 5.55
+      "x": 0.75,
+      "y": 4.45
     },
-    "rotation": 0
+    "rotation": -56.42845203337518
   },
   "command": {
     "type": "sequential",
@@ -32,7 +32,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "SubCNoteC"
+            "pathName": "SubRFieldCR"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 1.0
           }
         },
         {
@@ -50,49 +56,25 @@
         {
           "type": "path",
           "data": {
-            "pathName": "NoteCSubC"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "shoot"
+            "pathName": "FieldCRSubR"
           }
         },
         {
           "type": "wait",
           "data": {
-            "waitTime": 1.5
+            "waitTime": 1.0
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "intake"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "SubCNoteL"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "spinup"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "aim"
+            "name": "aimSubwooferHigh"
           }
         },
         {
           "type": "wait",
           "data": {
-            "waitTime": 1.25
+            "waitTime": 2.0
           }
         },
         {
@@ -104,6 +86,6 @@
       ]
     }
   },
-  "folder": "3Note",
+  "folder": "2Note",
   "choreoAuto": false
 }

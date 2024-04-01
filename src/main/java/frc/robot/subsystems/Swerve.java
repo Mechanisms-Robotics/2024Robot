@@ -58,6 +58,12 @@ public class Swerve extends SwerveDrive {
 
     private static final int GYRO_ID = 9;
 
+    /**
+     * Stops the serve from driving or turning
+     */
+    public void stop() {
+        drive(0, 0, 0);
+    }
 
     public Swerve() {
         super(
