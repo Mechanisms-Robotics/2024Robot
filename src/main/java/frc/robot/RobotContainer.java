@@ -64,6 +64,7 @@ public class RobotContainer {
 //    m_chooser.addOption("YeetRight", new PathPlannerAuto("YeetRight"));
 //    m_chooser.addOption("YeetLeft", new PathPlannerAuto("YeetRight"));
 //    m_chooser.addOption("TimedLeave", new TimedLeave(swerve));
+    m_chooser.addOption("Preload", new Preload(gerald, armWrist));
     m_chooser.addOption("TimedShootLeave", new TimedShootLeave(swerve, gerald, armWrist));
     // ----------------1Note----------------
     m_chooser.setDefaultOption("SubCNoteC1NoteGrab", new PathPlannerAuto("SubCNoteC1NoteGrab"));
