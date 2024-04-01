@@ -2,8 +2,8 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 0.75,
-      "y": 4.45
+      "x": 1.25,
+      "y": 5.55
     },
     "rotation": 0
   },
@@ -36,39 +36,21 @@
           }
         },
         {
-          "type": "wait",
-          "data": {
-            "waitTime": 1.0
-          }
-        },
-        {
           "type": "named",
           "data": {
             "name": "spinup"
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "stow"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "NoteCSubC"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 1.0
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "aimC"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 2.0
           }
         },
         {

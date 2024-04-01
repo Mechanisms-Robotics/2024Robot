@@ -45,11 +45,13 @@ public class RobotContainer {
     NamedCommands.registerCommand("shoot", new FeedNote(gerald));
     NamedCommands.registerCommand("stow", new StowPosition(armWrist));
     NamedCommands.registerCommand("aimSubwooferHigh", new SubwooferHighPosition(armWrist));
+    NamedCommands.registerCommand("aimSubwooferLow", new SubwooferLowPosition(armWrist));
     NamedCommands.registerCommand("aimShootStow", new AutoAimShootStow(armWrist, gerald, swerve, limeLight));
     NamedCommands.registerCommand("aimShootIntake", new AutoAimShootIntake(armWrist, gerald, swerve, limeLight));
     NamedCommands.registerCommand("subHighAim", new SubwooferHighPosition(armWrist));
     // TODO: make this function set the state of the arm and wrist
-    NamedCommands.registerCommand("aimC", new Aim(arm, wrist, 94, 92.5));
+    NamedCommands.registerCommand("aimC", new Aim(armWrist, 94, 92.5));
+    NamedCommands.registerCommand("aimL", new Aim(armWrist, 94, 117.5));
 
     NamedCommands.registerCommand("aimSubwooferLowShootIntake",
             new AutoAimShootIntake(armWrist, gerald, true, true));
@@ -75,6 +77,7 @@ public class RobotContainer {
     m_chooser.addOption("SubCNoteC2Note", new PathPlannerAuto("SubCNoteC2Note"));
     m_chooser.addOption("SubLNoteL2Note", new PathPlannerAuto("SubLNoteL2Note"));
     m_chooser.addOption("SubRFieldRR2Note", new PathPlannerAuto("SubRFieldRR2Note"));
+    m_chooser.addOption("SubRFieldCR2Note", new PathPlannerAuto("SubRFieldRR2Note"));
     // ----------------3Note----------------
     m_chooser.addOption("SubCNoteLC3Note", new PathPlannerAuto("SubCNoteLC3Note"));
 //    m_chooser.addOption("SubCNoteCR3Note", new PathPlannerAuto("SubCNoteCR3Note"));

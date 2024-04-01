@@ -16,28 +16,28 @@
     },
     {
       "anchor": {
-        "x": 2.3204900255954373,
-        "y": 5.999101228971689
+        "x": 2.250886555981385,
+        "y": 6.195032532718418
       },
       "prevControl": {
-        "x": 2.2316875402981586,
-        "y": 5.841230143998749
+        "x": 2.1220673539777883,
+        "y": 6.0076591479859145
       },
       "nextControl": {
-        "x": 2.461107251038317,
-        "y": 6.249087407536809
+        "x": 2.417279632666756,
+        "y": 6.437058826078958
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 2.85,
-        "y": 7.0
+        "x": 3.0120909314571827,
+        "y": 7.131899456380939
       },
       "prevControl": {
-        "x": 2.695433852406168,
-        "y": 6.660186397295872
+        "x": 2.7057484010831048,
+        "y": 6.853919633659525
       },
       "nextControl": null,
       "isLocked": false,
@@ -47,21 +47,33 @@
   "rotationTargets": [
     {
       "waypointRelativePos": 1.0,
-      "rotationDegrees": 60.30334746230093,
+      "rotationDegrees": 46.04162667601001,
       "rotateFast": false
     }
   ],
-  "constraintZones": [],
+  "constraintZones": [
+    {
+      "name": "Happy New Year",
+      "minWaypointRelativePos": 1.0,
+      "maxWaypointRelativePos": 2.0,
+      "constraints": {
+        "maxVelocity": 1.0,
+        "maxAcceleration": 2.0,
+        "maxAngularVelocity": 540.0,
+        "maxAngularAcceleration": 720.0
+      }
+    }
+  ],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 4.5,
-    "maxAcceleration": 4.5,
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 58.81502534126163,
+    "rotation": 32.11586709875252,
     "rotateFast": false
   },
   "reversed": false,
@@ -70,5 +82,5 @@
     "rotation": 0,
     "velocity": 0
   },
-  "useDefaultConstraints": true
+  "useDefaultConstraints": false
 }

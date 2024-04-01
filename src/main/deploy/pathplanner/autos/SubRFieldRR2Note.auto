@@ -36,12 +36,6 @@
           }
         },
         {
-          "type": "wait",
-          "data": {
-            "waitTime": 1.0
-          }
-        },
-        {
           "type": "named",
           "data": {
             "name": "spinup"
@@ -60,21 +54,9 @@
           }
         },
         {
-          "type": "wait",
+          "type": "path",
           "data": {
-            "waitTime": 1.0
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "aimSubwooferHigh"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 2.0
+            "pathName": "SubR6$ShripSpecial"
           }
         },
         {

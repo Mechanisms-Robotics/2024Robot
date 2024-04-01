@@ -18,6 +18,18 @@
           }
         },
         {
+          "type": "wait",
+          "data": {
+            "waitTime": 1.0
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "intake"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "SubLNoteL"
@@ -26,7 +38,25 @@
         {
           "type": "named",
           "data": {
-            "name": "aimShootStow"
+            "name": "spinup"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "aimSubwooferHigh"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "NoteLSubL"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shoot"
           }
         }
       ]

@@ -6,6 +6,7 @@ import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.ArmWrist;
@@ -44,12 +45,12 @@ public class DriveWhileAim extends Command {
     private static final InterpolatingDoubleTreeMap wristAimMap = new InterpolatingDoubleTreeMap();
     // create the wristAimMap interpolating treemap
     static {
-        wristAimMap.put(00.00, 117.5);
+        wristAimMap.put(00.00, 115.);
 //        wristAimMap.put(0.21, 120.0);
-        wristAimMap.put(0.22, 117.5);
+        wristAimMap.put(0.22, 115.);
 //        wristAimMap.put(0.24, 117.0);
 //        wristAimMap.put(0.25, 117.0);
-        wristAimMap.put(100.0, 117.5);
+        wristAimMap.put(100.0, 115.);
     }
     private static final ProfiledPIDController controller = new ProfiledPIDController(.1, 0, 0, new Constraints(kMaxOmega, kMaxOmegaAcceleration));
 
@@ -72,6 +73,7 @@ public class DriveWhileAim extends Command {
         this.xVal = xVal;
         this.yVal = yVal;
         this.rVal = rVal;
+        controller.setTolerance(2);
         addRequirements(swerve, limeLight, armWrist);
     }
 
@@ -113,6 +115,12 @@ public class DriveWhileAim extends Command {
             armWrist.aim(desiredArmRotation, desiredWristRotation);
         }
         SmartDashboard.putNumber("[Drive While Aim] omega", vomega);
-        swerve.drive(vx, vy, vomega);
+        if (!DriverStation.isAutonomous()) swerve.drive(vx, vy, vomega);
+        else swerve.drive(0, 0, vomega);
+    }
+
+    @Override
+    public void end(boolean interrupted) {
+        swerve.stop();
     }
 }
