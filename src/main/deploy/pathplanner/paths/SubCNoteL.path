@@ -8,32 +8,54 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.25,
-        "y": 5.55
+        "x": 1.713746312108009,
+        "y": 5.579600828432426
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 3.26,
-        "y": 5.55
+        "x": 2.250886555981385,
+        "y": 6.195032532718418
       },
       "prevControl": {
-        "x": 2.26,
-        "y": 5.55
+        "x": 2.1220673539777883,
+        "y": 6.0076591479859145
+      },
+      "nextControl": {
+        "x": 2.417279632666756,
+        "y": 6.437058826078958
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 3.0120909314571827,
+        "y": 7.131899456380939
+      },
+      "prevControl": {
+        "x": 2.7057484010831048,
+        "y": 6.853919633659525
       },
       "nextControl": null,
       "isLocked": false,
       "linkedName": null
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 1.0,
+      "rotationDegrees": 46.04162667601001,
+      "rotateFast": false
+    }
+  ],
   "constraintZones": [
     {
-      "name": "ching chong bing bong",
-      "minWaypointRelativePos": 0.5,
-      "maxWaypointRelativePos": 1.0,
+      "name": "Happy New Year",
+      "minWaypointRelativePos": 1.0,
+      "maxWaypointRelativePos": 2.0,
       "constraints": {
         "maxVelocity": 1.0,
         "maxAcceleration": 2.0,
@@ -51,7 +73,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 0,
+    "rotation": 32.11586709875252,
     "rotateFast": false
   },
   "reversed": false,

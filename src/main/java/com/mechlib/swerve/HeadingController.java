@@ -5,6 +5,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * MechLib HeadingController class
@@ -67,11 +68,13 @@ public class HeadingController {
    * @return Stabilized omega (rads/s)
    */
   public double stabilize(double vx, double vy, double omega, Rotation2d heading) {
+    SmartDashboard.putNumber("[Swerve] PrevHeading", prevHeading.getDegrees());
     // Set stabilizedOmega to omega
     double stabilizedOmega = omega;
 
     // Check if omega went from non-zero to zero
     if (omega == 0 && prevOmega != 0) {
+
       // If so save the last heading
       prevHeading = heading;
     }

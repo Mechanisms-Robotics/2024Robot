@@ -6,6 +6,7 @@ import com.mechlib.hardware.CANCoder;
 import com.mechlib.hardware.TalonFX;
 import com.mechlib.subsystems.SingleJointSubystem;
 import com.mechlib.util.MechUnits;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -28,7 +29,7 @@ public class Arm extends SingleJointSubystem {
        for different mechanical structures, such as belt tightening */
     private static final double kTolerance = Math.toRadians(2);
     private static final Rotation2d kStowed = Rotation2d.fromDegrees(25);
-    private static final Rotation2d kIntaking = Rotation2d.fromDegrees(3.5);
+    private static final Rotation2d kIntaking = Rotation2d.fromDegrees(4);
     private static final Rotation2d kSubwooferHigh = Rotation2d.fromDegrees(94);
     private static final Rotation2d kSubwooferLow = Rotation2d.fromDegrees(15);
     private static final Rotation2d kPodiumHigh = kSubwooferHigh;
@@ -155,6 +156,10 @@ public class Arm extends SingleJointSubystem {
         pivotTo(rotation);
     }
 
+    public boolean aimed() {
+        return MathUtil.isNear(getDesiredAngle().getDegrees(), getAngle().getDegrees(), kTolerance + 2);
+    }
+
     /**
      * Periodically output the data (right and left arm position) to SmartDashBoard. Do not run the arms if the robot
      * is disabled. Runs the PIDFs if the robot is in closed loop cuh.
@@ -165,6 +170,7 @@ public class Arm extends SingleJointSubystem {
         SmartDashboard.putNumber("[Arm] Right position", rightArmMotor.getRawPosition());
         SmartDashboard.putNumber("[Arm] current angle", getAngle().getDegrees());
         SmartDashboard.putNumber("[Arm] desired angle", getDesiredAngle().getDegrees());
+        SmartDashboard.putBoolean("[Arm] aimed", aimed());
         SmartDashboard.putBoolean("[Arm] disabled", disabled);
         // if disabled, do not run any processes on the arm
         if (Math.abs(leftArmMotor.getRawPosition() -rightArmMotor.getRawPosition()) > kAllowableDifference)

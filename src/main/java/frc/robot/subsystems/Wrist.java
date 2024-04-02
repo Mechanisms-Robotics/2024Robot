@@ -5,6 +5,7 @@ import com.mechlib.hardware.BrushlessMotorController;
 import com.mechlib.hardware.TalonFX;
 import com.mechlib.subsystems.SingleJointSubystem;
 import com.mechlib.util.MechUnits;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -17,7 +18,7 @@ import java.util.function.Supplier;
  */
 public class Wrist extends SingleJointSubystem {
     private static final double kSensorRatio = 38.0/16.0;
-    private static final double kMotorRatio = 125.0 * kSensorRatio;
+    private static final double kMotorRatio = 100.0 * kSensorRatio;
     private static final double kStartRotations = 0.29027778;
     // wrist magnet offset
     private final TalonFX wristMotor = new TalonFX(17);
@@ -29,8 +30,8 @@ public class Wrist extends SingleJointSubystem {
     private final Supplier<Double> swervePitch;
     private final Supplier<Double> swerveRoll;
     private static final double kAllowableTip = 5;
-    private static final double kTolerance = Math.toRadians(0.5);
-    private static final Rotation2d kStowed = Rotation2d.fromDegrees(90);
+    private static final double kTolerance = Math.toRadians(0.25);
+    private static final Rotation2d kStowed = Rotation2d.fromDegrees(97.5);
     private static final Rotation2d kIntaking = Rotation2d.fromDegrees(87.5);
     private static final Rotation2d kSubwooferHigh = Rotation2d.fromDegrees(92.5);
     private static final Rotation2d kSubwooferLow = Rotation2d.fromDegrees(97.5);
@@ -61,8 +62,8 @@ public class Wrist extends SingleJointSubystem {
 //        setLimits(kReverseLimit, kForwardLimit, kMotorRatio);
 //        setFeedforwardGains(0.15, 0, 0.0, 0.0);
 //        setPPIDGains(0.6, 0.0, 0.0);
-        setFeedforwardGains(0.15, 0, 0.0, 0.0);
-        setPPIDGains(0.6, 0.0, 0.0);
+        setFeedforwardGains(0.2, 0, 0.0, 0.0);
+        setPPIDGains(2, 0.0, 0.0);
         setPPIDConstraints(Math.PI/4, Math.PI/2);
         setTolerance(kTolerance);
         pivotTo(Rotation2d.fromDegrees(90));
@@ -159,6 +160,15 @@ public class Wrist extends SingleJointSubystem {
     }
 
     /**
+     * Returns true if the wrist is at the desired angle
+     *
+     * @return true if the wrist is at the desired angle else false
+     */
+    public boolean aimed() {
+        return MathUtil.isNear(getDesiredAngle().getDegrees(), getAngle().getDegrees(), kTolerance + 2);
+    }
+
+    /**
      * Returns the angle of the arm.
      * Overrides the angle from CANCoder based → gyro based.
      *
@@ -180,6 +190,7 @@ public class Wrist extends SingleJointSubystem {
         SmartDashboard.putNumber("[Wrist] position", wristMotor.getRawPosition());
         SmartDashboard.putNumber("[Wrist] current angle", getAngle().getDegrees());
         SmartDashboard.putNumber("[Wrist] desired angle", getDesiredAngle().getDegrees());
+        SmartDashboard.putBoolean("[Wrist] aimed", aimed());
         SmartDashboard.putNumber("[Wrist] gravity angle", bootGravityAngle.getDegrees());
         SmartDashboard.putNumber("[Wrist] pitch", gyro.getPitch().getValueAsDouble());
         SmartDashboard.putNumber("[Wrist] roll", gyro.getRoll().getValueAsDouble());

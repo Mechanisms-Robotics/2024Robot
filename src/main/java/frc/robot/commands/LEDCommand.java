@@ -26,6 +26,8 @@ public class LEDCommand extends Command {
     @Override
     public void execute() {
         SmartDashboard.putString("[LED] color", led.getLEDData().color());
+        // default to off
+        if (!gerald.spunUp()) led.off();
         if (gerald.getState() == Gerald.State.Intaking) {
             led.yellow();
             return;
@@ -34,14 +36,16 @@ public class LEDCommand extends Command {
             led.green();
             return;
         }
+        // if the shooter is spun-up set it to red
         if (gerald.spunUp()) {
-            if (armWrist.getState() == ArmWrist.State.ShootingPodium
-                    || armWrist.getState() == ArmWrist.State.Aiming) {
-                if (limeLightData.get().aimed()) {
+            led.red();
+            // if the states is podium or aiming and the shooter is spun-up, set the light to blue
+            if ((armWrist.getState() == ArmWrist.State.ShootingPodium
+                    || armWrist.getState() == ArmWrist.State.Aiming)
+                    && limeLightData.get().aimed() && armWrist.aimed()) {
                     led.blue();
-                } else { led.red(); }
-            } else { led.blue(); }
-        } else { led.red(); }
+            }
+        }
     }
 }
 

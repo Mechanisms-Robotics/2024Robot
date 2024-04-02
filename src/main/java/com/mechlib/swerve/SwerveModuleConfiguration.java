@@ -52,7 +52,7 @@ public class SwerveModuleConfiguration {
     0.1,
 
     6.75,
-    0.1016,
+    0.1016 * 1.154, // calculated by multiplying the previous wheels by the error
 
     30.0,
     10.0,

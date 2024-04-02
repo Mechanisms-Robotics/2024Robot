@@ -268,10 +268,10 @@ public class SwerveDrive extends SubsystemBase {
       this::getSpeeds,
       this::autoDrive,
       new HolonomicPathFollowerConfig(
-        new PIDConstants(1.6, 0, 0),
-        new PIDConstants(1.5, 0, 0),
+        new PIDConstants(7, 0, 0),
+        new PIDConstants(5, 0.0, 0.0),
 
-        4.25,
+        4,
         0.5388,
 
         new ReplanningConfig()
@@ -382,6 +382,9 @@ public class SwerveDrive extends SubsystemBase {
    * @return Estimated pose
    */
   public Pose2d getEstimatedPose() {
+//    Pose2d scaled = new Pose2d(
+//            new Translation2d(poseEstimator.getEstimatedPosition().getX(), poseEstimator.getEstimatedPosition().getY()),
+//            poseEstimator.getEstimatedPosition().getRotation());
     // Return estimated pose from pose estimator
     return poseEstimator.getEstimatedPosition();
   }

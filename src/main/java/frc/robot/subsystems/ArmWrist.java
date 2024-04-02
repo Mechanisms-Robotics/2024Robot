@@ -202,8 +202,18 @@ public class ArmWrist extends SubsystemBase {
         wrist.aim(desiredWristRotation);
     }
 
+    /**
+     * Returns true if both the arm and the wrist are at the desired angle, otherwise false
+     *
+     * @return true if both the arm and the wrist are at the desired angle, otherwise false
+     */
+    public boolean aimed() {
+        return arm.aimed() && wrist.aimed();
+    }
+
     @Override
     public void periodic() {
+        SmartDashboard.putBoolean("[Arm Wrist] aimed", aimed());
         if (state == null) return;
         SmartDashboard.putString("[Arm Wrist] state", state.toString());
         switch (state) {

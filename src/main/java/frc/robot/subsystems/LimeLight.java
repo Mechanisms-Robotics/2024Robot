@@ -39,13 +39,14 @@ public class LimeLight extends SubsystemBase {
      */
     public LimeLightData getData() {
         return new LimeLightData(yaw, area, area!=0,
-                                 MathUtil.isNear(0, yaw, 5));
+                                 MathUtil.isNear(0, yaw, 5) && area!=0);
     }
 
     @Override
     public void periodic() {
         SmartDashboard.putNumber("[Lime Light] Target Yaw", yaw);
         SmartDashboard.putNumber("[Lime Light] Target Area", area);
+        SmartDashboard.putBoolean("[Lime Light] aimed", MathUtil.isNear(0, yaw, 5) && area!=0);
         // If the Alliance is Blue, look for AprilTag 7, otherwise (when it is red) look for AprilTag 4
         // If there is no alliance specified, print error
         if (DriverStation.getAlliance().isPresent()) {
