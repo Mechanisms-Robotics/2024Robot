@@ -18,13 +18,9 @@ import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.ctre.phoenix6.hardware.Pigeon2;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Robot;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * MechLib SwerveDrive class
@@ -336,7 +332,7 @@ public class SwerveDrive extends SubsystemBase {
   }
 
   /**
-   * Gets the swerve module positions (in order of FL, FR, BR, FL)
+   * Gets the swerve module positions (in order of FL, FR, BR, BL)
    *
    * @return Swerve module positions
    */
@@ -351,7 +347,7 @@ public class SwerveDrive extends SubsystemBase {
   }
 
   /**
-   * Gets the current swerve module states (in order of FL, FR, BR, FL)
+   * Gets the current swerve module states (in order of FL, FR, BR, BL)
    *
    * @return Swerve module states
    */
@@ -483,9 +479,8 @@ public class SwerveDrive extends SubsystemBase {
    * @param speeds Desired speeds as ChassisSpeeds
    */
   public void autoDrive(ChassisSpeeds speeds) {
-    // Check if running in simulation
+    // If the robot is in simulation, divide the x and y velocities by 2
     if (Robot.isSimulation()) {
-      // If so divide velocities by 2
       speeds.vxMetersPerSecond /= 2.0;
       speeds.vyMetersPerSecond /= 2.0;
     }
@@ -504,9 +499,8 @@ public class SwerveDrive extends SubsystemBase {
     // Set module states to desired states
     setModuleStates(desiredStates);
 
-    // Check if this is a simulation
+    // If the robot is in simulation, update simulated heading depending on omega
     if (Robot.isSimulation()) {
-      // If so update simulated heading depending on omega
       simHeading = simHeading.rotateBy(new Rotation2d(
         speeds.omegaRadiansPerSecond * Robot.kDefaultPeriod
       ));
@@ -521,29 +515,26 @@ public class SwerveDrive extends SubsystemBase {
    * @param omega Angular velocity (rads/s)
    */
   public void drive(double vx, double vy, double omega) {
-    // Check if no desired velocity is given and wheels are locked
+    // Return if no desired velocity is given and wheels are locked
     if (vx == 0 && vy == 0 && omega == 0 && wheelsLocked) {
-      // If so return
       return;
+    // If wheels are locked but a desired velocity is given unlock wheels
     } else if (wheelsLocked) {
-      // If wheels are locked but a desired velocity is given unlock wheels
       wheelsLocked = false;
     }
 
     // Initialize actualOmega
     double actualOmega;
 
-    // Check if headingLocked is true
+    // If headingLocked is true, lock heading
     if (headingLocked) {
-      // Lock heading
       actualOmega = headingController.lock(
         getHeading(),
         desiredHeading
       );
 
-      // Check if omega is non-zero
+      // If omega is non-zero (given as an argument) disable heading lock
       if (omega != 0)
-        // If so disable heading lock
         headingLocked = false;
     } else {
       // Stabilize heading
@@ -563,11 +554,9 @@ public class SwerveDrive extends SubsystemBase {
     // Get the desired swerve module states
     SwerveModuleState[] desiredStates =  kinematics.toSwerveModuleStates(
       (
-        // Check if field relative is true
+        // If field relative is true, convert to robot relative speeds, else use robot relative speeds
         fieldOriented ?
-          // If so convert to robot relative speeds
           ChassisSpeeds.fromFieldRelativeSpeeds(vx, vy, actualOmega, getHeading()) :
-          // Otherwise just use robot relative speeds
           new ChassisSpeeds(vx, vy, actualOmega)
       )
     );
@@ -578,9 +567,8 @@ public class SwerveDrive extends SubsystemBase {
     // Set module states to desired states
     setModuleStates(desiredStates);
 
-    // Check if this is a simulation
+    // If robot is in simulation, update simulated heading depending on omega
     if (Robot.isSimulation()) {
-      // If so update simulated heading depending on omega
       simHeading = simHeading.rotateBy(new Rotation2d(actualOmega * Robot.kDefaultPeriod));
     }
   }
