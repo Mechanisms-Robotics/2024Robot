@@ -9,6 +9,7 @@ public class LED extends SubsystemBase {
     private static final DigitalOutput blue = new DigitalOutput(2);
     private static final DigitalOutput green = new DigitalOutput(0);
     private static final DigitalOutput yellow = new DigitalOutput(3);
+
     public record LEDData(
             boolean red,
             boolean green,
@@ -18,11 +19,7 @@ public class LED extends SubsystemBase {
             String color
     ) {}
 
-    /**
-     * Returns a record of all of the light data
-     *
-     * @return LEDData, all of the data of the light
-     */
+    /** @return LEDData, data of the light */
     public LEDData getLEDData() {
         String color = "off";
         if (red.get()) color = "red";

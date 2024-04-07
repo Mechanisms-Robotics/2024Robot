@@ -31,7 +31,7 @@
   "rotationTargets": [],
   "constraintZones": [
     {
-      "name": "bong bing chong ching",
+      "name": "constraint",
       "minWaypointRelativePos": 0.75,
       "maxWaypointRelativePos": 1.0,
       "constraints": {

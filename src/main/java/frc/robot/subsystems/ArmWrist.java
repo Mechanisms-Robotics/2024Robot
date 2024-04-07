@@ -125,9 +125,7 @@ public class ArmWrist extends SubsystemBase {
         }
     }
 
-    /**
-     * Set the arm and wrist to the amp position
-     */
+    /** Set the arm and wrist to the amp position */
     public void amp() {
         if (safe) return; // do not run if in safe mode
         // if not already in amping position, set the arm and wrist position to amp and set the state to Amping
@@ -139,9 +137,8 @@ public class ArmWrist extends SubsystemBase {
     }
 
     /**
-     * Shuttles the note across the floor.
+     * Sets the arm and wrist to their positions for shuttling the note across the floor.
      * Useful for transporting notes to your side of the field.
-     * Sets the arm and wrist to their shuttle positions.
      */
     public void shuttle() {
         if (safe) return; // do not run if in safe mode
@@ -152,23 +149,20 @@ public class ArmWrist extends SubsystemBase {
         }
     }
 
-    /**
-     * Set safe mode to true and set the arm and wrist to intaking cuh
-     */
+    /** Set safe mode to true and set the arm and wrist to intaking cuh */
     public void enableSafeMode() {
         intake();
         safe = true;
     }
 
-    /**
-     * Set safe mode to false
-     */
+    /** Set safe mode to false */
     public void disableSafeMode() {
         safe = false;
     }
 
     /**
-     * Sets the arm and the wrist positions
+     * Sets the arm and the wrist positions to the position for preparing to climb.
+     * This position moves the hooks on gerald above the chain, ready to pull on it.
      */
     public void prepClimb() {
         if (safe) return;
@@ -179,7 +173,10 @@ public class ArmWrist extends SubsystemBase {
         }
     }
 
-
+    /**
+     * Set the arm and wrist to the position for climbing.
+     * This position brings the arm and wrist down, pulling on the chain and bringing the robot up.
+     */
     public void climb() {
         if (safe) return;
         if (state != State.Climb) {
@@ -202,11 +199,7 @@ public class ArmWrist extends SubsystemBase {
         wrist.aim(desiredWristRotation);
     }
 
-    /**
-     * Returns true if both the arm and the wrist are at the desired angle, otherwise false
-     *
-     * @return true if both the arm and the wrist are at the desired angle, otherwise false
-     */
+    /** @return true if both the arm and the wrist are at the desired angle, otherwise false */
     public boolean aimed() {
         return arm.aimed() && wrist.aimed();
     }

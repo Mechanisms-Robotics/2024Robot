@@ -6,9 +6,7 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.subsystems.ArmWrist;
 import frc.robot.subsystems.Gerald;
 
-/**
- * Shoot the preload note
- */
+/** Shoot the preload note */
 public class Preload extends SequentialCommandGroup {
     /**
      * 1. Spinup the shooter

@@ -13,9 +13,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import java.util.function.Supplier;
 
-/**
- * Controls the motor that pivots Gerald
- */
+/** Controls the motor that pivots Gerald */
 public class Wrist extends SingleJointSubystem {
     private static final double kSensorRatio = 38.0/16.0;
     private static final double kMotorRatio = 100.0 * kSensorRatio;
@@ -59,9 +57,6 @@ public class Wrist extends SingleJointSubystem {
         setState(SingleJointSubsystemState.CLOSED_LOOP);
         setPositionUnitsFunction((rotations) -> MechUnits.rotationsToRadians(rotations, kMotorRatio));
         setVelocityUnitsFunction((rotations) -> MechUnits.rotationsToRadians(rotations, kMotorRatio));
-//        setLimits(kReverseLimit, kForwardLimit, kMotorRatio);
-//        setFeedforwardGains(0.15, 0, 0.0, 0.0);
-//        setPPIDGains(0.6, 0.0, 0.0);
         setFeedforwardGains(0.2, 0, 0.0, 0.0);
         setPPIDGains(2, 0.0, 0.0);
         setPPIDConstraints(Math.PI/4, Math.PI/2);
@@ -81,55 +76,42 @@ public class Wrist extends SingleJointSubystem {
                                  gyro.getGravityVectorX().getValueAsDouble()));
     }
 
-    /**
-     * Set arm to the stow position
-     */
+    /** Set arm to the stow position */
     public void stow() {
         pivotTo(kStowed);
     }
 
-    /**
-     * Set arm to the intake position
-     */
+    /** Set arm to the intake position */
     public void intake() {
         pivotTo(kIntaking);
     }
 
-    /**
-     * Set arm to the shoot high subwoofer position
-     */
+    /** Set arm to the shoot high subwoofer position */
     public void shootHighSubwoofer() {
         pivotTo(kSubwooferHigh.plus(Rotation2d.fromDegrees(wristAdjustment)));
     }
 
-    /**
-     * Set arm to the shoot low subwoofer position
-     */
+    /** Set arm to the shoot low subwoofer position */
     public void shootLowSubwoofer() {
         pivotTo(kSubwooferLow.plus(Rotation2d.fromDegrees(wristAdjustment)));
     }
 
-    /**
-     * Set arm to the shoot high podium position
-     */
+    /** Set arm to the shoot high podium position */
     public void shootHighPodium() {
         pivotTo(kPodiumHigh.plus(Rotation2d.fromDegrees(wristAdjustment)));
     }
 
-    /**
-     * Set arm to the shoot low podium position
-     */
+    /** Set arm to the shoot low podium position */
     public void shootLowPodium() {
         pivotTo(kPodiumLow.plus(Rotation2d.fromDegrees(wristAdjustment)));
     }
 
-    /**
-     * Pivot to the amp position
-     */
+    /** Pivot to the amp position */
     public void amp() {
         pivotTo(kAmp);
     }
 
+    /** Disable the wrist */
     public void disable() {
         disabled = true;
     }
@@ -142,9 +124,7 @@ public class Wrist extends SingleJointSubystem {
         pivotTo(kPrepClimb);
     }
 
-    /**
-     * Pivots the wrist down to the climb position, pulling on the chain to lift the robot
-     */
+    /** Pivots the wrist down to the climb position, pulling on the chain to lift the robot */
     public void climb() {
         pivotTo(kClimb);
     }
@@ -154,26 +134,18 @@ public class Wrist extends SingleJointSubystem {
         pivotTo(kShuttle);
     }
 
-    /**
-     * Pivot to the given rotation
-     *
-     * @param rotation angle fo the Wrist
-     */
+    /** Pivot to the given rotation */
     public void aim(Rotation2d rotation) {
         pivotTo(rotation.plus(Rotation2d.fromDegrees(wristAdjustment)));
     }
 
-    /**
-     * Returns true if the wrist is at the desired angle
-     *
-     * @return true if the wrist is at the desired angle else false
-     */
+    /** @return true if the wrist is at the desired angle, else false */
     public boolean aimed() {
         return MathUtil.isNear(getDesiredAngle().getDegrees(), getAngle().getDegrees(), kTolerance + 2);
     }
 
     /**
-     * Returns the angle of the arm.
+     * Returns the angle of the wrist.
      * Overrides the angle from CANCoder based → gyro based.
      *
      * @return angle of the wrist

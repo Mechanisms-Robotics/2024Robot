@@ -9,6 +9,7 @@ import org.photonvision.PhotonCamera;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
+/** LimeLight subsystem, contains and updates the data of the limelight */
 public class LimeLight extends SubsystemBase {
     private final PhotonCamera camera = new PhotonCamera("LimeLight");
     private int aprilTagID = 7;
@@ -23,7 +24,6 @@ public class LimeLight extends SubsystemBase {
      * @param hasTarget true if the camera sees an AprilTag otherwise false
      * @param aimed true if the camera is pointed at the target
      */
-
     public record LimeLightData(
             double yaw,
             double area,

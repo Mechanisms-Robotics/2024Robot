@@ -10,7 +10,7 @@ import frc.robot.subsystems.LimeLight;
 import frc.robot.subsystems.Swerve;
 
 /**
- * Spins up the shooter, aims, shoots, intakes.
+ * Spins up the shooter, aims, shoots, stows.
  * Used for autos to group the spinup shoot and intake for making autos.
  */
 public class AutoAimShootStow extends SequentialCommandGroup {

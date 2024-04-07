@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * The arm that Gerald is attached to. It is directly connected to the swerve.
+ * Controls the motor for the left and right arm.
  */
 public class Arm extends SingleJointSubystem {
     // rotations as detected by the CanCoder at the start position if there was no offset
@@ -24,20 +25,22 @@ public class Arm extends SingleJointSubystem {
     private final TalonFX rightArmMotor = new TalonFX(13, new CANCoder(13, kRightMagnetOffset, AbsoluteSensorRangeValue.Unsigned_0To1, SensorDirectionValue.Clockwise_Positive));
     // left arm TalonFX motor with its can coder
     private final TalonFX leftArmMotor = new TalonFX(12, new CANCoder(12, kLeftMagnetOffset, AbsoluteSensorRangeValue.Unsigned_0To1, SensorDirectionValue.CounterClockwise_Positive));
-    // feed forward controller for the arm
-    /* PID controller for the right and left arm, which will always have the same values they are different to account
-       for different mechanical structures, such as belt tightening */
     private static final double kTolerance = Math.toRadians(2);
     private static final Rotation2d kStowed = Rotation2d.fromDegrees(25);
+    /** Angle of the intake, as low as possible without touching the floor */
     private static final Rotation2d kIntaking = Rotation2d.fromDegrees(4);
     private static final Rotation2d kSubwooferHigh = Rotation2d.fromDegrees(94);
     private static final Rotation2d kSubwooferLow = Rotation2d.fromDegrees(15);
     private static final Rotation2d kPodiumHigh = kSubwooferHigh;
     private static final Rotation2d kPodiumLow = kSubwooferLow;
     private static final Rotation2d kAmp = Rotation2d.fromDegrees(94);
+    /** Angle of the arm before it pulls down and climbs, should be high enough for the hooks to go above the chain */
     private static final Rotation2d kPrepClimb = Rotation2d.fromDegrees(90);
+    /** Angle of the arm after it pulls down on the chain */
     private static final Rotation2d kClimb = Rotation2d.fromDegrees(40);
+    /** Ratio of the can coder sensor to the arm shaft */
     private static final double kSensorRatio = 64.0/16.0;
+    /** Ratio of the motor to the arm shaft */
     private static final double kMotorRatio = 60 * kSensorRatio;
     private static final Rotation2d kShuttle = Rotation2d.fromDegrees(60);
     private static final Rotation2d kForwardLimit = Rotation2d.fromDegrees(94);
@@ -62,52 +65,38 @@ public class Arm extends SingleJointSubystem {
         SmartDashboard.putBoolean("[arm] disabled", disabled);
     }
 
-    /**
-     * Set arm to the stow position
-     */
+    /** Set arm to the stow position */
     public void stow() {
         pivotTo(kStowed);
     }
 
-    /**
-     * Set arm to the intake position
-     */
+    /** Set arm to the intake position */
     public void intake() {
         pivotTo(kIntaking);
     }
 
-    /**
-     * Set arm to the shoot high subwoofer position
-     */
+    /** Set arm to the shoot high subwoofer position */
     public void shootHighSubwoofer() {
         System.out.println("kSubwooferHigh: " + kSubwooferHigh.getDegrees());
         pivotTo(kSubwooferHigh);
     }
 
-    /**
-     * Set arm to the shoot low subwoofer position
-     */
+    /** Set arm to the shoot low subwoofer position */
     public void shootLowSubwoofer() {
         pivotTo(kSubwooferLow);
     }
 
-    /**
-     * Set arm to the shoot high podium position
-     */
+    /** Set arm to the shoot high podium position */
     public void shootHighPodium() {
         pivotTo(kPodiumHigh);
     }
 
-    /**
-     * Set arm to the shoot low podium position
-     */
+    /** Set arm to the shoot low podium position */
     public void shootLowPodium() {
         pivotTo(kPodiumLow);
     }
 
-    /**
-     * Set the arm to the amp position
-     */
+    /** Set the arm to the amp position */
     public void amp() {
         pivotTo(kAmp);
     }
@@ -128,34 +117,28 @@ public class Arm extends SingleJointSubystem {
         pivotTo(kClimb);
     }
 
-    /**
-     * Pivots to the shuttle position (kShuttle)
-     */
+    /** Pivots to the shuttle position */
     public void shuttle() {
         pivotTo(kShuttle);
     }
 
-    /**
-     * Stops voltage and disables all processes on the arm (PID etc.)
-     */
+    /** Stops voltage and disables all processes on the arm (PID etc.) */
     public void disable() {
         stop();
         disabled = true;
     }
 
+    /** Un-disable the arm */
     public void unDisable() {
         disabled = false;
     }
 
-    /**
-     * Sets the arm rotation to a given angle
-     *
-     * @param rotation rotation to pivot to
-     */
+    /** Sets the arm rotation to a given angle */
     public void aim(Rotation2d rotation) {
         pivotTo(rotation);
     }
 
+    /** @return true if the arm is aimed at the desired angle */
     public boolean aimed() {
         return MathUtil.isNear(getDesiredAngle().getDegrees(), getAngle().getDegrees(), kTolerance + 2);
     }

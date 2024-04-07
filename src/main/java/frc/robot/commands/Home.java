@@ -4,9 +4,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.subsystems.Arm;
 
-/**
- * Undisables the arm
- */
+/** Undisables the arm */
 public class Home extends Command {
     private final Arm arm;
 

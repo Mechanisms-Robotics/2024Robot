@@ -6,9 +6,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 
-/**
- * Experimental rumble command for the controllers.
- */
+/** Experimental rumble command for the controllers */
 public class Rumble extends SequentialCommandGroup {
     private static final double kValue = 1.0;
     private static final double kSeconds = 0.25;

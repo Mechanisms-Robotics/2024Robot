@@ -9,9 +9,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.util6328.Alert;
 import frc.util6328.Alert.AlertType;
 
-/**
- * The box of wheels that intakes, shoots, and amps the notes.
- */
+/** The box of wheels that intakes, shoots, and amps the notes. */
 public class Gerald extends SubsystemBase {
     private static final double kIntakeVoltage = 10; // volts
     private static final double kOuttakeVoltage = -12; // volts
@@ -32,12 +30,18 @@ public class Gerald extends SubsystemBase {
     private boolean lastDetected = false;
 
     // naming is based off of the unique function
+    /** Controls the intake wheels */
     private final TalonFX intakeMotor = new TalonFX(14);
-    // allows for amp and assists shooter
+    /**
+     * Motor that controls the row of colsons on the bottom of the shooter (facing the limelight).
+     * Helps shoot and allows for amp.
+     */
     private final TalonFX ampMotor = new TalonFX(15);
-    // only shoots
+    /**
+     * Motor that controls the row of colsons on the top of the shooter (facing the limelight).
+     * Used only for shooting.
+     */
     private final TalonFX shooterMotor = new TalonFX(16);
-
 
     public enum State {
         /** Puts the intake motor in brake mode and spins the shooter and amp motors */
@@ -54,14 +58,9 @@ public class Gerald extends SubsystemBase {
         Outtaking
     }
 
-
     private State state = State.Idling;
 
-    /**
-     * Returns the state of gerald
-     *
-     * @return state of gerald
-     */
+    /** @return state of gerald */
     public State getState() {
         return state;
     }
@@ -71,10 +70,6 @@ public class Gerald extends SubsystemBase {
         intakeMotor.brakeMode();
         ampMotor.brakeMode();
         shooterMotor.brakeMode();
-        // set inversions (amp and shooter alternate)
-        intakeMotor.setInverted(false);
-        ampMotor.setInverted(true);
-        shooterMotor.setInverted(false);
         // set motor voltage compensations and current limits
         intakeMotor.setVoltageCompensation(10);
         ampMotor.setVoltageCompensation(10);
@@ -87,7 +82,8 @@ public class Gerald extends SubsystemBase {
     }
 
     /**
-     * Set the intake motor speed (voltage) to kIntakeVoltage
+     * Intakes the note.
+     * Stops the note as soon as the note is detected to it does not feed into the shooter.
      */
     public void intake() {
         if (state != State.Intaking) {
@@ -113,17 +109,7 @@ public class Gerald extends SubsystemBase {
         }
     }
 
-    /**
-     * If the state is in intaking, it spins up the intake motors, otherwise it idles
-     */
-    public void toggleIntake() {
-        if (state != State.Intaking) intake();
-        else idle();
-    }
-
-    /**
-     * Sets the outtake motor speed (voltage) to kOuttakeVoltage
-     */
+    /** Spins the intake motors in reverse */
     public void outtake() {
         if (state!=State.Outtaking) {
             intakeMotor.setVoltage(kOuttakeVoltage);
@@ -131,15 +117,40 @@ public class Gerald extends SubsystemBase {
         }
     }
 
-    /**
-     * Set the amp and shooter motors to the shooter voltage
-     */
+    /** If the state is in intaking, it intakes, otherwise it idles */
+    public void toggleIntake() {
+        if (state != State.Intaking) intake();
+        else idle();
+    }
+
+    /** Spins the top shooter wheels */
     public void prepareShoot() {
         if (state != State.PreparingShoot) {
             shooterMotor.setVoltage(kShooterVoltage);
-            ampMotor.setVoltage(kShooterVoltage);
+            ampMotor.setVoltage(-kShooterVoltage);
             state = State.PreparingShoot;
         }
+    }
+
+    /** Spins the shooter wheels for amping. The motors spin in the same direction */
+    public void prepareAmp () {
+        if (state != State.PreparingAmp) {
+            shooterMotor.setVoltage(kAmpVoltage);
+            ampMotor.setVoltage(kAmpVoltage);
+            state = State.PreparingAmp;
+        }
+    }
+
+    /** If the state is in preparing amp, it idles, otherwise it spins shooter motors for amping */
+    public void toggleSpinupAmp() {
+        if (state == State.PreparingAmp) idle();
+        else prepareAmp();
+    }
+
+    /** If the state is in PreparShoot in idles, otherwise it spins up for shooting */
+    public void toggleSpinupShoot() {
+        if (state == State.PreparingShoot) idle();
+        else prepareShoot();
     }
 
     /**
@@ -155,34 +166,6 @@ public class Gerald extends SubsystemBase {
         if (state == State.PreparingAmp)
             return Math.abs(shooterMotor.getVelocity()) > kAmpSpinupRPM;
         return false;
-    }
-
-    /**
-     * Set the shooter and amp motors to the amp voltage. The motors spin in the same direction
-     */
-    public void prepareAmp () {
-        if (state != State.PreparingAmp) {
-            // spins in the same direction as they are inverted and the amp motor is negative
-            shooterMotor.setVoltage(kAmpVoltage);
-            ampMotor.setVoltage(-kAmpVoltage);
-            state = State.PreparingAmp;
-        }
-    }
-
-    /**
-     * If the state is in PreparingAmp, it idles, otherwise it spins for amping
-     */
-    public void toggleSpinupAmp() {
-        if (state == State.PreparingAmp) idle();
-        else prepareAmp();
-    }
-
-    /**
-     * If the state is in PreparShoot in idles, otherwise it spins up for shooting
-     */
-    public void toggleSpinupShoot() {
-        if (state == State.PreparingShoot) idle();
-        else prepareShoot();
     }
 
     /**
@@ -222,7 +205,7 @@ public class Gerald extends SubsystemBase {
     public void idle() {
         if (state != State.Idling) {
             shooterMotor.setVoltage(kIdleVoltage);
-            ampMotor.setVoltage(kIdleVoltage);
+            ampMotor.setVoltage(-kIdleVoltage);
             intakeMotor.setVoltage(0);
             state = State.Idling;
         }
