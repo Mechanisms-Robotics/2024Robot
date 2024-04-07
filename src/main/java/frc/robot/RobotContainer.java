@@ -68,6 +68,7 @@ public class RobotContainer {
 //    m_chooser.addOption("YeetRight", new PathPlannerAuto("YeetRight"));
 //    m_chooser.addOption("YeetLeft", new PathPlannerAuto("YeetRight"));
 //    m_chooser.addOption("TimedLeave", new TimedLeave(swerve));
+    m_chooser.addOption("Preload", new Preload(gerald, armWrist));
     m_chooser.addOption("TimedShootLeave", new TimedShootLeave(swerve, gerald, armWrist));
     m_chooser.addOption("SubCNoteL1NoteGrab", new PathPlannerAuto("SubCNoteL1NoteGrab"));
     // ----------------1Note----------------
@@ -116,17 +117,13 @@ public class RobotContainer {
             new FeedNote(gerald)
     );
 
-    xboxController.rightStick().onTrue(
-            new OuttakeCommand(gerald)
-    ).onFalse(new Idle(gerald));
-
     // ----------------x, y, a, b----------------
     xboxController.x().onTrue(
             new SubwooferHighPosition(armWrist)
     );
     xboxController.y().onTrue(
-            new PodiumHighPosition(armWrist)
-    );
+            new OuttakeCommand(gerald)
+    ).onFalse(new Idle(gerald));
     xboxController.a().onTrue(
             new IntakePosition(armWrist)
     );

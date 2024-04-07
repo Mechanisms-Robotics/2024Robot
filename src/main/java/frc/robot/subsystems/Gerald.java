@@ -91,7 +91,9 @@ public class Gerald extends SubsystemBase {
      */
     public void intake() {
         if (state != State.Intaking) {
-            if (DriverStation.isAutonomous()) intakeMotor.setVoltage(2);
+            // increased the intake voltage in autonomous because it was intaking better in teleop
+            // intake voltage for autonomous was lowered because the note was shooting out at gwinnett
+            if (DriverStation.isAutonomous()) intakeMotor.setVoltage(8);
             else intakeMotor.setVoltage(kIntakeVoltage);
             state = State.Intaking;
         }

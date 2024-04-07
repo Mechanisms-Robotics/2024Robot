@@ -46,10 +46,7 @@ public class DriveWhileAim extends Command {
     // create the wristAimMap interpolating treemap
     static {
         wristAimMap.put(00.00, 115.);
-//        wristAimMap.put(0.21, 120.0);
         wristAimMap.put(0.22, 115.);
-//        wristAimMap.put(0.24, 117.0);
-//        wristAimMap.put(0.25, 117.0);
         wristAimMap.put(100.0, 115.);
     }
     private static final ProfiledPIDController controller = new ProfiledPIDController(.1, 0, 0, new Constraints(kMaxOmega, kMaxOmegaAcceleration));

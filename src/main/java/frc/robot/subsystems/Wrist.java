@@ -31,7 +31,7 @@ public class Wrist extends SingleJointSubystem {
     private final Supplier<Double> swerveRoll;
     private static final double kAllowableTip = 5;
     private static final double kTolerance = Math.toRadians(0.25);
-    private static final Rotation2d kStowed = Rotation2d.fromDegrees(97.5);
+    private static final Rotation2d kStowed = Rotation2d.fromDegrees(96);
     private static final Rotation2d kIntaking = Rotation2d.fromDegrees(87.5);
     private static final Rotation2d kSubwooferHigh = Rotation2d.fromDegrees(92.5);
     private static final Rotation2d kSubwooferLow = Rotation2d.fromDegrees(97.5);
@@ -130,6 +130,10 @@ public class Wrist extends SingleJointSubystem {
         pivotTo(kAmp);
     }
 
+    public void disable() {
+        disabled = true;
+    }
+
     /**
      * Pivots the wrist to the prepare climb position.
      * This position puts the hooks right above the chain so when the arm and wrist go down, it pulls against the chain.
@@ -196,7 +200,6 @@ public class Wrist extends SingleJointSubystem {
         SmartDashboard.putNumber("[Wrist] roll", gyro.getRoll().getValueAsDouble());
         SmartDashboard.putNumber("[Wrist] x gravity component", gravityVector.getX());
         SmartDashboard.putNumber("[Wrist] y gravity component", gravityVector.getY());
-
         if (getAngle().getDegrees() < 0) disabled = true; // if the angle of the arm is negative, disable it
         if (Math.abs(swerveRoll.get()) > kAllowableTip || Math.abs(swervePitch.get()) > kAllowableTip) {
             wristMotor.stop();
