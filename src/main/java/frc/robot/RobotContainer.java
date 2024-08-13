@@ -101,7 +101,7 @@ public class RobotContainer {
 
     // -----------------Right-----------------
 
-    ps4Controller.L1().onTrue(new ToggleSpinupShoot(gerald));
+    ps4Controller.R1().onTrue(new ToggleSpinupShoot(gerald));
 
     ps4Controller.R2().whileTrue(new FeedNote(gerald));
 
