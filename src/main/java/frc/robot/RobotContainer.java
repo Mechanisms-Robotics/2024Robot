@@ -156,6 +156,14 @@ public class RobotContainer {
 
   private void configureDefaultCommands() {
     // Set the swerves default command to teleop drive
+    while (!(ps4Controller.getLeftY() <= .1 && ps4Controller.getLeftX() <= .1 && ps4Controller.getRightX() <= .1 && ps4Controller.getRightY() <= 0)) {
+      try {
+        Thread.sleep(1000);
+      } catch (InterruptedException e) {
+        System.out.println("Interuption?");
+        e.printStackTrace();
+      }
+    }
     swerve.setDefaultCommand(new SwerveTeleopDriveCommand(
             swerve,
             () -> -ps4Controller.getLeftY(),
