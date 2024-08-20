@@ -68,6 +68,8 @@ public class SwerveDrive extends SubsystemBase {
   private boolean headingLocked = false;
   private Rotation2d desiredHeading = new Rotation2d();
 
+  private boolean pastZeroInput = false;
+
   /**
    * SwerveDrive constructor
    *
@@ -517,11 +519,13 @@ public class SwerveDrive extends SubsystemBase {
   public void drive(double vx, double vy, double omega) {
     // Return if no desired velocity is given and wheels are locked
     if (vx == 0 && vy == 0 && omega == 0 && wheelsLocked) {
+      // TODO confirm that the robot has recieved an empty so it does not spin on start
       return;
     // If wheels are locked but a desired velocity is given unlock wheels
     } else if (wheelsLocked) {
       wheelsLocked = false;
     }
+    // TODO stop robot from moving if it has not recieved a blank input at least once
 
     // Initialize actualOmega
     double actualOmega;
