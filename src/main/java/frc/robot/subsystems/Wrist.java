@@ -45,6 +45,7 @@ public class Wrist extends SingleJointSubystem {
     private double wristAdjustment = 0;
     /** Shot adjustment for the wrist, used in SmartDashboard */
     private final SendableChooser<Double> adjustmentAmount = new SendableChooser<>();
+    private final SendableChooser<Double> intakeAdjust = new SendableChooser<>();
 
 
     public Wrist(Supplier<Double> swervePitch, Supplier<Double> swerveRoll) {
@@ -72,6 +73,14 @@ public class Wrist extends SingleJointSubystem {
         adjustmentAmount.addOption("vv", 2.5);
         adjustmentAmount.addOption("vvv", 7.5);
         SmartDashboard.putData("Shot Adjustment", adjustmentAmount);
+        intakeAdjust.addOption("^^^", -7.5);
+        intakeAdjust.addOption("^^", -2.5);
+        intakeAdjust.addOption("^", -1.);
+        intakeAdjust.setDefaultOption("None", 0.);
+        intakeAdjust.addOption("v", 1.);
+        intakeAdjust.addOption("vv", 2.5);
+        intakeAdjust.addOption("vvv", 7.5);
+        SmartDashboard.putData("Shot Adjustment", intakeAdjust);
         bootGravityAngle = new Rotation2d(Math.atan2(gyro.getGravityVectorZ().getValueAsDouble(),
                                  gyro.getGravityVectorX().getValueAsDouble()));
     }
@@ -83,7 +92,7 @@ public class Wrist extends SingleJointSubystem {
 
     /** Set arm to the intake position */
     public void intake() {
-        pivotTo(kIntaking);
+        pivotTo(kIntaking.rotateBy(Rotation2d.fromDegrees(intakeAdjust.getSelected())));
     }
 
     /** Set arm to the shoot high subwoofer position */
