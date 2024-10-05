@@ -1,7 +1,3 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot;
 
 
@@ -11,17 +7,16 @@ import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import frc.robot.commands.*;
 import frc.robot.commands.autos.AutoAimShootIntake;
 import frc.robot.commands.autos.AutoAimShootStow;
-import frc.robot.commands.autos.TimedLeave;
 import frc.robot.commands.autos.TimedShootLeave;
 import frc.robot.subsystems.*;
 
 public class RobotContainer {
-  private final SendableChooser<Command> routineChooser = new SendableChooser<>();
-  private final SendableChooser<Boolean> quasistaticChooser = new SendableChooser<>();
+//  private final SendableChooser<Command> routineChooser = new SendableChooser<>();
+//  private final SendableChooser<Boolean> quasistaticChooser = new SendableChooser<>();
   public final Swerve swerve = new Swerve();
   public final Gerald gerald = new Gerald();
   public final Arm arm = new Arm();
@@ -30,8 +25,8 @@ public class RobotContainer {
   public final LimeLight limeLight = new LimeLight();
   public final LED led = new LED();
 
-  private final CommandXboxController xboxController = new CommandXboxController(0);
-  private final CommandXboxController xboxController2 = new CommandXboxController(1);
+  private final CommandPS4Controller ps4Controller = new CommandPS4Controller(0);
+  private final CommandPS4Controller ps4Controller2 = new CommandPS4Controller(1);
 
   private final SendableChooser<Command> m_chooser = new SendableChooser<>();
 
@@ -100,104 +95,72 @@ public class RobotContainer {
     //////////////////
 
     // -----------------Left-----------------
-    xboxController.leftTrigger().onTrue(
-            new ToggleIntake(gerald)
-    );
+    ps4Controller.L2().onTrue(new ToggleIntake(gerald));
 
-    xboxController.leftBumper().onTrue(
-            new ToggleSpinupAmp(gerald)
-    );
+    ps4Controller.L1().onTrue(new ToggleSpinupAmp(gerald));
 
     // -----------------Right-----------------
-    xboxController.rightBumper().onTrue(
-            new ToggleSpinupShoot(gerald)
-    );
 
-    xboxController.rightTrigger().whileTrue(
-            new FeedNote(gerald)
-    );
+    ps4Controller.R1().onTrue(new ToggleSpinupShoot(gerald));
+
+    ps4Controller.R2().whileTrue(new FeedNote(gerald));
 
     // ----------------x, y, a, b----------------
-    xboxController.x().onTrue(
-            new SubwooferHighPosition(armWrist)
-    );
-    xboxController.y().onTrue(
-            new OuttakeCommand(gerald)
-    ).onFalse(new Idle(gerald));
-    xboxController.a().onTrue(
-            new IntakePosition(armWrist)
-    );
-    xboxController.b().onTrue(
-            new SubwooferLowPosition(armWrist)
-    );
+
+    ps4Controller.square().onTrue(new SubwooferHighPosition(armWrist));
+
+    ps4Controller.triangle().onTrue(new OuttakeCommand(gerald)).onFalse(new Idle(gerald));
+
+    ps4Controller.cross().onTrue(new IntakePosition(armWrist));
+
+    ps4Controller.circle().onTrue(new SubwooferLowPosition(armWrist));
 
     // ----------------other----------------
-    xboxController.button(13).onTrue( // big button
-            new ZeroGyro(swerve)
-    );
+    ps4Controller.touchpad().onTrue(new ZeroGyro(swerve));
 
-    xboxController.start().onTrue( // start
-            new ZeroGyro(swerve)
-    );
+    ps4Controller.options().onTrue(new ZeroGyro(swerve));
 
     ////////////////////
     //Secondary Driver//
     ////////////////////
 
     // -----------------Left-----------------
-    xboxController2.leftTrigger().onTrue(
-            new SubwooferLowPosition(armWrist)
-    );
-    xboxController2.leftBumper().onTrue(
-            new SubwooferHighPosition(armWrist)
-    );
+    ps4Controller2.L2().onTrue(new SubwooferLowPosition(armWrist));
 
-    xboxController2.leftStick().whileTrue(
-            new Home(arm)
-    );
+    ps4Controller2.L1().onTrue(new SubwooferHighPosition(armWrist));
+
+    ps4Controller2.L3().whileTrue(new Home(arm));
     // -----------------Right-----------------
-    xboxController2.rightTrigger().onTrue(
-            new PodiumLowPosition(armWrist)
-    );
-    xboxController2.rightBumper().onTrue(
-            new PodiumHighPosition(armWrist)
-    );
-    xboxController2.rightStick().whileTrue(
-            new Climb(armWrist)
-    );
+
+    ps4Controller2.R2().onTrue(new PodiumLowPosition(armWrist));
+
+    ps4Controller2.R1().onTrue(new PodiumHighPosition(armWrist));
+
+    ps4Controller2.R3().whileTrue(new Climb(armWrist));
 
     // ----------------x, y, a, b----------------
-    xboxController2.x().whileTrue( // square on ps4
-            new DriveWhileAim(swerve, limeLight, armWrist,
-                    () -> -xboxController.getLeftY(),
-                    () -> -xboxController.getLeftX(),
-                    () -> -xboxController.getRightX())
-    );
-    xboxController2.y().onTrue(
-            new DisableArm(arm)
-    );
-    xboxController2.a().onTrue(
-            new IntakePosition(armWrist)
-    );
-    xboxController2.b().onTrue(
-            new ShuttleNote(armWrist)
-    );
+
+    ps4Controller2.square().whileTrue(new DriveWhileAim(swerve, limeLight, armWrist, () -> -ps4Controller.getLeftY(), () -> -ps4Controller.getLeftX(), () -> -ps4Controller.getRightX()));
+
+    ps4Controller2.triangle().onTrue(new DisableArm(arm));
+
+    ps4Controller2.cross().onTrue(new IntakePosition(armWrist));
+
+    ps4Controller2.circle().onTrue(new IntakePosition(armWrist));
     // ----------------D-Pad----------------
-    xboxController2.povDown().onTrue(
-            new StowPosition(armWrist)
-    );
-    xboxController2.povUp().whileTrue(
-            new Savery(armWrist)
-    );
+
+    ps4Controller2.povDown().onTrue(new StowPosition(armWrist));
+
+    ps4Controller2.povUp().whileTrue(new Savery(armWrist));
   }
 
   private void configureDefaultCommands() {
     // Set the swerves default command to teleop drive
     swerve.setDefaultCommand(new SwerveTeleopDriveCommand(
             swerve,
-            () -> -xboxController.getLeftY(),
-            () -> -xboxController.getLeftX(),
-            () -> -xboxController.getRightX(),
+            () -> -ps4Controller.getLeftY(),
+            () -> -ps4Controller.getLeftX(),
+            () -> -ps4Controller.getRightX(),
             0.1,
             5,
             8, // note in use
@@ -205,6 +168,7 @@ public class RobotContainer {
             Math.PI*4, // not in use
             true
     ));
+
     led.setDefaultCommand(new LEDCommand(led, gerald, limeLight::getData, armWrist));
   }
 
