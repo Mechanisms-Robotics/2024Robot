@@ -30,7 +30,7 @@ public class Wrist extends SingleJointSubystem {
     private static final double kAllowableTip = 5;
     private static final double kTolerance = Math.toRadians(0.25);
     private static final Rotation2d kStowed = Rotation2d.fromDegrees(96);
-    private static final Rotation2d kIntaking = Rotation2d.fromDegrees(87.5);
+    private static final Rotation2d kIntaking = Rotation2d.fromDegrees(80);
     private static final Rotation2d kSubwooferHigh = Rotation2d.fromDegrees(92.5);
     private static final Rotation2d kSubwooferLow = Rotation2d.fromDegrees(97.5);
     private static final Rotation2d kPodiumHigh = Rotation2d.fromDegrees(120);
