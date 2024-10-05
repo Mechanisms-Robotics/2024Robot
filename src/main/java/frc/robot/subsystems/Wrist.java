@@ -80,7 +80,7 @@ public class Wrist extends SingleJointSubystem {
         intakeAdjust.addOption("v", 1.);
         intakeAdjust.addOption("vv", 2.5);
         intakeAdjust.addOption("vvv", 7.5);
-        SmartDashboard.putData("Shot Adjustment", intakeAdjust);
+        SmartDashboard.putData("Intake Adjustment", intakeAdjust);
         bootGravityAngle = new Rotation2d(Math.atan2(gyro.getGravityVectorZ().getValueAsDouble(),
                                  gyro.getGravityVectorX().getValueAsDouble()));
     }
