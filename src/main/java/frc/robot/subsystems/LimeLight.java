@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Robot;
 import org.photonvision.PhotonCamera;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
@@ -52,7 +53,7 @@ public class LimeLight extends SubsystemBase {
         if (DriverStation.getAlliance().isPresent()) {
             if (DriverStation.getAlliance().get() == Alliance.Blue) aprilTagID = 7;
             else aprilTagID = 4;
-        } else { System.out.println("The Alliance was no found"); }
+        } else if (Robot.isReal()) { System.out.println("The Alliance was no found"); }
         SmartDashboard.putNumber("[Lime Light] Target ID", aprilTagID);
 
         PhotonPipelineResult result = camera.getLatestResult();
