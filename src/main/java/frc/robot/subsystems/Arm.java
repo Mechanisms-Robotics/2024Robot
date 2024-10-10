@@ -18,17 +18,17 @@ public class Arm extends SingleJointSubystem {
     // rotations as detected by the CanCoder at the start position if there was no offset
     private static final double kIdealStartRotation = 1.0533;
     // left arm motor magnet offset (acquired in Phoenix Tuner X)
-    private static final double kLeftMagnetOffset = kIdealStartRotation - 0.499268;
+    private static final double kLeftMagnetOffset = kIdealStartRotation - 0.484863;
     // right arm motor magnet offset
-    private static final double kRightMagnetOffset = kIdealStartRotation - 0.507812;
+    private static final double kRightMagnetOffset = kIdealStartRotation - 0.484619;
     // right arm TalonFX motor and it's can coder
     private final TalonFX rightArmMotor = new TalonFX(13, new CANCoder(13, kRightMagnetOffset, AbsoluteSensorRangeValue.Unsigned_0To1, SensorDirectionValue.Clockwise_Positive));
     // left arm TalonFX motor with its can coder
     private final TalonFX leftArmMotor = new TalonFX(12, new CANCoder(12, kLeftMagnetOffset, AbsoluteSensorRangeValue.Unsigned_0To1, SensorDirectionValue.CounterClockwise_Positive));
     private static final double kTolerance = Math.toRadians(2);
-    private static final Rotation2d kStowed = Rotation2d.fromDegrees(25);
+    private static final Rotation2d kStowed = Rotation2d.fromDegrees(50);
     /** Angle of the intake, as low as possible without touching the floor */
-    private static final Rotation2d kIntaking = Rotation2d.fromDegrees(4);
+    private static final Rotation2d kIntaking = Rotation2d.fromDegrees(10);
     private static final Rotation2d kSubwooferHigh = Rotation2d.fromDegrees(94);
     private static final Rotation2d kSubwooferLow = Rotation2d.fromDegrees(15);
     private static final Rotation2d kPodiumHigh = kSubwooferHigh;

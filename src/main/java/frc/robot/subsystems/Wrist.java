@@ -31,9 +31,9 @@ public class Wrist extends SingleJointSubystem {
     private static final double kTolerance = Math.toRadians(0.25);
     private static final Rotation2d kStowed = Rotation2d.fromDegrees(96);
     private static final Rotation2d kIntaking = Rotation2d.fromDegrees(84.5);
-    private static final Rotation2d kSubwooferHigh = Rotation2d.fromDegrees(92.5);
+    private static final Rotation2d kSubwooferHigh = Rotation2d.fromDegrees(89.5);
     private static final Rotation2d kSubwooferLow = Rotation2d.fromDegrees(97.5);
-    private static final Rotation2d kPodiumHigh = Rotation2d.fromDegrees(120);
+    private static final Rotation2d kPodiumHigh = Rotation2d.fromDegrees(110);
     private static final Rotation2d kPodiumLow = kPodiumHigh;
     private static final Rotation2d kAmp = Rotation2d.fromDegrees(90);
     private static final Rotation2d kPrepClimb = Rotation2d.fromDegrees(110);
@@ -60,7 +60,7 @@ public class Wrist extends SingleJointSubystem {
         setVelocityUnitsFunction((rotations) -> MechUnits.rotationsToRadians(rotations, kMotorRatio));
         setFeedforwardGains(0.2, 0, 0.0, 0.0);
         setPPIDGains(2, 0.0, 0.0);
-        setPPIDConstraints(Math.PI/4, Math.PI/2);
+        setPPIDConstraints(Math.PI/4, Math.PI/4);
         setTolerance(kTolerance);
         pivotTo(Rotation2d.fromDegrees(90));
         wristMotor.coastMode();
@@ -92,7 +92,7 @@ public class Wrist extends SingleJointSubystem {
 
     /** Set arm to the intake position */
     public void intake() {
-        pivotTo(kIntaking.rotateBy(Rotation2d.fromDegrees(intakeAdjust.getSelected())));
+        pivotTo(kIntaking.rotateBy(Rotation2d.fromDegrees(-intakeAdjust.getSelected())));
     }
 
     /** Set arm to the shoot high subwoofer position */
