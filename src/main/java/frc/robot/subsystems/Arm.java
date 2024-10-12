@@ -28,7 +28,7 @@ public class Arm extends SingleJointSubystem {
     private static final double kTolerance = Math.toRadians(2);
     private static final Rotation2d kStowed = Rotation2d.fromDegrees(50);
     /** Angle of the intake, as low as possible without touching the floor */
-    private static final Rotation2d kIntaking = Rotation2d.fromDegrees(10);
+    private static final Rotation2d kIntaking = Rotation2d.fromDegrees(12);
     private static final Rotation2d kSubwooferHigh = Rotation2d.fromDegrees(94);
     private static final Rotation2d kSubwooferLow = Rotation2d.fromDegrees(15);
     private static final Rotation2d kPodiumHigh = kSubwooferHigh;

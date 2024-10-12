@@ -125,7 +125,8 @@ public class RobotContainer {
     ////////////////////
 
     // -----------------Left-----------------
-    ps4Controller2.L2().onTrue(new SubwooferLowPosition(armWrist));
+    // not is use for now as stow is used instead
+    // ps4Controller2.L2().onTrue(new SubwooferLowPosition(armWrist));
 
     ps4Controller2.L1().onTrue(new SubwooferHighPosition(armWrist));
 
