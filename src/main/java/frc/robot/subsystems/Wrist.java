@@ -23,7 +23,7 @@ public class Wrist extends SingleJointSubystem {
     private final Pigeon2 gyro = new Pigeon2(18);
     private Translation2d gravityVector = new Translation2d();
     // the gravity of the gyro when the wrist is in the zero position
-    private static final Rotation2d gravityOffset = Rotation2d.fromDegrees(90);
+    private static final Rotation2d gravityOffset = Rotation2d.fromDegrees(96);
     private Rotation2d bootGravityAngle = new Rotation2d();
     private final Supplier<Double> swervePitch;
     private final Supplier<Double> swerveRoll;
@@ -176,7 +176,8 @@ public class Wrist extends SingleJointSubystem {
         SmartDashboard.putNumber("[Wrist] current angle", getAngle().getDegrees());
         SmartDashboard.putNumber("[Wrist] desired angle", getDesiredAngle().getDegrees());
         SmartDashboard.putBoolean("[Wrist] aimed", aimed());
-        SmartDashboard.putNumber("[Wrist] gravity angle", bootGravityAngle.getDegrees());
+        SmartDashboard.putNumber("[Wrist] gravity angle", new Rotation2d(Math.atan2(gyro.getGravityVectorZ().getValueAsDouble(),
+                gyro.getGravityVectorX().getValueAsDouble())).getDegrees());
         SmartDashboard.putNumber("[Wrist] pitch", gyro.getPitch().getValueAsDouble());
         SmartDashboard.putNumber("[Wrist] roll", gyro.getRoll().getValueAsDouble());
         SmartDashboard.putNumber("[Wrist] x gravity component", gravityVector.getX());
