@@ -42,6 +42,7 @@ public class Wrist extends SingleJointSubystem {
     private static final Rotation2d kForwardLimit = Rotation2d.fromDegrees(140);
     private static final Rotation2d kReverseLimit = Rotation2d.fromDegrees(80);
     private boolean disabled = false;
+    private boolean badInit = false;
     private double wristAdjustment = 0;
     /** Shot adjustment for the wrist, used in SmartDashboard */
     private final SendableChooser<Double> adjustmentAmount = new SendableChooser<>();
@@ -191,7 +192,20 @@ public class Wrist extends SingleJointSubystem {
             wristMotor.stop();
             return;
         }
+        /*
+         * If the robot is enabled quickly after connection or robot code deployed, sometimes the 
+         * wrist gyro will give a reading of 0.
+         */
+        boolean is0start = () => getAngle().getDegrees() == 0 || getDesiredAngle().getDegrees() == 0;
+        if (is0start()) { 
+            disabled = true;
+            badInit = true;
+        } else if (badInit && is0start()) {
+            disabled = false;
+            badInit = false;
+        }
         if (disabled) return;
+
         // Check if current state is closed loop
         if (state == SingleJointSubsystemState.CLOSED_LOOP) {
             // Loop over every motor
