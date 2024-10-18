@@ -29,7 +29,7 @@ public class Wrist extends SingleJointSubystem {
     private final Supplier<Double> swerveRoll;
     private static final double kAllowableTip = 5;
     private static final double kTolerance = Math.toRadians(0.25);
-    private static final Rotation2d kStowed = Rotation2d.fromDegrees(97);
+    private static final Rotation2d kStowed = Rotation2d.fromDegrees(99);
     private static final Rotation2d kIntaking = Rotation2d.fromDegrees(84.5);
     private static final Rotation2d kSubwooferHigh = Rotation2d.fromDegrees(89.5);
     private static final Rotation2d kSubwooferLow = Rotation2d.fromDegrees(97.5);
@@ -73,13 +73,13 @@ public class Wrist extends SingleJointSubystem {
         adjustmentAmount.addOption("vv", 2.5);
         adjustmentAmount.addOption("vvv", 7.5);
         SmartDashboard.putData("Shot Adjustment", adjustmentAmount);
-        intakeAdjust.addOption("^^^", -7.5);
-        intakeAdjust.addOption("^^", -2.5);
-        intakeAdjust.addOption("^", -1.);
+        intakeAdjust.addOption("^^^", 7.5);
+        intakeAdjust.addOption("^^", 2.5);
+        intakeAdjust.addOption("^", 1.);
         intakeAdjust.setDefaultOption("None", 0.);
-        intakeAdjust.addOption("v", 1.);
-        intakeAdjust.addOption("vv", 2.5);
-        intakeAdjust.addOption("vvv", 7.5);
+        intakeAdjust.addOption("v", -1.);
+        intakeAdjust.addOption("vv", -2.5);
+        intakeAdjust.addOption("vvv", -7.5);
         SmartDashboard.putData("Intake Adjustment", intakeAdjust);
         bootGravityAngle = new Rotation2d(Math.atan2(gyro.getGravityVectorZ().getValueAsDouble(),
                                  gyro.getGravityVectorX().getValueAsDouble()));
