@@ -96,7 +96,7 @@ public class RobotContainer {
     //////////////////
 
     // -----------------Left-----------------
-    ps4Controller.L2().onTrue(new ToggleIntake(gerald));
+    ps4Controller.L2().onTrue(new ToggleIntake(gerald, armWrist));
 
     ps4Controller.L1().onTrue(new ToggleSpinupAmp(gerald));
 

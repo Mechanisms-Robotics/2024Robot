@@ -199,6 +199,10 @@ public class ArmWrist extends SubsystemBase {
         wrist.aim(desiredWristRotation);
     }
 
+    public boolean isIntaking() {
+        return state == State.Intaking;
+    }
+
     /** @return true if both the arm and the wrist are at the desired angle, otherwise false */
     public boolean aimed() {
         return arm.aimed() && wrist.aimed();

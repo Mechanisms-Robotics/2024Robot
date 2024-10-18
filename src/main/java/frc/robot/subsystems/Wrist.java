@@ -60,7 +60,7 @@ public class Wrist extends SingleJointSubystem {
         setVelocityUnitsFunction((rotations) -> MechUnits.rotationsToRadians(rotations, kMotorRatio));
         setFeedforwardGains(0.2, 0, 0.0, 0.0);
         setPPIDGains(2, 0.0, 0.0);
-        setPPIDConstraints(Math.PI/8, Math.PI/8);
+        setPPIDConstraints(Math.PI/4, Math.PI/4);
         setTolerance(kTolerance);
         pivotTo(Rotation2d.fromDegrees(90));
         wristMotor.coastMode();
