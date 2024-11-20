@@ -325,7 +325,7 @@ public class SwerveModule extends SubsystemBase {
     // Get current velocity
     double curVelocity = driveMotor.getVelocity();
 
-    // Run drive motor PIDF in driveClosedLoop flag is true
+    // Run drive motor PIDF if driveClosedLoop flag is true
     if (driveClosedLoop) {
       driveMotor.periodicPIDF(curVelocity);
     }
